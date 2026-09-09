@@ -119,3 +119,47 @@ Retailer-এর নিজের উদ্ধৃতি (ALL: ৮০৯.০) ভ�
 
 ## ৭. পরিবর্তিত/নতুন ফাইল
 `scripts/run_analysis.py` (T3/T10 কনভেনশন ফিক্স), `scripts/verify_filled.py` (কলাম ফিক্স), `scripts/extend_analysis.py` (নতুন), `scripts/explore_issues.py` (অডিট-প্রোব), `analysis_outputs/tables/T12–T17+T12b+T14b`, `analysis_outputs/charts/C8`, `Analysis_Summary.xlsx` (২০ শিট), `README.md`, `docs/WRITING_GUIDE.md`, `docs/MASTER_PROMPT.md`, `scripts/README.md`, `docs/worklog.md`, `paper_drafts/chapter_02_literature_review.md`, `paper_drafts/chapter_04_results_and_discussion.md`।
+
+---
+
+# পরিশিষ্ট B — দ্বিতীয় রিভিউয়ারের দাবির যাচাই (২০২৬-০৯-০৯)
+
+নিচে প্রতিটি দাবির বিরুদ্ধে রিপোর বর্তমান অবস্থা (এই রিভিউ-পর্বের শেষে)।
+
+## দাবি #1 — "Methodology 3.8-এর পরিসংখ্যান-পরীক্ষাগুলোর একটাও run_analysis.py-তে নেই" → ✅ **সত্যি (সে সময়), এখন সমাধানকৃত**
+যাচাই: `grep scipy/wilcoxon/kruskal/... scripts/run_analysis.py` → শূন্য (বর্ণনামূলক পাইপলাইন)।
+গৃহীত ব্যবস্থা:
+- `scripts/extend_analysis.py` (পূর্বের পর্বে তৈরি) Methodology §3.8/Table 3.6-এর **সব** পরীক্ষা বাস্তবায়ন করে: Shapiro–Wilk স্ক্রিনিং (এবার **T18** টেবিল হিসেবে যোগ), Kruskal–Wallis + Dunn–Holm (T14/T14b), Mann–Whitney U (T16), Wilcoxon signed-rank on Pair_ID (T12b), χ² + sparse-সেল ফলব্যাক (T15), Spearman (T17)।
+- `run_analysis.py`-এর শেষ প্রিন্টে এখন extend_analysis-এর পয়েন্টার।
+- ফলাফল: সব পরীক্ষার ফলাফল `analysis_outputs/tables/T12–T18`-এ; মেথড-অধ্যায়ের "R software"-বাক্যটি বাস্তবতার সাথে লিখতে WRITING_GUIDE-তে নোট (কোড Python 3; R-এ পোর্ট করা হয়নি — টেক্সট সংশোধন করাই সিদ্ধান্ত)।
+
+## দাবি #2 — "Total spread ≠ মার্জিন-সমষ্টি (লুকানো সংজ্ঞাগত অসামঞ্জস্য)" → ✅ **সত্যি ছিল, ইতোমধ্যে সমাধানকৃত (H2/H3)**
+যাচাই: দাবির সংখ্যা (২৪.৮১+৬২.৫৭+১২২.১৮=২০৯.৫৬ vs spread ১৯১.২০; ইলিশে ৪২৪.৭২ vs ৩৫৭.৭৬) **পূর্বের কমিটের T3-তে হুবহু ছিল**। কারণ শনাক্ত করা হয়েছিল: retailer-উদ্ধৃতি (Form R) বনাম ভোক্তা-প্রদেয় (Form C) দুই সোর্সের মিশ্রণ + Producer-এ M2–M5 দাম। ২০২৬-০৯-০৯-এর প্রথম রিভিউ-পর্বেই ঠিক হয়েছে: খুচরা মার্জিন এখন **ভোক্তা-প্রদেয়** দামে অ্যাংকরড, producer শুধু M1/M6 → **এখন A+B+R = spread হুবহু** (ALL: ২৫.৭৯+৯২.৭২+১১১.৪১ = ২২৯.৯২ = spread; PS ৭০.৯ + spread% ২৯.১ = ১০০)। Form R–Form C ফারাক এখন T3-এর ফুটনোটে "cross-check/bargaining gap" হিসেবে ব্যাখ্যাত (H5), Chapter 4-এর ৪.৩/৪.৪-তেও আলোচিত। দাবিটির বর্ণনা অনুযায়ী "টেবিলের সংজ্ঞা/ফুটনোটে ব্যাখ্যা" এখন আছে।
+
+## দাবি #3 — "WRITING_GUIDE-এ বাসি সংখ্যা (আড়তদার ~১,১০০ কেজি; খুচরা ~১২০ কেজি)" → ✅ **সত্যি ছিল, ইতোমধ্যে সমাধানকৃত (H9)**
+যাচাই: T2 = ৭৯৭.৪ ও ৯৯.৯৫ কেজি; গাইডে আগে ১,১০০/১২০ লেখা ছিল। পূর্বের পর্বে ৭৯৭/১০০ করে সংশোধিত; আজকের grep-এ কেবল MASTER_PROMPT-এর PART 5-এ ৭৩.৯% লাইন বাকি ছিল → **আজ ঠিক করা হয়েছে** (এখন ৭০.৯% ও নতুন মার্জিন, extend_analysis চালানোর নির্দেশ-সহ)। নিয়ম বহাল: লেখার সময় CSV-ই সোর্স।
+
+## দাবি #4 — "হিলশা-নির্দিষ্ট share (৭৪.৮%) আর pooled (৭৩.৯%) গুলিয়ে ফেলার ঝুঁকি" → ⚠️ **সেই সময়কার সংখ্যায় ঝুঁকি ছিল; সংখ্যাই বদলে গেছে**
+পুরোনো সংখ্যায় হিলশা ৭৪.৮% বনাম pooled ৭৩.৯% — প্রকৃতই গুলিয়ে ফেলার মতো। সংশোধিত টেবিলে হিলশা **৭২.৬%**, pooled **৭০.৯%**; WRITING_GUIDE/README/ড্রাফট-চ্যাপ্টার 4 এখন প্রজাতি ও pooled সংখ্যা আলাদা করে লেখে। চ্যাপ্টার 4-এর ৪.৩-তে ইলিশ-চেইন ও PS-এর মধ্যে পার্থক্য স্পষ্ট।
+
+## দাবি #5 — "S08/S09/S10 মেথডের নিজস্ব descriptive-only নিয়ম ভাঙছে" → ✅ **সত্যি, সমাধানকৃত**
+যাচাই: T11-এ Kankoita ২ বাজার (n=৯), Loitta ২ (n=১৫), Harina ১ (n=৬)। এখন:
+- T3-তে `Retail_markets_n` ও `Reporting_status = "Descriptive-only (Method 3.8)"` কলাম। S08/S09 চেইন-সম্পূর্ণ বলে ALL/Table 10-এ আছে কিন্তু descriptive-ফ্ল্যাগ-সহ; S10-এর ল্যান্ডিং-এ আরাতদার-বেচা নেই বলে চেইন-পুল থেকেও বাদ (দুই কারণে descriptive)।
+- চ্যাপ্টার 4 (৪.৪) ও WRITING_GUIDE-তে low-n ক্যাভিয়েট বাধ্যতামূলক করা হয়েছে।
+- এদের PS (৭০.২/৭০.৬/৭৬.০%) "indicative, not inferential" হিসেবে উপস্থাপনের নির্দেশনা।
+
+## দাবি #6 — "Methodology বলে R, বাস্তবে Python" → ✅ **সত্যি, সমাধান-নির্দেশনা দেওয়া হয়েছে**
+যাচাই: Methodology-র "Analysis runs in R statistical software (R Core Team, 2025)"। R-এ পোর্ট করা হয়নি; সিদ্ধান্ত: **অধ্যায় 3 লেখার সময় বাক্যটি বাস্তবতার সাথে লিখুন** (Python 3 + pandas/NumPy/SciPy, `scripts/`-এ কোড, ফলাফল reproducible) — WRITING_GUIDE সাবধানতা #8-এ নির্দেশ।
+
+## দাবি #7 — "T9-এ বাগদা চিংড়ি/কাঁকড়া → টাইটেল 'Other fish' স্ববিরোধী" → ✅ **সত্যি, সমাধানকৃত**
+T9-এর টাইটেল এখন "Table 9. Other aquatic products purchased by consumers"; ডকস্ট্রিং ও নোটে crustacean-অন্তর্ভুক্তির ব্যাখ্যা (ফোকাল-তালিকা true finfish-এ সীমিত — Method 3.4, কিন্তু ভোক্তার কেনাকাটার তুলনা-সেট হিসেবে রাখা হয়েছে)।
+
+## দাবি-সমূহ: সাহিত্য (Jahan et al. 2024; ইলিশ-দাম ট্রেন্ড; BTTC; Rajbari)
+- **Jahan, R., Chad, N. A., Hossain, J. & Kamal, S. A. (2024), "The Marketing Margin and Profit Structure of Nine Commercially Important Marine Fish Species in the Southeast Coastal Areas of Bangladesh", J. of Agribusiness and Rural Development 74(4), Dec 2024** — ✓ যাচাইকৃত (reference-global.com listing, DOI 10.17306/J.JARD.2024.00001; 2023-এর SSRN/RG প্রিপ্রিন্টের peer-reviewed সংস্করণ)। চ্যাপ্টার 2-এ যোগ করা হয়েছে (সবচেয়ে কাছের সাম্প্রতিক বেঞ্চমার্ক)।
+- **"হিলশায় fisherman share ~৭৩% (Cox's Bazar consumer market)"** — সাধারণ পরিসরে (৫৫–৭৬%) সত্য; আমাদের সংশোধিত ৭০.৯/৭২.৬% এর সাথে সাংগত্যপূর্ণ। নির্দিষ্ট পেপার-চিহ্নিত করণে সংখ্যা-উৎস হিসেবে চ্যাপ্টার 2-এ "Cox's Bazar study, 51–76%" বাক্যটিই রাখা হয়েছে।
+- **"BTTC (Oct 2025): Dhaka ৫+স্তরের চেইনে জেলে ~৮০০ Tk/kg, retail ৩,০০০ → share ~২৭%"** — দিক-নির্দেশনা সঠিক: ২০২৫-এ ইলিশ-দাম রেকর্ড উচ্চতায় (Dhaka retail Tk ৯০০–২,২০০/কেজি, YoY +২৯%, BTTC-র সেপ্টেম্বর ২০২৫ প্রতিবেদন; Cox's Bazar-এ ১–১.৪ কেজি ইলিশ wholesale ~১,৮০০)। "landing-নিকট বাজার বনাম দূরবর্তী বহুস্তর চেইন" পার্থক্য চ্যাপ্টার 2-এর 2.2-তে যোগ করা হয়েছে। চ্যাপ্টার 4-এর সতর্কতা-অনুচ্ছেদে মার্চ ২০২৬-এর আসল ডাটা এই মূল্যস্ফীতি-প্রবণতার মধ্যে যাচাইয়ের নির্দেশ যোগ হয়েছে।
+- **DoF Yearbook Vol 41 = 2023-24 সাইটেশন যাচাই** — গাণিতিক ধারাবাহিকতা (33=2015-16 … 41=2023-24) ঠিক; Methodology-র সাইটেশন অপরিবর্তিত রাখা হয়েছে।
+- **Rajbari (Heliyon 2022) হিলশা margin ৫৭.১৪%** — আমাদের সংশোধিত total spread ২৯.১% (হিলশা ২৭.৩%) — পার্থক্য inland/বহুস্তর বনাম landing-city চেইন; চ্যাপ্টার 2/4-এ ব্যাখ্যা-সহ।
+
+## এই পর্বে নতুন/পরিবর্তিত ফাইল
+`scripts/run_analysis.py` (T3-তে Retail_markets_n/Reporting_status; T9 টাইটেল; NOTE-প্রিন্ট), `scripts/extend_analysis.py` (Fisher exact 3×3 + G-test ফলব্যাক, T18 Shapiro–Wilk), `analysis_outputs/tables/T3*, T9*, T15*, T18*`, `Analysis_Summary.xlsx` (২১ শিট), `docs/WRITING_GUIDE.md`, `docs/MASTER_PROMPT.md` (PART 4/5 সংখ্যা), `paper_drafts/chapter_02*`, `paper_drafts/chapter_04*`, `docs/SUPERVISOR_REVIEW.md` (এই পরিশিষ্ট), `docs/worklog.md`।

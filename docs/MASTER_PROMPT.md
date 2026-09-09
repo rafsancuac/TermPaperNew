@@ -213,7 +213,7 @@ Delete all simulated-data warnings from the final text at that point.
 ১. শুরুতে `README.md` পড়ুন — রিপোর মানচিত্র ও সতর্কতা ওখানেই।
 ২. ডাটা বুঝতে `docs/DATA_DICTIONARY.md` (১৬ শিটের প্রতিটি কলাম, K/D ফ্ল্যাগ, Pair_ID)।
 ৩. লেখালেখির জন্য `docs/WRITING_GUIDE.md` — কোন টেবিল/চার্ট কোন অধ্যায়ে, সংখ্যাসহ।
-৪. নিজে বিশ্লেষণ চালাতে: `pip install openpyxl pandas matplotlib numpy pdfplumber` → `python scripts/run_analysis.py`।
+৪. নিজে বিশ্লেষণ চালাতে: `pip install openpyxl pandas matplotlib numpy scipy pdfplumber` → `python scripts/run_analysis.py` (বর্ণনামূলক) তারপর `python scripts/extend_analysis.py` (Methodology §3.8-এর সব পরিসংখ্যান-পরীক্ষা)।
 ৫. **মনে রাখুন:** `04_data_filled`-এর ডাটা এখন সিমুলেটেড — চূড়ান্ত জমায় দেওয়ার আগে আসল ডাটা ঢোকান।
 
 ## PART 5 — সংক্ষিপ্ত চ্যাট-প্রম্পট (ফাইল অ্যাক্সেস ছাড়া AI-কে)
@@ -225,11 +225,15 @@ Kazir Dewri, Karnaphuli Complex, Bahaddarhat, Patenga), 120 respondents
 (30 Aratdar, 30 Bepari/Faria, 30 retailers, 30 consumers), 10 focal
 species, 2–7 March 2026. Chain: fisher → Aratdar (auction) → Bepari →
 retailer → consumer; 1 maund = 37.32 kg; producer's share = fisher price
-÷ consumer price. Current dataset (SIMULATED, for drafting only) gives:
-producer's share 73.9%, retailer margin 122 BDT/kg (16.7%), Bepari 63
-(8.5%), Aratdar 25 (3.4%); MFS use rises down-chain; top problems
-syndicate 31%, spoilage 31%, import competition 29%. TASK: <এখানে কাজ লিখুন —
-e.g., "draft Chapter 4.3 (price chain & margins) from the numbers above">.
+÷ consumer price (producer price = landing markets M1/M6 only; retail
+price = consumer-paid). Current dataset (SIMULATED, for drafting only)
+gives: producer's share 70.9%; margins (% of consumer taka) Aratdar 25.8
+(3.3%), Bepari/Faria 92.7 (11.7%), Retailer 111.4 (14.1%) — additive to
+100; Ilish chain ≈1,032→1,083→1,236→1,420 BDT/kg; MFS use rises
+down-chain (retail ~29%); consumer MFS ~57%; top problems spoilage 31%,
+syndicate 31%, import competition 29%. Species S08/S09/S10 are
+descriptive-only (Method 3.8). TASK: <এখানে কাজ লিখুন — e.g., "draft
+Chapter 4.3 (price chain & margins) from the numbers above">.
 I will paste the exact tables next. [Then paste the relevant CSV contents.]
 ```
 

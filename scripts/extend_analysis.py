@@ -18,8 +18,14 @@ Outputs (analysis_outputs/):
   tables/T15_Payment_Actor_ChiSquare.csv  payment mode x actor chi-square
   tables/T16_Stratum_Margin_MannWhitney.csv  stratum margin comparisons
   tables/T17_Retailer_MC_Profit_Spearman.csv  marketing cost vs profit
+  tables/T18_ShapiroWilk_Screening.csv  normality screening (Method 3.8)
   charts/C8_retail_vs_wholesale_by_market.png
   and all tables appended to Analysis_Summary.xlsx (Index updated).
+
+Together with run_analysis.py these implement EVERY test pre-registered in
+Methodology V4 Sec. 3.8 / Table 3.6: Shapiro-Wilk screening, Kruskal-Wallis
++ Dunn/Holm, Mann-Whitney U, Wilcoxon signed-rank on Pair_ID, chi-square
+with sparse-cell fallbacks, Spearman rank correlation.
 
 Nothing in 04_data_filled/ or the template is modified; results are derived.
 """
@@ -56,7 +62,7 @@ plt.rcParams.update({
 
 EXT_SHEETS = ["T12 Pair Detail", "T12b Wilcoxon", "T13 Species-Market Spread",
               "T14 Kruskal-Wallis", "T14b Dunn-Holm", "T15 Payment x Actor",
-              "T16 Stratum Margins", "T17 MC-Prof Spearman"]
+              "T16 Stratum Margins", "T17 MC-Prof Spearman", "T18 Shapiro-Wilk"]
 
 
 # ----------------------------------------------------------------------------
@@ -326,6 +332,56 @@ def table_dunn(d):
 # ----------------------------------------------------------------------------
 # 3. Payment mode x actor (chi-square) - Methodology 3.8 Q4
 # ----------------------------------------------------------------------------
+def fisher_exact_3x3(table):
+    """Exact independence test for a 3x3 table (Freeman-Halton extension of
+    Fisher's exact test): probability of every table with the observed
+    margins, p = Pr(chi2 >= observed chi2). Exact, hence valid for sparse
+    cells (Methodology 3.8 fallback)."""
+    t = np.asarray(table, dtype=np.int64)
+    if t.shape != (3, 3):
+        return None
+    obs_chi2 = float(stats.chi2_contingency(t)[0])
+    r = t.sum(1).astype(np.int64)
+    c = t.sum(0).astype(np.int64)
+    N = int(r.sum())
+    # enumerate all tables compatible with the margins
+    a = np.arange(min(r[0], c[0]) + 1, dtype=np.int64)
+    b = np.arange(min(r[0], c[1]) + 1, dtype=np.int64)
+    d = np.arange(min(r[1], c[0]) + 1, dtype=np.int64)
+    e = np.arange(min(r[1], c[1]) + 1, dtype=np.int64)
+    A, B, D, E = np.meshgrid(a, b, d, e, indexing="ij")
+    A, B, D, E = A.ravel(), B.ravel(), D.ravel(), E.ravel()
+    keep = ((A + B <= r[0]) & (D + E <= r[1])
+            & (A + D <= c[0]) & (B + E <= c[1]))
+    A, B, D, E = A[keep], B[keep], D[keep], E[keep]
+    C = r[0] - A - B          # row1 col2
+    F = r[1] - D - E          # row2 col2
+    G = c[0] - A - D          # row2? no: row3 col0
+    H = c[1] - B - E          # row3 col1
+    I1 = r[2] - G - H         # row3 col2 (from row margin)
+    I2 = c[2] - C - F         # row3 col2 (from column margin)
+    ok = (I1 == I2) & (I1 >= 0) & (C >= 0) & (F >= 0) & (G >= 0) & (H >= 0)
+    A, B, C, D, E, F, G, H, I1 = (A[ok], B[ok], C[ok], D[ok], E[ok],
+                                  F[ok], G[ok], H[ok], I1[ok])
+    # chi2 of each compatible table (vectorised)
+    exp_ = np.empty((9, A.size), dtype=np.float64)
+    cells = [A, B, C, D, E, F, G, H, I1]
+    rowm = np.array([r[0], r[1], r[2]])
+    colm = np.array([c[0], c[1], c[2]])
+    for k in range(9):
+        i, j = divmod(k, 3)
+        exp_[k] = rowm[i] * colm[j] / N
+    obs_arr = np.vstack(cells).astype(np.float64)
+    chi2v = np.sum((obs_arr - exp_) ** 2 / exp_, axis=0)
+    # exact log-probability of each table (hypergeometric over margins)
+    from scipy.special import gammaln
+    logP = (gammaln(r + 1).sum() + gammaln(c + 1).sum() - gammaln(N + 1)
+            - gammaln(obs_arr + 1).sum(axis=0))
+    P = np.exp(logP - logP.max())
+    p_extreme = float(P[chi2v >= obs_chi2].sum() / P.sum())
+    return p_extreme
+
+
 def table_payment_actor(d):
     freq_col = "MFS_transaction_frequency"
     cats = ["Regular", "Occasional", "Never"]
@@ -338,10 +394,13 @@ def table_payment_actor(d):
     n = arr.sum()
     cramer = float(np.sqrt(chi2 / (n * (min(arr.shape) - 1))))
     sparse = exp.min() < 5
-    g_text = ""
+    fallback = ""
     if sparse:
-        _, g_p, _, _ = stats.chi2_contingency(arr, lambda_="log-likelihood")
-        g_text = f", G-test p={g_p:.4f}"
+        g_p = stats.chi2_contingency(arr, lambda_="log-likelihood")[1]
+        exact_p = fisher_exact_3x3(arr)
+        fallback = (f", G-test p={g_p:.4f}"
+                    + (f", Fisher-exact p={exact_p:.4f}"
+                       if exact_p is not None else ""))
     rows = []
     for i, actor in enumerate(counts):
         row = {"Actor": actor, "n": int(arr[i].sum()),
@@ -349,7 +408,7 @@ def table_payment_actor(d):
                "MFS_Never": int(arr[i][2]),
                "MFS_share_pct": round(100.0 * arr[i][0] / arr[i].sum(), 1)}
         rows.append(row)
-    ptext = f"chi2={chi2:.2f}, df={dof}, p={p:.4f}{g_text}"
+    ptext = f"chi2={chi2:.2f}, df={dof}, p={p:.4f}{fallback}"
     rows.append({"Actor": "chi-square (actor x MFS frequency)",
                  "n": int(n), "MFS_Regular": "", "MFS_Occasional": "",
                  "MFS_Never": "", "MFS_share_pct": ptext})
@@ -358,10 +417,11 @@ def table_payment_actor(d):
                  "MFS_Never": "", "MFS_share_pct": f"V={cramer:.3f} / min exp={exp.min():.2f}"})
     df = pd.DataFrame(rows)
     note = ("Payment-mode adoption by trader class (Methodology 3.8 Q4). Chi-square on "
-            "MFS-use frequency (Regular/Occasional/Never); where expected cell counts < 5 the "
-            "likelihood-ratio (G) test is reported alongside Pearson chi-square as the sparse-"
-            "cell fallback. Consumer payment method is a separate question and appears in "
-            "Tables 5/8.")
+            "MFS-use frequency (Regular/Occasional/Never); because the smallest expected "
+            "cell < 5, sparse-cell fallbacks are reported alongside Pearson chi-square: the "
+            "likelihood-ratio (G) test and the exact Freeman-Halton/Fisher test (p from the "
+            "marginal-conditional enumeration). Consumer payment method is a separate "
+            "question and appears in Tables 5/8.")
     return "T15_Payment_Actor_ChiSquare", "Table 15. Payment mode x actor chi-square", df, note
 
 
@@ -448,6 +508,55 @@ def table_mc_profit_spearman(d):
             "mix monthly/yearly/per-trip frequencies, so per-kg MC is not computed for them "
             "until the cost module defines the period consistently (flagged in review).")
     return "T17_Retailer_MC_Profit_Spearman", "Table 17. Retailer marketing cost vs net margin (Spearman)", out, note
+
+
+# ----------------------------------------------------------------------------
+# 6. Shapiro-Wilk normality screening (Methodology 3.8 pre-test)
+# ----------------------------------------------------------------------------
+def _pooled_level_series(po, cpf_yes, actor, field, mkts=None):
+    vals = [r[field] for r in po
+            if r.get("Actor_type") == actor and r[field] is not None
+            and (mkts is None or r.get("Market") in mkts)]
+    return vals
+
+
+def table_shapiro(d):
+    po = d["PO"]
+    cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
+    series = [
+        ("Producer price - landing markets M1/M6 (Form A buy)",
+         _pooled_level_series(po, cpf_yes, "Aratdar", "buy_kg", LANDING_MARKETS)),
+        ("Aratdar auction sell - M1/M6",
+         _pooled_level_series(po, cpf_yes, "Aratdar", "sell_kg", LANDING_MARKETS)),
+        ("Bepari/Faria sell - all markets",
+         _pooled_level_series(po, cpf_yes, "Bepari_Faria", "sell_kg")),
+        ("Khuchra retailer sell quotes - all markets",
+         _pooled_level_series(po, cpf_yes, "Khuchra", "sell_kg")),
+        ("Consumer-paid prices (Form C slips)",
+         [r["price_kg"] for r in cpf_yes if r["price_kg"] is not None]),
+    ]
+    rows = []
+    for label, vals in series:
+        vals = np.asarray([v for v in vals if v is not None], dtype=float)
+        n = len(vals)
+        if n < 3:
+            rows.append({"Series": label, "n": int(n), "W": None,
+                         "p_value": None,
+                         "Decision": "n<3 - not tested"})
+            continue
+        w, p = stats.shapiro(vals)
+        rows.append({"Series": label, "n": int(n),
+                     "W": round(float(w), 4), "p_value": round(float(p), 4),
+                     "Decision": ("p>0.05 - normality not rejected"
+                                  if p > 0.05
+                                  else "p<=0.05 - non-normal; nonparametric tests used")})
+    df = pd.DataFrame(rows)
+    note = ("Shapiro-Wilk screening on pooled price series run BEFORE any inferential test, "
+            "as pre-registered in Methodology 3.8 ('confirmed here by Shapiro-Wilk screening "
+            "on the pooled series before any test is applied'). Screening motivates the "
+            "distribution-free battery (Kruskal-Wallis/Mann-Whitney/Wilcoxon) used in Tables "
+            "12b/14/16.")
+    return "T18_ShapiroWilk_Screening", "Table 18. Shapiro-Wilk normality screening", df, note
 
 
 # ----------------------------------------------------------------------------
@@ -568,7 +677,7 @@ def main():
     tables = [table_pair_detail(d["PO"]), table_wilcoxon(d["PO"]),
               table_species_market_spread(d), table_species_market_kw(d),
               table_dunn(d), table_payment_actor(d), table_stratum_margins(d),
-              table_mc_profit_spearman(d)]
+              table_mc_profit_spearman(d), table_shapiro(d)]
     os.makedirs(TBL_DIR, exist_ok=True)
     os.makedirs(CH_DIR, exist_ok=True)
     for sheet, title, df, note in tables:

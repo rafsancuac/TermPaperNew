@@ -324,14 +324,24 @@ def t3_chain(d):
     - Species without a full chain (all four chain levels observed) are
       shown descriptively with blank margins; the ALL row and Table 10 pool
       only chain-complete species (state this in the Methods chapter).
+    - Methodology Sec. 3.8: species observed in fewer than three markets are
+      reported descriptively only. Reporting_status flags such species
+      (currently S08 Kankoita, S09 Loitta, S10 Harina); Retail_markets_n
+      counts markets with >=1 retailer sell quote for the species.
     """
     po = d["PO"]
     cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
+    mkt_list = ["M1", "M2", "M3", "M4", "M5", "M6"]
     rows = []
     for code in sorted(d["SP"].keys()):
         sp = d["SP"][code]
         n_obs = sum(1 for r in po if r.get("Species_code") == code
                     and (r.get("buy_kg") is not None or r.get("sell_kg") is not None))
+        ret_markets = [m for m in mkt_list
+                       if any(r.get("Actor_type") == "Khuchra"
+                              and r.get("Market") == m and r.get("Species_code") == code
+                              and r["sell_kg"] is not None for r in po)]
+        status = "" if len(ret_markets) >= 3 else "Descriptive-only (Method 3.8)"
         prod = _po_mean(po, "Aratdar", "buy_kg", code, LANDING_MARKETS)
         arat = _po_mean(po, "Aratdar", "sell_kg", code, LANDING_MARKETS)
         bep = _po_mean(po, "Bepari_Faria", "sell_kg", code)
@@ -345,6 +355,8 @@ def t3_chain(d):
         row = {
             "Species_code": code, "Local_name": sp["Local_name"],
             "English_name": sp["English_common_name"], "n_price_obs": n_obs,
+            "Retail_markets_n": len(ret_markets),
+            "Reporting_status": status,
             "Producer_BDT_kg": prod, "Aratdar_sell_BDT_kg": arat,
             "Bepari_sell_BDT_kg": bep, "Retailer_sell_BDT_kg": ret,
             "Consumer_paid_BDT_kg": cons,
@@ -376,6 +388,7 @@ def t3_chain(d):
     rows.append({
         "Species_code": "ALL", "Local_name": f"Mean of species means (chain-complete: {', '.join(codes_all)})",
         "English_name": "-", "n_price_obs": n_all,
+        "Retail_markets_n": None, "Reporting_status": "Pooled over chain-complete species",
         "Producer_BDT_kg": prod_p, "Aratdar_sell_BDT_kg": arat_p,
         "Bepari_sell_BDT_kg": bep_p, "Retailer_sell_BDT_kg": ret_p,
         "Consumer_paid_BDT_kg": cons_p,
@@ -392,7 +405,10 @@ def t3_chain(d):
             "(descriptive; margins use the consumer-paid anchor); Consumer = focal-species "
             "purchases actually paid (Form C). Margins = differences of consecutive level means "
             "and telescope to the total spread. K/D-flagged prices excluded. Species without a "
-            "complete chain show blank margins and are excluded from ALL (see Local_name note).")
+            "complete chain show blank margins and are excluded from ALL (see Local_name note). "
+            "Reporting_status marks species observed in fewer than three markets as "
+            "descriptive-only (Methodology 3.8): S08/S09/S10 quotes are few and their share "
+            "figures are indicative, not inferential.")
     return "T3_Price_Chain", "Table 3. Price chain by species (BDT per kg)", df, note
 
 
@@ -573,6 +589,9 @@ def t8_consumer(d):
 
 
 def t9_other_fish(d):
+    """Non-focal aquatic products (incl. crustaceans like bagda/kakra) bought
+    by consumers — a deliberate comparison set kept outside the focal list
+    (Methodology 3.4 restricts focal species to true finfish)."""
     rows = []
     cnt = Counter(r.get("Fish_name_local") for r in d["COF"])
     for name, n_ in cnt.most_common():
@@ -581,8 +600,11 @@ def t9_other_fish(d):
                      "Mean_price_BDT_kg": mean_sd([r.get("price_kg") for r in rs])[0],
                      "Mean_qty_kg": mean_sd([num(r.get("Quantity_raw")) for r in rs])[0]})
     df = pd.DataFrame(rows)
-    note = "Non-focal marine items consumers reported buying (Consumer_Other_Fish sheet)."
-    return "T9_Other_Fish", "Table 9. Other fish/items purchased by consumers", df, note
+    note = ("Non-focal aquatic items consumers reported buying on the interview day "
+            "(Consumer_Other_Fish sheet). Includes crustaceans (Bagda shrimp, Kakra crab) and "
+            "finfish (Khoira, Datina, Moid, Faisya, lobster) - comparison items outside the "
+            "ten focal marine-finfish species of Table 3.4.")
+    return "T9_Other_Fish", "Table 9. Other aquatic products purchased by consumers", df, note
 
 
 def t10_margins(d):
@@ -946,6 +968,10 @@ def main():
         if f.startswith(tuple(own)):
             print(f"  chart  {f}")
     print("DONE - outputs in analysis_outputs/")
+    print("NOTE: descriptive pipeline only. The inferential battery pre-registered in "
+          "Methodology 3.8 (Table 3.6) is implemented in scripts/extend_analysis.py "
+          "(Wilcoxon, Kruskal-Wallis/Dunn-Holm, Mann-Whitney, chi-square, Spearman, "
+          "Shapiro-Wilk screening) - run it after this script.")
 
 
 if __name__ == "__main__":

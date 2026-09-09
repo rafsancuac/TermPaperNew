@@ -91,3 +91,18 @@ Work Log:
 Stage Summary:
 - সব এক্সটেনশন আউটপুট analysis_outputs/-এ; 04_data_filled/ অপরিবর্তিত (সিমুলেটেড); রিপো কমিট ও পুশ হয়েছে।
 - পরবর্তী: আসল ডাটা এলে হলুদ ঘরে → verify_filled (২৪/২৪) → run_analysis → extend_analysis → সংখ্যা হালনাগাদ।
+---
+Task ID: 6
+Agent: Arena.ai research assistant
+Task: দ্বিতীয় রিভিউয়ারের ৭টি দাবি যাচাই ও সে অনুযায়ী ফিক্স (২০২৬-০৯-০৯)
+
+Work Log:
+- দাবি-যাচাই: #1 (৩.৮ পরীক্ষা run_analysis-এ নেই → সত্যি ছিল; extend_analysis.py-ই সব পরীক্ষা চালায় — এ পর্বে Shapiro–Wilk T18 যোগ, run_analysis-এর শেষে NOTE-পয়েন্টার); #2 (spread ≠ মার্জিন-সমষ্টি → পূর্বের কমিটে সত্যি, H2/H3-এ ঠিক হয়েছে; এখন হুবহু মেলে); #3 (WRITING_GUIDE-এ ১,১০০/১২০ কেজি → সত্যি ছিল, H9-এ ঠিক; MASTER_PROMPT PART 5-এর ৭৩.৯% লাইন আজ ঠিক); #4 (হিলশা PS বনাম pooled গুলানোর ঝুঁকি — সংখ্যা-হালনাগাদে নিষ্পন্ন); #5 (S08/S09/S10 descriptive-নিয়ম — T3-তে Retail_markets_n + Reporting_status কলাম, ক্যাভিয়েট ডক/ড্রাফটে); #6 (R-বাক্য বনাম Python — টেক্সট-সংশোধনের নির্দেশনা WRITING_GUIDE #8); #7 (T9 টাইটেল → "Other aquatic products")।
+- T15: sparse-সেলে G-test-এর সাথে exact Freeman–Halton/Fisher 3×3 যোগ (স্যানিটি-টেস্ট: dense টেবিলে χ²-অনুমানের কাছাকাছি; আমাদের টেবিলে p=0.8945)।
+- T18 Shapiro–Wilk: পাঁচটি pooled সিরিজই non-normal (p<0.001) → §3.8-এর nonparametric যুক্তি মজবুত।
+- সাহিত্য-যাচাই (ওয়েব): Jahan et al. 2024 (JARD 74(4), DOI 10.17306/J.JARD.2024.00001) ✓; ২০২৫ ইলিশ-দাম (Dhaka retail ৯০০–২,২০০ Tk/kg, +২৯% YoY; Cox's Bazar ১–১.৪ কেজি ~১,৮০০ wholesale) ✓ → চ্যাপ্টার 2/4-এ যোগ; landing-city বনাম দূরবর্তী-চেইন PS-পার্থক্যের ব্যাখ্যা যোগ।
+- ড্রাফট/ডক আপডেট: chapter_02 (Jahan 2024 + দাম-ট্রেন্ড), chapter_04 (S08–S10 ক্যাভিয়েট, Shapiro/Fisher ফলাফল, রিয়েল-ডাটা মূল্যস্ফীতি-চেক নোট), WRITING_GUIDE (সাবধানতা ৬–৮, T18-ম্যাপ), MASTER_PROMPT (PART 4/5), SUPERVISOR_REVIEW.md পরিশিষ্ট B, worklog।
+- পাইপলাইন রিরান: verify ২৪/২৪ → run_analysis → extend_analysis (T18-সহ ৯ শিট) → Analysis_Summary ২১ শিট।
+
+Stage Summary:
+- ৭ দাবির মধ্যে ৩টি (১,৩,৫) বর্তমান-অবস্থায় সত্যি ছিল → ফিক্স; ২টি (২,৪) আগের পর্বে ফিক্সড; ২টি (৬,৭) নির্দেশনামূলক → সম্পন্ন; সাহিত্য-দাবি (Jahan 2024, দাম-ট্রেন্ড) যাচাই করে ড্রাফটে ঢোকানো হয়েছে। কমিট + পুশ হবে।
