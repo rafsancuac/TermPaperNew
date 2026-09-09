@@ -526,7 +526,9 @@ def t6_problems(d):
                      "Bepari_n": b, "Bepari_pct": round(100.0 * b / nB, 1),
                      "Retailer_n": rr, "Retailer_pct": round(100.0 * rr / nR, 1),
                      "Total_n": tot, "Total_pct": round(100.0 * tot / (nA + nB + nR), 1)})
-    rows.sort(key=lambda x: -x["Total_n"])
+    # deterministic ordering: count desc, then problem name (set iteration
+    # order is hash-random between runs, which previously shuffled ties)
+    rows.sort(key=lambda x: (-x["Total_n"], x["Problem"]))
     df = pd.DataFrame(rows)
     note = "% = share of that actor's respondents mentioning the problem in any of the 3 slots (multi-response)."
     return "T6_Problems", "Table 6. Marketing problems reported by traders", df, note
