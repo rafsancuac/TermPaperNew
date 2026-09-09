@@ -11,18 +11,27 @@ wbv = openpyxl.load_workbook(OUT, data_only=True)
 
 print("=== QC_Check (values) ===")
 ws = wbv["QC_Check"]
+# Sheet layout (header row 5): B=Check, C=Value, D=Rule / target, E=Status.
+# (Bugfix 2026-09-09: status/rule were previously read from columns D/E swapped,
+# so the script always reported 'non-passing checks: 24' even when every check
+# passed. Status text is compared against the allowed vocabulary and the rule
+# text is printed for context.)
 fails = 0
+total = 0
+PASS_TOKENS = ("OK", "TARGET MET", "Info", "COMPLETE", "All matched", "No pairs yet")
 for r in range(6, 30):
     label = ws.cell(row=r, column=2).value
     val = ws.cell(row=r, column=3).value
-    status = ws.cell(row=r, column=4).value
-    rule = ws.cell(row=r, column=5).value
+    rule = ws.cell(row=r, column=4).value
+    status = ws.cell(row=r, column=5).value
     if label:
-        print(f"  {str(label)[:58]:58s} = {val}  [{status}]")
-        if status not in ("OK", "TARGET MET", "Info", "COMPLETE", "All matched",
-                          "No pairs yet") and status is not None:
+        total += 1
+        ok = (status is None) or (str(status).strip() in PASS_TOKENS)
+        print(f"  [{'PASS' if ok else 'FAIL'}] {str(label)[:52]:52s} = {val}"
+              f"  [{str(status).strip() if status is not None else ''}]  rule: {rule}")
+        if not ok:
             fails += 1
-print(f"  >>> non-passing checks: {fails}")
+print(f"  >>> checks read: {total}; non-passing: {fails}")
 
 print("\n=== Progress_Dashboard (values) ===")
 ws = wbv["Progress_Dashboard"]
@@ -107,3 +116,7 @@ for r in range(5, 505):
     kbuy += (g == "K"); dbuy += (g == "D")
     ksell += (h == "K"); dsell += (h == "D")
 print(f"  buy: K={kbuy} D={dbuy} | sell: K={ksell} D={dsell}")
+
+# Exit non-zero if any QC check failed (useful for CI/git hooks).
+import sys as _sys
+_sys.exit(1 if fails else 0)

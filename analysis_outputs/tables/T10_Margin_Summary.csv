@@ -1,6 +1,6 @@
 ﻿Level,n_species,Margin_BDT_kg,Margin_pct_consumer
-Aratdar (auction margin),10,24.81,3.4
-Bepari/Faria (wholesale margin),10,62.57,8.5
-Retailer (khuchra margin),10,122.18,16.7
-Total marketing spread (consumer - producer),10,191.2,26.1
-Producer share of consumer price,10,,73.9
+"Aratdar (auction margin, M1/M6)",9,25.79,3.3
+Bepari/Faria (wholesale margin),9,92.72,11.7
+Retailer (margin to consumer),9,111.41,14.1
+Total marketing spread (consumer - producer),9,229.92,29.1
+Producer share of consumer price,9,,70.9

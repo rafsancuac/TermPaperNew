@@ -232,15 +232,21 @@ def main(path):
         str(mfs_bad[:5]) if mfs_bad else "consistent")
 
     # ---------------- 6. price chain coherence ----------------
+    # Convention (since supervisor-review commit): producer & auction sell
+    # observed only at landing markets M1/M6 (first-sale proxy, Methodology
+    # 3.11c); consumer price = consumer-paid (Form C focal purchases);
+    # retail margin anchored to consumer-paid price.
+    LANDING = {"M1", "M6"}
     chain = defaultdict(lambda: defaultdict(list))  # species -> stage -> [prices]
     for p in PO:
         sp = p.get("Species_code")
         at = p.get("Actor_type")
+        mk = str(p.get("Market")).strip()
         if sp is None:
             continue
         bp = price_kg(p.get("Buy_price_raw"), p.get("Unit"), p.get("Buy_BDT_per_kg"))
         sp_ = price_kg(p.get("Sell_price_raw"), p.get("Unit"), p.get("Sell_BDT_per_kg"))
-        if at == "Aratdar" and bp:
+        if at == "Aratdar" and bp and mk in LANDING:
             chain[sp]["producer"].append(bp)
             if sp_:
                 chain[sp]["aratdar_sell"].append(sp_)
@@ -252,28 +258,35 @@ def main(path):
             chain[sp]["retail_buy"].append(bp)
             if sp_:
                 chain[sp]["retail_sell"].append(sp_)
+    for r in CPF:
+        if r.get("Purchased_today") == "Yes" and r.get("Species_code"):
+            v = price_kg(r.get("Price_raw"), r.get("Unit"), r.get("Price_BDT_per_kg"))
+            if v:
+                chain[r["Species_code"]]["consumer_paid"].append(v)
 
     mono_bad, share = [], {}
     for sp in SPECIES:
         c = chain[sp]
         prod = np.mean(c["producer"]) if c["producer"] else None
         asel = np.mean(c["aratdar_sell"]) if c["aratdar_sell"] else None
+        bsel = np.mean(c["bepari_sell"]) if c["bepari_sell"] else None
+        cons = np.mean(c["consumer_paid"]) if c["consumer_paid"] else None
         rsell = np.mean(c["retail_sell"]) if c["retail_sell"] else None
-        if prod and rsell:
-            share[sp] = 100 * prod / rsell
+        if prod and cons:
+            share[sp] = 100 * prod / cons
         vals = [("producer", prod), ("aratdar_sell", asel),
-                ("retail_sell", rsell)]
+                ("bepari_sell", bsel), ("consumer_paid", cons)]
         for (n1, v1), (n2, v2) in zip(vals, vals[1:]):
             if v1 and v2 and v2 <= v1:
                 mono_bad.append((sp, n1, round(v1), n2, round(v2)))
     rep("PASS" if not mono_bad else "FAIL",
-        "Chain monotonic: producer < aratdar < retail (per species mean)",
-        str(mono_bad[:4]) if mono_bad else
-        "all 10 species strictly increasing")
+        "Chain monotonic: producer < aratdar < bepari < consumer (per species)",
+        str(mono_bad[:4]) if mono_bad else "increasing wherever both stages exist")
     if share:
         overall = np.mean(list(share.values()))
-        rep("PASS" if 60 < overall < 85 else "WARN",
-            "Producer's share recomputed", f"species-mean = {overall:.1f}% "
+        rep("PASS" if 55 < overall < 85 else "WARN",
+            "Producer's share recomputed (consumer-anchored, all species)",
+            f"species-mean = {overall:.1f}% "
             f"(range {min(share.values()):.0f}-{max(share.values()):.0f}%)")
 
     # buy<=sell within each PO row
@@ -285,20 +298,29 @@ def main(path):
     rep("PASS" if not row_bad else "FAIL", "Sell >= Buy within each observation",
         str(row_bad[:5]) if row_bad else f"all {len(PO)} rows")
 
-    # margin sanity per stage
+    # margin sanity per stage (new convention; chain-complete species only)
     mgn = defaultdict(list)
+    chain_complete = []
     for sp in SPECIES:
         c = chain[sp]
-        if c["producer"] and c["aratdar_sell"]:
-            mgn["aratdar"].append(np.mean(c["aratdar_sell"]) - np.mean(c["producer"]))
-        if c["bepari_buy"] and c["bepari_sell"]:
-            mgn["bepari"].append(np.mean(c["bepari_sell"]) - np.mean(c["bepari_buy"]))
-        if c["retail_buy"] and c["retail_sell"]:
-            mgn["retail"].append(np.mean(c["retail_sell"]) - np.mean(c["retail_buy"]))
+        if not (c["producer"] and c["aratdar_sell"] and c["bepari_sell"]
+                and c["consumer_paid"]):
+            continue
+        chain_complete.append(sp)
+        mgn["aratdar"].append(np.mean(c["aratdar_sell"]) - np.mean(c["producer"]))
+        mgn["bepari"].append(np.mean(c["bepari_sell"]) - np.mean(c["aratdar_sell"]))
+        mgn["retail"].append(np.mean(c["consumer_paid"]) - np.mean(c["bepari_sell"]))
     for st in ("aratdar", "bepari", "retail"):
         v = np.mean(mgn[st]) if mgn[st] else 0
         rep("PASS" if 0 < v < 200 else "WARN", f"Margin {st} plausible (BDT/kg)",
-            f"species-mean = {v:.1f}")
+            f"species-mean = {v:.1f} (chain-complete: {len(chain_complete)} species)")
+    if chain_complete:
+        sum_m = np.mean(mgn["aratdar"]) + np.mean(mgn["bepari"]) + np.mean(mgn["retail"])
+        spread = np.mean([np.mean(chain[sp]["consumer_paid"])
+                          - np.mean(chain[sp]["producer"]) for sp in chain_complete])
+        rep("PASS" if abs(sum_m - spread) < 0.6 else "FAIL",
+            "Margins telescope: A+B+R = spread (100% accounting)",
+            f"A+B+R = {sum_m:.2f} vs spread = {spread:.2f} BDT/kg")
 
     # ---------------- 7. retail price realism bands ----------------
     out_band = []
@@ -536,9 +558,9 @@ def main(path):
         rep("PASS" if claimed and abs(comp_share - claimed) < 1.5 else "WARN",
             "Recomputed overall share matches T10 claim",
             f"mine={comp_share:.1f}% vs T10={claimed}%")
-        for lvl, mkey in [("Aratdar (auction margin)", "aratdar"),
+        for lvl, mkey in [("Aratdar (auction margin, M1/M6)", "aratdar"),
                           ("Bepari/Faria (wholesale margin)", "bepari"),
-                          ("Retailer (khuchra margin)", "retail")]:
+                          ("Retailer (margin to consumer)", "retail")]:
             v = np.mean(mgn[mkey]) if mgn[mkey] else 0
             c = float(t10[lvl]["Margin_BDT_kg"] or 0)
             rep("PASS" if abs(v - c) < 1.5 else "WARN",

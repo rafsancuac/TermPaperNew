@@ -43,18 +43,24 @@ REPOSITORY MAP (TermPaperNew)
 03_data_entry_template/  Blank 16-sheet data-entry workbook.
 04_data_filled/    FILLED workbook — ⚠ SIMULATED data, see warning below.
 scripts/           run_analysis.py (main pipeline: 12 tables + 7 charts +
-                   Analysis_Summary.xlsx), verify_filled.py (24 QC checks),
-                   review_audit.py (64 supervisor-level deep checks),
-                   fill_survey_data.py (regenerate simulated data,
-                   seed=20260302), extract_pdfs.py, inspect_*.py.
-analysis_outputs/  tables/ (T1–T11 + T2b, CSV utf-8-sig), charts/ (C1–C7,
-                   PNG 150 dpi), Analysis_Summary.xlsx (all tables + Index).
+                   Analysis_Summary.xlsx), extend_analysis.py (statistical
+                   extension: T12–T17 + C8; run AFTER run_analysis.py),
+                   verify_filled.py (24 QC checks), review_audit.py (64
+                   independent data-audit checks), fill_survey_data.py
+                   (regenerate simulated data, seed=20260302),
+                   extract_pdfs.py, inspect_*.py, explore_issues.py.
+analysis_outputs/  tables/ (T1–T11, T2b, T12–T17; CSV utf-8-sig),
+                   charts/ (C1–C8, PNG 150 dpi), Analysis_Summary.xlsx
+                   (all tables + Index).
+paper_drafts/      chapter 2 (literature review skeleton) and chapter 4
+                   (results & discussion) drafts with [SIMULATED] notes.
 docs/              DATA_DICTIONARY.md (every sheet & column explained),
                    WRITING_GUIDE.md (chapter→table map + current numbers),
                    LITERATURE_NOTES.md (13+ published references for
                    Chapters 1-2 + price-realism verification),
-                   REVIEW_SUPERVISOR.md (64-check supervisor audit &
-                   verdict — read this first when picking up the work),
+                   SUPERVISOR_REVIEW.md (supervisor-level audit: found &
+                   fixed pipeline bugs, new methodology-consistent chain
+                   convention — read before extending the analysis),
                    worklog.md (full process log), MASTER_PROMPT.md (this).
 
 SURVEY DESIGN (Methodology V4)
@@ -97,33 +103,54 @@ enter it in yellow cells only, run verify_filled.py (must pass 24/24),
 then run_analysis.py to regenerate every table and chart.
 
 CURRENT STATUS & HEADLINE (SIMULATED) RESULTS
-- 120 respondents; 463 price observations; 16 matched buy/sell pairs;
-  6 market-observation rows; 7 collection-log visits.
-- Producer's (fisher's) share of consumer price: 73.9%.
-- Retailer margin ≈ 122 BDT/kg (≈16.7%) — the largest in the chain;
-  Bepari ≈ 63 BDT/kg (8.5%); Aratdar ≈ 25 BDT/kg (3.4%, commission-based).
-- Ilish chain example: fisher 1,062 → consumer ≈1,420 BDT/kg.
-- MFS payment share rises down-chain (Aratdar 14% → retail 29%).
-- Top problems: supply syndicate 31%, unsold-fish spoilage 31%,
+- 120 respondents; 463 price observations; 16 matched buy/sell pairs
+  (14 usable); 6 market-observation rows; 7 collection-log visits.
+- Producer's (fisher's) share of consumer price: 70.9% (producer price =
+  Form A buy quotes at landing-linked markets M1/M6 only; Methodology 3.11c).
+- Channel margins (chain-complete species S01–S09, % of consumer taka):
+  Aratdar ≈ 25.8 BDT/kg (3.3%), Bepari/Faria ≈ 92.7 (11.7%),
+  Retailer (consumer-anchored) ≈ 111.4 (14.1%); total spread 229.9 (29.1%);
+  margins + share = exactly 100%.
+- Ilish chain example: fisher ≈1,032 → auction ≈1,083 → bepari ≈1,236 →
+  consumer ≈1,420 BDT/kg.
+- Retailer vendor quotes average ≈2.5% ABOVE consumer-paid prices (bargaining
+  gap) — margins use the consumer-paid anchor; quote series are descriptive.
+- MFS payment share rises down-chain (Aratdar ~14% → retail ~29%);
+  consumers pay ~57% by MFS (bKash 37%, Nagad 20%).
+- Top problems: unsold-fish spoilage 31%, supply syndicate 31%,
   frozen-import competition 29%, ice cost 27%.
-- Consumers: 53% weekly buyers; freshness/hygiene is the #1 purchase
-  reason (33%); average purchase 1.6 kg.
+- Statistics (Methodology 3.8): Wilcoxon on matched pairs p=0.116
+  (consistent); Kruskal–Wallis across markets exploratory (cells n≥3):
+  significant for S01–S03, S05, S06 (S01 Fishery Ghat vs Bahaddarhat
+  survives Dunn–Holm); payment mode × actor χ² p=0.87; stratum margins
+  differ (MWU p<0.0001); retailer MC/kg vs net margin Spearman rho=0.43,
+  p=0.018.
 (Full numbers live in analysis_outputs/ and docs/WRITING_GUIDE.md.)
 
 REPRODUCING / RE-RUNNING
-pip install openpyxl pandas matplotlib numpy pdfplumber
-python scripts/run_analysis.py                    # from 04_data_filled
+pip install openpyxl pandas matplotlib numpy scipy pdfplumber
+python scripts/run_analysis.py                    # tables/charts (T1–T11)
+python scripts/extend_analysis.py                 # statistics (T12–T17, C8)
 python scripts/run_analysis.py --data OTHER.xlsx  # from another workbook
 python scripts/verify_filled.py                   # 24 QC checks
 python scripts/fill_survey_data.py                # regenerate simulated
 
 METHOD NOTES (for analysis & writing)
 - Margin = next-level price − previous-level price, per kg; species-level
-  means, then composition-consistent aggregate ("ALL" row = mean of
-  species means — state this in the Methodology chapter).
+  means, then composition-consistent aggregate over CHAIN-COMPLETE species
+  (state this in the Methodology chapter; S10 Harina currently excluded —
+  no landing-market auction sell quote).
+- Producer price (fisher first-sale) is proxied ONLY from Form A buy quotes
+  at landing-linked markets M1 Fishery Ghat & M6 Patenga; retail price P_r
+  is the consumer-paid anchor (Form C slips) and the retailer margin is
+  P_r − Bepari sell. Under this convention margins telescope to the total
+  spread and PS% + spread% = 100 exactly.
 - Producer's share = fisher price ÷ consumer price × 100.
 - Maund prices converted at 37.32 kg before any averaging.
 - K/D-flagged price cells are excluded from means.
+- Statistical tests: distribution-free only; within-species across markets
+  (never pooled across species); cells n≥5 pre-specified, n≥3 exploratory;
+  Holm adjustment after significant omnibus tests.
 ```
 
 ---

@@ -36,6 +36,11 @@ import matplotlib.pyplot as plt
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 MAUND = 37.32  # 1 maund = 37.32 kg (template Unit_Converter)
+# First-sale (fisher->aratdar auction) prices are observable only at the two
+# landing-linked markets (Methodology V4 Table 3.1 & Sec. 3.11c): Fishery Ghat
+# and Patenga. Producer-side and auction (aratdar sell) series are therefore
+# restricted to these markets; wholesale/retail series cover all six markets.
+LANDING_MARKETS = ("M1", "M6")
 
 TBL_DIR = os.path.join(ROOT, "analysis_outputs", "tables")
 CH_DIR = os.path.join(ROOT, "analysis_outputs", "charts")
@@ -283,14 +288,43 @@ def t2b_channel(d):
     return "T2b_Channel_Patterns", "Table 2b. Channel structure and trading patterns", df, note
 
 
-def _po_mean(po, actor, field, species=None):
+def _po_mean(po, actor, field, species=None, markets=None):
+    """Mean of numeric price/quantity values for actor+species(+markets)."""
     vals = [r[field] for r in po
             if r[field] is not None and r.get("Actor_type") == actor
+            and (species is None or r.get("Species_code") == species)
+            and (markets is None or r.get("Market") in markets)]
+    return round(float(np.mean(vals)), 2) if vals else None
+
+
+def _cons_mean(cpf, species=None):
+    """Mean consumer-paid price (Form C focal purchases, 'Yes' today)."""
+    vals = [r["price_kg"] for r in cpf
+            if r.get("Purchased_today") == "Yes" and r["price_kg"] is not None
             and (species is None or r.get("Species_code") == species)]
     return round(float(np.mean(vals)), 2) if vals else None
 
 
 def t3_chain(d):
+    """Price chain per species.
+
+    Methodological basis (Methodology V4, Sec. 3.7):
+    - Producer (fisher first-sale) price = Form A BUY quotes at the two
+      landing-linked markets only (M1 Fishery Ghat, M6 Patenga), where an
+      aratdar's buy price is the net auction price paid to the fisherman.
+    - Aratdar (auction hammer) sell = Form A SELL quotes at M1/M6 only.
+    - Bepari sell = Form B sell quotes pooled over markets (city wholesale).
+    - Retailer sell quote = Form R sell quotes pooled over markets
+      (descriptive vendor quote, not used for margins).
+    - Consumer price = mean actually paid on Form C focal purchases
+      (consumer slips validate the retail price, Sec. 3.7.3).
+    - Segment margins are differences of consecutive level means, so on any
+      species with all levels present the margins telescope to the total
+      spread (consumer - producer) exactly.
+    - Species without a full chain (all four chain levels observed) are
+      shown descriptively with blank margins; the ALL row and Table 10 pool
+      only chain-complete species (state this in the Methods chapter).
+    """
     po = d["PO"]
     cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
     rows = []
@@ -298,13 +332,12 @@ def t3_chain(d):
         sp = d["SP"][code]
         n_obs = sum(1 for r in po if r.get("Species_code") == code
                     and (r.get("buy_kg") is not None or r.get("sell_kg") is not None))
-        prod = _po_mean(po, "Aratdar", "buy_kg", code)
-        arat = _po_mean(po, "Aratdar", "sell_kg", code)
+        prod = _po_mean(po, "Aratdar", "buy_kg", code, LANDING_MARKETS)
+        arat = _po_mean(po, "Aratdar", "sell_kg", code, LANDING_MARKETS)
         bep = _po_mean(po, "Bepari_Faria", "sell_kg", code)
         ret = _po_mean(po, "Khuchra", "sell_kg", code)
-        cons_vals = [r["price_kg"] for r in cpf_yes
-                     if r.get("Species_code") == code and r["price_kg"] is not None]
-        cons = round(float(np.mean(cons_vals)), 2) if cons_vals else None
+        cons = _cons_mean(cpf_yes, code)
+        complete = all(x is not None for x in (prod, arat, bep, cons))
 
         def diff(a, b):
             return round(a - b, 2) if (a is not None and b is not None) else None
@@ -315,42 +348,51 @@ def t3_chain(d):
             "Producer_BDT_kg": prod, "Aratdar_sell_BDT_kg": arat,
             "Bepari_sell_BDT_kg": bep, "Retailer_sell_BDT_kg": ret,
             "Consumer_paid_BDT_kg": cons,
-            "Aratdar_margin_BDT_kg": diff(arat, prod),
-            "Bepari_margin_BDT_kg": diff(bep, arat),
-            "Retailer_margin_BDT_kg": diff(ret, bep),
-            "Total_spread_BDT_kg": diff(cons, prod),
+            "Aratdar_margin_BDT_kg": diff(arat, prod) if complete else None,
+            "Bepari_margin_BDT_kg": diff(bep, arat) if complete else None,
+            "Retailer_margin_BDT_kg": diff(cons, bep) if complete else None,
+            "Total_spread_BDT_kg": diff(cons, prod) if complete else None,
             "Producer_share_pct": (round(100.0 * prod / cons, 1)
                                    if (prod is not None and cons) else None),
         }
         rows.append(row)
 
-    # pooled row: unweighted mean of species-level means (composition-consistent,
-    # matching T10 methodology - avoids mixing different species mixes per level)
-    def pooled(field):
-        vals = [row[field] for row in rows if row[field] is not None]
+    # pooled row over chain-complete species only: unweighted mean of the
+    # per-species means (composition-consistent; matches Table 10), so the
+    # pooled margins telescope to the pooled spread and PS + spread % = 100.
+    def pooled(field, complete_only=False):
+        vals = [row[field] for row in rows if row[field] is not None
+                and (not complete_only
+                     or row["Total_spread_BDT_kg"] is not None)]
         return round(float(np.mean(vals)), 2) if vals else None
 
-    prod_p, arat_p = pooled("Producer_BDT_kg"), pooled("Aratdar_sell_BDT_kg")
-    bep_p, ret_p = pooled("Bepari_sell_BDT_kg"), pooled("Retailer_sell_BDT_kg")
-    cons_p = pooled("Consumer_paid_BDT_kg")
-    n_all = sum(1 for r in po if r.get("buy_kg") is not None or r.get("sell_kg") is not None)
+    full = [row for row in rows if row["Total_spread_BDT_kg"] is not None]
+    codes_all = [row["Species_code"] for row in full]
+    n_all = sum(1 for r in po if r.get("Species_code") in codes_all
+                and (r.get("buy_kg") is not None or r.get("sell_kg") is not None))
+    prod_p, arat_p = pooled("Producer_BDT_kg", True), pooled("Aratdar_sell_BDT_kg", True)
+    bep_p, ret_p = pooled("Bepari_sell_BDT_kg", True), pooled("Retailer_sell_BDT_kg", True)
+    cons_p = pooled("Consumer_paid_BDT_kg", True)
     rows.append({
-        "Species_code": "ALL", "Local_name": "Mean of species means",
+        "Species_code": "ALL", "Local_name": f"Mean of species means (chain-complete: {', '.join(codes_all)})",
         "English_name": "-", "n_price_obs": n_all,
         "Producer_BDT_kg": prod_p, "Aratdar_sell_BDT_kg": arat_p,
         "Bepari_sell_BDT_kg": bep_p, "Retailer_sell_BDT_kg": ret_p,
         "Consumer_paid_BDT_kg": cons_p,
         "Aratdar_margin_BDT_kg": round(arat_p - prod_p, 2),
         "Bepari_margin_BDT_kg": round(bep_p - arat_p, 2),
-        "Retailer_margin_BDT_kg": round(ret_p - bep_p, 2),
+        "Retailer_margin_BDT_kg": round(cons_p - bep_p, 2),
         "Total_spread_BDT_kg": round(cons_p - prod_p, 2),
         "Producer_share_pct": round(100.0 * prod_p / cons_p, 1),
     })
     df = pd.DataFrame(rows)
-    note = ("Producer price = net auction price paid to fishers (Form A buy). "
-            "Aratdar sell = auction hammer price to Bepari. Retailer sell = khuchra counter price. "
-            "Consumer = focal-species retail purchases. Margins are simple differences of level means. "
-            "K (not traded today) / D (refused) price flags excluded.")
+    note = ("Producer price = net auction price paid to fishers (Form A buy) at the "
+            "landing-linked markets M1/M6 only; Aratdar sell = auction hammer price at M1/M6; "
+            "Bepari sell = Form B sell over all markets; Retailer sell = Form R vendor quote "
+            "(descriptive; margins use the consumer-paid anchor); Consumer = focal-species "
+            "purchases actually paid (Form C). Margins = differences of consecutive level means "
+            "and telescope to the total spread. K/D-flagged prices excluded. Species without a "
+            "complete chain show blank margins and are excluded from ALL (see Local_name note).")
     return "T3_Price_Chain", "Table 3. Price chain by species (BDT per kg)", df, note
 
 
@@ -544,59 +586,71 @@ def t9_other_fish(d):
 
 
 def t10_margins(d):
+    """Channel margins & producer's share (composition-consistent pooling over
+    chain-complete species only - see t3_chain docstring)."""
     po = d["PO"]
-    codes = sorted(d["SP"].keys())
-    lv = {}
+    cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
+    codes = [c for c in sorted(d["SP"].keys())]
 
-    def sp_mean(actor, field):
+    # chain-complete species set (same rule as Table 3)
+    chain_codes = []
+    for c in codes:
+        if (_po_mean(po, "Aratdar", "buy_kg", c, LANDING_MARKETS) is not None
+                and _po_mean(po, "Aratdar", "sell_kg", c, LANDING_MARKETS) is not None
+                and _po_mean(po, "Bepari_Faria", "sell_kg", c) is not None
+                and _cons_mean(cpf_yes, c) is not None):
+            chain_codes.append(c)
+    if not chain_codes:
+        chain_codes = codes
+
+    def sp_mean(actor, field, mkts=None, cset=None):
         vals = []
-        for c in codes:
-            m = _po_mean(po, actor, field, c)
+        for c in (cset or chain_codes):
+            m = _po_mean(po, actor, field, c, mkts)
             if m is not None:
                 vals.append(m)
         return round(float(np.mean(vals)), 2) if vals else None, len(vals)
 
-    prod, _ = sp_mean("Aratdar", "buy_kg")
-    arat, _ = sp_mean("Aratdar", "sell_kg")
-    bep, _ = sp_mean("Bepari_Faria", "sell_kg")
-    ret, _ = sp_mean("Khuchra", "sell_kg")
-    # consumer price: mean of species-level means (consistent with T3 ALL row)
+    prod, n_prod = sp_mean("Aratdar", "buy_kg", LANDING_MARKETS)
+    arat, n_arat = sp_mean("Aratdar", "sell_kg", LANDING_MARKETS)
+    bep, n_bep = sp_mean("Bepari_Faria", "sell_kg")
     cons_vals = []
-    for c in codes:
-        v = [r["price_kg"] for r in d["CPF"]
-             if r.get("Purchased_today") == "Yes"
-             and r.get("Species_code") == c and r["price_kg"] is not None]
-        if v:
-            cons_vals.append(float(np.mean(v)))
+    for c in chain_codes:
+        v = _cons_mean(cpf_yes, c)
+        if v is not None:
+            cons_vals.append(v)
     cons = round(float(np.mean(cons_vals)), 2) if cons_vals else None
 
-    def level(name, sell, buy):
+    def level(name, sell, buy, n_sp):
         if sell is None or buy is None:
-            return {"Level": name, "n_species": 0, "Margin_BDT_kg": None,
+            return {"Level": name, "n_species": n_sp, "Margin_BDT_kg": None,
                     "Margin_pct_consumer": None}
         mg = round(sell - buy, 2)
-        return {"Level": name, "n_species": len(codes),
+        return {"Level": name, "n_species": n_sp,
                 "Margin_BDT_kg": mg,
                 "Margin_pct_consumer": round(100.0 * mg / cons, 1) if cons else None}
 
-    rows = [level("Aratdar (auction margin)", arat, prod),
-            level("Bepari/Faria (wholesale margin)", bep, arat),
-            level("Retailer (khuchra margin)", ret, bep)]
+    rows = [level("Aratdar (auction margin, M1/M6)", arat, prod, n_arat),
+            level("Bepari/Faria (wholesale margin)", bep, arat, n_bep),
+            level("Retailer (margin to consumer)", cons, bep, len(chain_codes))]
     rows.append({"Level": "Total marketing spread (consumer - producer)",
-                 "n_species": len(codes),
+                 "n_species": len(chain_codes),
                  "Margin_BDT_kg": round(cons - prod, 2) if cons and prod else None,
                  "Margin_pct_consumer": round(100.0 - 100.0 * prod / cons, 1)
                  if cons and prod else None})
     rows.append({"Level": "Producer share of consumer price",
-                 "n_species": len(codes),
+                 "n_species": len(chain_codes),
                  "Margin_BDT_kg": None,
                  "Margin_pct_consumer": round(100.0 * prod / cons, 1)
                  if cons and prod else None})
     df = pd.DataFrame(rows)
-    note = ("All values are unweighted means of species-level means, so levels are "
-            "composition-consistent (identical to the ALL row of Table 3). Margin % is "
-            "expressed as a share of the pooled consumer price; producer's share is the "
-            "classic marketing-efficiency measure.")
+    note = ("Unweighted means of species-level means over chain-complete species only "
+            f"(n_species={len(chain_codes)}; see Table 3 note). Producer & auction prices from "
+            "landing-linked markets M1/M6 (first-sale proxy, Methodology 3.11c); wholesale "
+            "price = Bepari sell over all markets; retail price = consumer-paid anchor (Form C "
+            "slips). Margins are differences of consecutive level means, so they sum exactly to "
+            "the total spread and PS% + spread% = 100. Margin % is expressed as a share of the "
+            "pooled consumer price.")
     return "T10_Margin_Summary", "Table 10. Channel margins and producer's share", df, note
 
 
@@ -887,8 +941,10 @@ def main():
     print(f"  workbook {XLSX_OUT}")
 
     make_charts(d, tables)
+    own = {f"C{i}_" for i in range(1, 8)}
     for f in sorted(os.listdir(CH_DIR)):
-        print(f"  chart  {f}")
+        if f.startswith(tuple(own)):
+            print(f"  chart  {f}")
     print("DONE - outputs in analysis_outputs/")
 
 
