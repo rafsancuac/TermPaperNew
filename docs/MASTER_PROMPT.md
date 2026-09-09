@@ -44,12 +44,17 @@ REPOSITORY MAP (TermPaperNew)
 04_data_filled/    FILLED workbook — ⚠ SIMULATED data, see warning below.
 scripts/           run_analysis.py (main pipeline: 12 tables + 7 charts +
                    Analysis_Summary.xlsx), verify_filled.py (24 QC checks),
+                   review_audit.py (64 supervisor-level deep checks),
                    fill_survey_data.py (regenerate simulated data,
                    seed=20260302), extract_pdfs.py, inspect_*.py.
 analysis_outputs/  tables/ (T1–T11 + T2b, CSV utf-8-sig), charts/ (C1–C7,
                    PNG 150 dpi), Analysis_Summary.xlsx (all tables + Index).
 docs/              DATA_DICTIONARY.md (every sheet & column explained),
                    WRITING_GUIDE.md (chapter→table map + current numbers),
+                   LITERATURE_NOTES.md (13+ published references for
+                   Chapters 1-2 + price-realism verification),
+                   REVIEW_SUPERVISOR.md (64-check supervisor audit &
+                   verdict — read this first when picking up the work),
                    worklog.md (full process log), MASTER_PROMPT.md (this).
 
 SURVEY DESIGN (Methodology V4)

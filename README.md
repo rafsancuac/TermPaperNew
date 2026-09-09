@@ -31,6 +31,8 @@ TermPaperNew/
 └── docs/
     ├── DATA_DICTIONARY.md          প্রতিটি শিট-কলামের ব্যাখ্যা, ড্রপডাউন মান, K/D ফ্ল্যাগ, Pair_ID
     ├── WRITING_GUIDE.md            কোন টেবিল/চার্ট পেপারের কোথায় বসবে + সংখ্যাসহ ব্যাখ্যা
+    ├── LITERATURE_NOTES.md         অধ্যায় ১-২-এর জন্য ১৩+ প্রকাশিত রেফারেন্স + দাম-বাস্তবতা যাচাই
+    ├── REVIEW_SUPERVISOR.md        সুপারভাইজার/রিভিউয়ার-ধাঁচের যাচাই রিপোর্ট (৬৪ চেক + রায়)
     ├── MASTER_PROMPT.md            অন্য AI/মানুষকে কাজ হস্তান্তরের রেডি প্রম্পট-প্যাকেজ
     └── worklog.md                  পুরো কাজের ধাপে-ধাপে লগ
 ```
@@ -76,6 +78,7 @@ python scripts/run_analysis.py --data path/to/filled.xlsx
 | স্ক্রিপ্ট | কাজ |
 |---|---|
 | `run_analysis.py` | **মূল বিশ্লেষণ** — ১২ টেবিল + ৭ চার্ট + Analysis_Summary.xlsx বানায় |
+| `review_audit.py` | **সুপারভাইজার-অডিট** — ৬৪টি ডীপ-চেক (কোটা/চেইন/প্যার/আউটলায়ার); ফলাফল docs/REVIEW_SUPERVISOR.md |
 | `fill_survey_data.py` | টেমপ্লেটে সিমুলেটেড ডাটা ভরে (seed বদলালে নতুন ডাটাসেট) |
 | `verify_filled.py` | QC_Check, ড্যাশবোর্ড, চেইন-সামঞ্জস্য, Pair_ID মিল যাচাই করে |
 | `extract_pdfs.py` | 01_source_pdfs থেকে টেক্সট বের করে 02_extracted_text এ লেখে |
