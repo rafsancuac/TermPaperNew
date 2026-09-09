@@ -55,3 +55,19 @@ Work Log:
 Stage Summary:
 - ৮ PDF রিপোতে নিশ্চিত; হস্তান্তর-প্রম্পট রেডি: repo docs/MASTER_PROMPT.md (ইংরেজি প্রম্পট + বাংলা ব্যবহার-নির্দেশিকা)
 - GitHub-এ সরাসরি পুশ এখনো সম্ভব নয় (PAT দরকার); download/TermPaperNew.bundle ও .zip সর্বশেষ স্ন্যাপশট
+
+---
+Task ID: 4
+Agent: Super Z (main agent)
+Task: ব্যবহারকারীর দেওয়া PAT দিয়ে TermPaperNew রিপো GitHub-এ পুশ
+
+Work Log:
+- টোকেন ফাইলে/কনফিগে সেভ না করে ওয়ান-টাইম credential helper (-c) দিয়ে পুশ — origin URL-এ টোকেন অবশিষ্ট নেই
+- পুশ সফল: main -> main (নতুন ব্রাঞ্চ), ৩ কমিট (b1d1cd0, 1297e93, abcb013) আপলোড
+- যাচাই: git ls-remote HEAD = abcb013 = লোকাল HEAD — হুবহু মিল
+- পাবলিক-অ্যাক্সেস টেস্ট: টোকেন ছাড়া ls-remote সফল — রিপো public, যে কেউ ক্লোন করতে পারে
+
+Stage Summary:
+- রিপো লাইভ: https://github.com/rafsancuac/TermPaperNew (main, HEAD abcb013)
+- ৫৩+ ফাইল অনলাইনে: ৮ PDF, ৮ txt, টেমপ্লেট+ফিলড এক্সেল, ১২ টেবিল + ৭ চার্ট, Analysis_Summary.xlsx, ১০ স্ক্রিপ্ট, ৫ ডকুমেন্ট (MASTER_PROMPT.md-সহ)
+- ব্যবহারকারীকে পরামর্শ: চ্যাটে শেয়ার করা PAT পরে revoke/regenerate করা উচিত
