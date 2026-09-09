@@ -25,15 +25,33 @@
 ##    Example:  INPUT_FILE <- "F:/TermPaperNew/Data/My_Final_Data.xlsx"
 ##    The default below points at the repo's filled workbook (simulated data,
 ##    currently in 04_data_filled/) so the suite can be tested end-to-end.
+##    The repo root is located by walking upward from the working directory.
 ## ---------------------------------------------------------------------------
-INPUT_FILE <- file.path(getwd(), "04_data_filled",
-                        "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
-if (!file.exists(INPUT_FILE)) {
-  # Fallback: look one level above the scripts/R folder (repo root)
-  cand <- file.path(dirname(dirname(getwd())), "04_data_filled")
-  cand <- list.files(cand, pattern = "\\.xlsx$", full.names = TRUE)
-  if (length(cand) > 0) INPUT_FILE <- cand[1]
+find_repo_root <- function() {
+  d <- normalizePath(getwd(), winslash = "/")
+  repeat {
+    if (dir.exists(file.path(d, "04_data_filled"))) return(d)
+    nd <- dirname(d)
+    if (identical(nd, d)) return(NULL)
+    d <- nd
+  }
 }
+repo_root <- find_repo_root()
+if (!is.null(repo_root)) {
+  found <- list.files(file.path(repo_root, "04_data_filled"),
+                      pattern = "\\.xlsx$", full.names = TRUE)
+  found <- found[!grepl("^~\\$", basename(found))]
+  if (length(found) > 0) {
+    INPUT_FILE <- found[1]
+  } else {
+    INPUT_FILE <- NULL
+    warning("[config] No filled workbook (*.xlsx) found in 04_data_filled/ - set INPUT_FILE.")
+  }
+} else {
+  INPUT_FILE <- NULL
+  warning("[config] Could not locate the repo root - set INPUT_FILE explicitly.")
+}
+stopifnot(!is.null(INPUT_FILE), file.exists(INPUT_FILE))
 
 ## ---------------------------------------------------------------------------
 ## 2. OUTPUT FOLDER  ----------------------------------------------------------
