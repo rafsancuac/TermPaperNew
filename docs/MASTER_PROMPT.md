@@ -42,16 +42,29 @@ REPOSITORY MAP (TermPaperNew)
                    the Excel column names.)
 03_data_entry_template/  Blank 16-sheet data-entry workbook.
 04_data_filled/    FILLED workbook — ⚠ SIMULATED data, see warning below.
+05_data_cleaned/   Data-cleaning outputs: cleaning_log.csv (every check),
+                   missing_report.csv (K/D + blanks per variable),
+                   outlier_flags.csv (Tukey 1.5×IQR, flagged not deleted),
+                   sensitivity_check.csv (headline chain with outliers
+                   excluded), price_obs_cleaned.csv (analysis-ready),
+                   CLEANING_REPORT.md (Methods-chapter write-up).
 scripts/           run_analysis.py (main pipeline: 12 tables + 7 charts +
                    Analysis_Summary.xlsx), extend_analysis.py (statistical
                    extension: T12–T17 + C8; run AFTER run_analysis.py),
-                   verify_filled.py (24 QC checks), review_audit.py (64
+                   clean_data.py (data-cleaning pipeline, S1–S5 stages),
+                   make_charts_v2.py (publication figure suite F1–F8 + A1–A2,
+                   1000 dpi, Times-style serif), verify_filled.py (24 QC
+                   checks), review_audit.py (64
                    independent data-audit checks), fill_survey_data.py
                    (regenerate simulated data, seed=20260302),
+                   R/run_analysis.R (independent R re-computation with
+                   console MATCH/MISMATCH verification report),
                    extract_pdfs.py, inspect_*.py, explore_issues.py.
 analysis_outputs/  tables/ (T1–T11, T2b, T12–T17; CSV utf-8-sig),
-                   charts/ (C1–C8, PNG 150 dpi), Analysis_Summary.xlsx
-                   (all tables + Index).
+                   charts/ (C1–C8, PNG 150 dpi, legacy working figures),
+                   charts_v2/ (PUBLICATION figures F1–F8 + A1–A2, 1000 dpi,
+                   Times-style serif, + FIGURE_INDEX.csv),
+                   Analysis_Summary.xlsx (all tables + Index).
 paper_drafts/      chapter 2 (literature review skeleton) and chapter 4
                    (results & discussion) drafts with [SIMULATED] notes.
 docs/              DATA_DICTIONARY.md (every sheet & column explained),
@@ -129,11 +142,34 @@ CURRENT STATUS & HEADLINE (SIMULATED) RESULTS
 
 REPRODUCING / RE-RUNNING
 pip install openpyxl pandas matplotlib numpy scipy pdfplumber
+python scripts/verify_filled.py                   # 24 QC checks
 python scripts/run_analysis.py                    # tables/charts (T1–T11)
 python scripts/extend_analysis.py                 # statistics (T12–T17, C8)
+python scripts/clean_data.py                      # cleaning log, outliers,
+                                                   # sensitivity -> 05_data_cleaned/
+python scripts/make_charts_v2.py                  # PUBLICATION figures F1–F8 +
+                                                   # A1–A2 (1000 dpi, Times-style
+                                                   # serif, title top-centre,
+                                                   # legend bottom-centre, major
+                                                   # + minor grid, value labels)
+                                                   # -> analysis_outputs/charts_v2/
 python scripts/run_analysis.py --data OTHER.xlsx  # from another workbook
-python scripts/verify_filled.py                   # 24 QC checks
 python scripts/fill_survey_data.py                # regenerate simulated
+Rscript scripts/R/run_analysis.R                  # optional independent
+                                                   # re-computation in R with a
+                                                   # numbered console MATCH/MISMATCH
+                                                   # verification report (~60
+                                                   # checks vs the Python values)
+
+PUBLICATION FIGURE SET (analysis_outputs/charts_v2/, English, 1000 dpi)
+F1 margins by intermediary (bar) | F2 retail price distribution by species
+(box) | F3 price progression along the chain (line) | F4 consumer-price
+decomposition (donut) | F5 payment mix by actor (stacked bar) | F6 market
+infrastructure profile (radar) | F7 reported problems (rose) | F8 retail
+price by market (bar) | A1 daily capacity (box, log) | A2 producer share by
+species (horizontal bar) - use THESE in the paper; charts/C1–C8 are legacy
+working figures. Table/axis labels must use full parameter names, e.g.
+"Marketing margin (BDT per kilogram)".
 
 METHOD NOTES (for analysis & writing)
 - Margin = next-level price − previous-level price, per kg; species-level

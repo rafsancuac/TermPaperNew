@@ -23,10 +23,15 @@ TermPaperNew/
 ├── 02_extracted_text/              PDF থেকে বের করা পূর্ণ টেক্সট (প্রতি পেজ আলাদা)
 ├── 03_data_entry_template/         খালি ডাটা-এন্ট্রি টেমপ্লেট (১৬টি শিট, নীল ফর্মুলা-কলামসহ)
 ├── 04_data_filled/                 পূরণ করা ডাটা (এখন সিমুলেটেড — উপরের সতর্কতা দেখুন)
-├── scripts/                        পুরো প্রসেসের ৯টি স্ক্রিপ্ট (নিচে বিস্তারিত)
+├── 05_data_cleaned/                ক্লিনিং আউটপুট: ক্লিনিং-লগ, মিসিং-রিপোর্ট, আউটলায়ার-ফ্ল্যাগ,
+│                                   সংবেদনশীলতা-চেক, বিশ্লেষণ-প্রস্তুত price_obs_cleaned.csv
+├── scripts/                        পুরো প্রসেসের ১২টি স্ক্রিপ্ট + scripts/R/ (R যাচাই-স্ক্রিপ্ট)
 ├── analysis_outputs/
 │   ├── tables/                     মূল ১২টি + পরিসংখ্যান (T12–T17) টেবিল (CSV utf-8-sig)
-│   ├── charts/                     ৮টি প্রস্তুত ফিগার (C1–C8, PNG 150 dpi)
+│   ├── charts/                     কার্যকরী/লেগেসি ফিগার (C1–C8, PNG 150 dpi)
+│   ├── charts_v2/                  **প্রকাশনা-ফিগার স্যুট** F1–F8 + A1–A2
+│   │                               (1000 dpi, Times New Roman-স্টাইল, বার/বক্স/
+│   │                               লাইন/ডোনাট/রাডার/রোজ — FIGURE_INDEX.csv-সহ)
 │   └── Analysis_Summary.xlsx       সব টেবিল এক ওয়ার্কবুকে (Index শিটসহ, ২০ শিট)
 ├── paper_drafts/                   লেখা-ড্রাফট (চ্যাপ্টার ২ ও ৪ — সিমুলেটেড-সতর্কতা-সহ)
 └── docs/
@@ -44,12 +49,21 @@ TermPaperNew/
 # নির্ভরতা (একবারই):
 pip install openpyxl pandas matplotlib numpy pdfplumber
 
-# বিশ্লেষণ চালান (ফলাফল যাবে analysis_outputs/ এ):
-python scripts/run_analysis.py
+# সম্পূর্ণ পাইপলাইন (ক্রমানুসারে):
+python scripts/verify_filled.py     # ২৪-চেক QC
+python scripts/run_analysis.py      # মূল টেবিল + চার্ট
+python scripts/extend_analysis.py   # পরিসংখ্যান T12–T17
+python scripts/clean_data.py        # ক্লিনিং → 05_data_cleaned/
+python scripts/make_charts_v2.py    # প্রকাশনা-ফিগার (1000 dpi) → charts_v2/
 
 # ভিন্ন কোনো পূরণ-করা ফাইল বিশ্লেষণ করতে:
 python scripts/run_analysis.py --data path/to/filled.xlsx
+
+# আপনার নিজের PC-তে R-এ দ্বৈত-যাচাই (কনসোলে MATCH/MISMATCH রিপোর্ট):
+Rscript scripts/R/run_analysis.R
 ```
+
+> **চার্ট-ভাষা:** সব আউটপুট টেবিল/ফিগার **ইংরেজিতে** (পেপারের ভাষা); এই README-টা নির্দেশনার জন্য বাংলায়।
 
 ## জরিপের ডিজাইন (Methodology V4 অনুযায়ী)
 

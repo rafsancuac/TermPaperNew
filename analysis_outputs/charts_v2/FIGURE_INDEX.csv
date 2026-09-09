@@ -1,0 +1,11 @@
+﻿Figure,File,Title,Chart type,Placement
+F1,F1_margin_by_intermediary.png,Average Marketing Margin by Chain Intermediary,bar chart,"Main text, section 4.4 (margins)"
+F2,F2_retail_price_boxplot.png,Distribution of Retail Selling Prices by Species,box plot,"Main text, section 4.3 (price levels and dispersion)"
+F3,F3_price_chain_progression.png,Average Price Progression along the Marketing Chain,line chart,"Main text, section 4.3 (price chain)"
+F4,F4_consumer_price_decomposition.png,Decomposition of the Average Consumer Price,donut chart,"Main text, section 4.4 (producer share)"
+F5,F5_payment_method_mix.png,Payment Method Composition by Market Actor,stacked bar,"Main text, section 4.6 (payment methods)"
+F6,F6_infrastructure_radar.png,Market Infrastructure Quality Profile,radar chart,"Main text, section 4.8 (market infrastructure)"
+F7,F7_problems_rose.png,Most Frequently Reported Marketing Problems,rose chart,"Main text, section 4.7 (constraints)"
+F8,F8_retail_price_by_market.png,Average Retail Selling Price by Market,bar chart,"Main text, section 4.3 (spatial price comparison)"
+A1,A1_daily_capacity_boxplot.png,Daily Trading Capacity by Actor Group,box plot (log),Appendix (business scale)
+A2,A2_producer_share_by_species.png,Producer Share of the Consumer Price by Species,horizontal bar,Appendix (producer share detail)

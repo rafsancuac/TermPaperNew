@@ -47,9 +47,41 @@ Methodology V4-এর সঙ্গে হুবহু মিলিয়ে ল�
 ---
 
 ## ফিগার/টেবিল বসানোর নিয়ম
-- চার্ট PNG (150 dpi) — Word-এ Insert → Picture দিয়ে বসান, নিচে "Figure 4.1: …" ক্যাপশন।
+- **প্রকাশনা-মানের ফিগার = `analysis_outputs/charts_v2/` (F1–F8 মূল অংশ, A1–A2 অ্যাপেন্ডিক্স; ১০০০ dpi, Times New Roman-স্টাইল সেরিফ, টাইটেল উপরে-মাঝ, লিজেন্ড নিচে-মাঝ, মেজর+মাইনর গ্রিড, ভ্যালু-লেবেল) — পেপারে এগুলোই ব্যবহার করুন** (নিচের "ফিগার স্যুট v2" দেখুন)। পুরনো `charts/C1–C8` (150 dpi) এখন কার্যকরী/লেগেসি সেট — দ্রুত দেখার জন্য।
+- চার্ট PNG Word-এ Insert → Picture দিয়ে বসান, নিচে "Figure 4.1: …" ক্যাপশন (ইংরেজিতে)।
 - টেবিল CSV Excel-এ খুলে পেপারের টেবিল-স্টাইলে ফরম্যাট করুন, বা Analysis_Summary.xlsx থেকে সরাসরি কপি।
 - প্রতিটি টেবিলের ঠিক নিচে Source নোট: "Field survey, March 2026" — আসল ডাটার ক্ষেত্রে।
+- **পেপারের সব টেবিল-কলামের নাম পূর্ণ ও প্রফেশনাল রাখুন** — যেমন "Marketing margin (BDT per kilogram)", "Producer share of consumer price (%)"; সংক্ষিপ্ত কোড-নাম (T3-এর `Bepari_sell_BDT_kg`) পেপারে নয়, শুধু রিপোতে।
+
+## ফিগার স্যুট v2 (publication set — `analysis_outputs/charts_v2/`)
+
+স্টাইল-স্পেসিফিকেশন (প্রতিটি ফিগারে প্রযোজ্য): Times New Roman টাইপোগ্রাফি (Python পাইপলাইনে metric-সমতুল্য Liberation Serif; R/ggplot2-তে আসল Times New Roman), ১০০০ dpi PNG, টাইটেল উপরে-কেন্দ্রে (বোল্ড), লিজেন্ড (থাকলে) প্লট-এরিয়ার নিচে-কেন্দ্রে, X/Y অক্ষে পূর্ণ প্যারামিটার-নাম লেবেল, মেজর গ্রিড + ডটেড মাইনর সাব-গ্রিড, ডাটায় ভ্যালু-লেবেল (কোনো লেখা ওভারল্যাপ ছাড়া — VLM-ভিত্তিক কিউসি পাস)।
+
+| ফিগার | ফাইল | ধরন | পেপারের জায়গা |
+|---|---|---|---|
+| F1 | F1_margin_by_intermediary.png | Bar chart | ৪.৪ — স্তরভিত্তিক গড় মার্জিন (আড়তদার ২৫.৮ / বেপারি ৯২.৭ / খুচরা ১১১.৪ / স্প্রেড ২২৯.৯) |
+| F2 | F2_retail_price_boxplot.png | Box plot | ৪.৩ — প্রজাতিভেদে খুচরা দামের বিস্তার (মধ্যক, IQR, Tukey-আউটলায়ার) |
+| F3 | F3_price_chain_progression.png | Line chart | ৪.৩ — চেইনের ধাপে ধাপে দাম-বৃদ্ধি (৪ প্রজাতি) |
+| F4 | F4_consumer_price_decomposition.png | Donut chart | ৪.৪ — ভোক্তা-দামের বিভাজন (জেলে ৭০.৯% + তিন মার্জিন) |
+| F5 | F5_payment_method_mix.png | Stacked bar | ৪.৬ — অভিনেতাভেদে পেমেন্ট-মিশ্রণ |
+| F6 | F6_infrastructure_radar.png | Radar chart | ৪.৮ — বাজার-অবকাঠামো প্রোফাইল (৩ বাজার × ৭ সুবিধা, ০–৩ স্কোর) |
+| F7 | F7_problems_rose.png | Rose chart | ৪.৭ — সবচেয়ে নিয়মিত সমস্যা (সেক্টর-ক্ষেত্রফল ∝ ফ্রিকোয়েন্সি) |
+| F8 | F8_retail_price_by_market.png | Bar chart | ৪.৩/৪.৪ — বাজারভেদে গড় খুচরা দাম |
+| A1 | A1_daily_capacity_boxplot.png | Box plot (log) | অ্যাপেন্ডিক্স — অভিনেতাভেদে দৈনিক ধারণক্ষমতা |
+| A2 | A2_producer_share_by_species.png | Horizontal bar | অ্যাপেন্ডিক্স — প্রজাতিভেদে জেলের অংশ |
+
+- `FIGURE_INDEX.csv`-তে পূর্ণ তালিকা; প্রয়োজনীয় নয় এমন ফিগার ইচ্ছাকৃত বাদ (education/pollution-জাতীয় বিষয় টেবিলেই যথেষ্ট), কম-গুরুত্বপূর্ণ দুটি অ্যাপেন্ডিক্সে।
+- প্রজন্ম: `python scripts/make_charts_v2.py` (run_analysis.py-এর পরে)।
+
+## ডাটা ক্লিনিং (অধ্যায় ৩-এর "Data processing" অনুচ্ছেদ)
+- `python scripts/clean_data.py` → `05_data_cleaned/` (কিছইই 04_data_filled-এ বদলায় না)।
+- স্তর: S1 কাঠামো-যাচাই (ID/কোটা/তারিখ/ডুপ্লিকেট) → S2 মিসিং-অডিট (K = ব্যবসা-বন্ধ = valid skip, D = না-বলা = item non-response; প্রতি ভ্যারিয়েবলে missing_report.csv) → S3 রেঞ্জ-লজিক (বয়স ১৮–৮০, অভিজ্ঞতা ≤ বয়স−১২, দাম/পরিমাণ > ০, নষ্ট ০–১০০%, পেমেন্ট-যোগফল ১০০, sell ≥ buy) → S4 Tukey (1.5×IQR) আউটলায়ার-ফ্ল্যাগ (প্রজাতি×অভিনেতা×দিক; বর্তমানে ১৭টি = ২.১%, **ফ্ল্যাগ করা হয়, মোছা হয় না**) → S5 সংবেদনশীলতা (আউটলায়ার বাদ দিয়ে হেডলাইন চেইন — producer share ৭০.৯% → ৭০.৯%, মানে রোবাস্ট)।
+- পেপারে ৩–৪ অনুচ্ছেদে এই নিয়মগুলো লিখুন (05_data_cleaned/CLEANING_REPORT.md থেকে সরাসরি); price_obs_cleaned.csv = ফ্ল্যাগসহ বিশ্লেষণ-প্রস্তুত ডাটাসেট।
+
+## R-এ স্বাধীন যাচাই (অপশনাল, দ্বৈত-যাচাই)
+- আপনার PC-তে: `Rscript scripts/R/run_analysis.R` (বা RStudio-এ source)।
+- এটি Python পাইপলাইনের টেবিল/টেস্ট হুবহু R-এ পুনর্গণনা করে কনসোলে **[OK/!!] নম্বরযুক্ত যাচাই-রিপোর্ট** ছাপে (R = … Python = … MATCH/MISMATCH), r_outputs/tables/*.csv লেখে, এবং ggplot2 দিয়ে ৫টি মূল ফিগার (Times New Roman, ১০০০ dpi) r_outputs/charts/-এ দেয়।
+- আসল ডাটা ঢোকালে: আগে Python পাইপলাইন → তারপর R — MISMATCH দেখালে কনসোল-আউটপুট পাঠিয়ে অসঙ্গতি ধরা যাবে।
 
 ## লেখার সময় যেসব সাবধানতা মেনে চলবেন
 1. **সিমুলেটেড সংখ্যা চূড়ান্ত জমায় দেবেন না** — আসল ডাটা ঢোকিয়ে `verify_filled.py` (২৪/২৪) → `run_analysis.py` → `extend_analysis.py` আবার চালান; এই গাইডের সংখ্যাগুলো জায়গামতো বদলে যাবে।
@@ -62,8 +94,14 @@ Methodology V4-এর সঙ্গে হুবহু মিলিয়ে ল�
 ## টেবিল→চ্যাপ্টার কুইক-ম্যাপ (এক নজরে)
 `T1→৪.১ | T2,T2b→৪.২ | T3→৪.৩ | T4→৪.৫ | T5→৪.৬ | T6→৪.৭ | T7→৪.৮ | T8,T9→৪.৯ | T10→৪.৩ | T11,T13→৪.৪ | T12/T12b→৪.১০ | T14/T14b→৪.৪ ও ৪.১০ | T15→৪.৬ | T16,T17→৪.১০ | C1,C2→৪.৩ | C3→৪.৬ | C4→৪.১ | C5→৪.৭ | C6,C8→৪.৪ | C7→৪.২`
 
-## এক্সটেনশন চালানোর নিয়ম
+## সম্পূর্ণ পাইপলাইন চালানোর নিয়ম (ক্রমানুসারে)
 ```bash
-python scripts/run_analysis.py    # মূল টেবিল-চার্ট (T1–T11+T2b, C1–C7)
-python scripts/extend_analysis.py # পরিসংখ্যান (T12–T17, C8) — Analysis_Summary.xlsx-এ শিট যোগ করে
+python scripts/verify_filled.py     # ২৪-চেক QC (টেমপ্লেট নিয়ম)
+python scripts/run_analysis.py      # মূল টেবিল-চার্ট (T1–T11+T2b, C1–C7)
+python scripts/extend_analysis.py   # পরিসংখ্যান (T12–T17, C8)
+python scripts/clean_data.py        # ক্লিনিং+আউটলায়ার+সংবেদনশীলতা → 05_data_cleaned/
+python scripts/make_charts_v2.py    # প্রকাশনা-ফিগার F1–F8+A1–A2 (1000 dpi) → analysis_outputs/charts_v2/
+python scripts/review_audit.py      # ৬৫-চেক সুপারভাইজর-অডিট
+# অপশনাল দ্বৈত-যাচাই (আপনার PC-তে R দিয়ে):
+Rscript scripts/R/run_analysis.R    # কনসোলে MATCH/MISMATCH যাচাই-রিপোর্ট
 ```
