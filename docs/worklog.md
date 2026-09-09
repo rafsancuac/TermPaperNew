@@ -138,3 +138,14 @@ Work Log:
 - নতুন সংখ্যা: PS 70.9%; মার্জিন A 27.84 (3.3%) / B 99.58 (11.7%) / R 118.97 (14.0%); spread 246.39 (29.1%); A+B+R=spread; PS+margin=100%।
 - review_audit: PASS=62 / WARN=3 (নথিভুক্ত: pair-অ্যালাইনমেন্ট, crustacean-দাম-ব্যান্ড, S08/S10-কভারেজ) / FAIL=0।
 - ডক/ড্রাফট হালনাগাদ: README, WRITING_GUIDE (#2/#6 + ৪.৩ সারি), MASTER_PROMPT (৩ জায়গা), chapter_04 (৪.৩/৪.৪/৪.১০), SUPERVISOR_REVIEW (সেকশন ৩ + পরিশিষ্ট C), worklog।
+---
+Task ID: 8
+Agent: Arena.ai research assistant
+Task: রেজাল্ট-সেকশনের জন্য সম্পূর্ণ R অ্যানালাইসিস স্যুট (scripts/R) — Python পাইপলাইনের প্রতিটি সংখ্যার সেল-ফর-সেল মিরর
+
+Work Log:
+- scripts/R/ লিখা: config.R (এক জায়গায় INPUT_FILE/OUTPUT_DIR; Windows-ডিফল্ট F:/TermPaperNew/Analysis), helpers.R (readxl-ভিত্তিক শিট-রিডার, numpy-bitwise np_sum/np_mean/np_sd, python-সমতুল্য round-half-even rp(), mc_names, Dunn-Holm), tables_descriptive.R (T1–T11+T2b), tables_inferential.R (T12–T18; হাতে-লেখা Freeman–Halton exact Fisher), figures.R (C1–C8, 300dpi, Times New Roman), excel_out.R (styled R_Analysis_Summary.xlsx + quality gates), run_all.R (মাস্টার)।
+- Python-সংখ্যার সাথে সেল-ফর-সেল মিল আনতে ৩টি গভীর গরমিল ধরা ও মিরর করা হয়েছে: (ক) readxl বনাম openpyxl-এর ফাঁকা-সারি/কলাম নীতি (drop_id + Obs_Date-require); (খ) numpy np.mean/np.std-এর নির্দিষ্ট summation-order (n<8 sequential; ≤128 আট-অ্যাকিউমুলেটর; নাহলে 8-গুণিতক-ভাগ) — R-তে np_sum() পোর্ট, ৫০০ এলোমেলো ভেক্টরে bitwise 0/1000 mismatch; (গ) R round() বনাম python round(): exact-decimal half-even — rp() (sprintf-নির্ভর exact expansion), ৭০,০৩৫ কেসে 0 mismatch।
+- সেল-ফর-সেল তুলনা স্ক্রিপ্ট scripts/compare_r_py.py → ২১/২১ টেবিল PASS (প্রতিটি সেল numeric-সমান, কলাম-অর্ডার/নাম হুবহু)। T2b-এর 'None'-ক্যাটাগরি সারি ও most_common টাই-অর্ডার, T5/T8/T9-এর tie-অর্ডার, T11-এর স্পেস-নাম, T12b-এর W-সংজ্ঞা, T14b-এর Holm-অর্ডার/আনরাউন্ডেড p, T15-এর লেবেল+exact-Fisher p=0.8945, T17-এর scipy t-approximation p=0.0177 — সব মিরর।
+- Quality gates: A+B+R=246.39=spread [PASS], PS 70.9% [PASS], T3-ALL=T10 70.9% [PASS]; টেবিল ২টি টানা রানে MD5-অভিন্ন (deterministic); run_log.txt + R_Analysis_Summary.xlsx (২২ শিট) আউটপুটে।
+- analysis_outputs_r/ = নন-উইন্ডোজ ডেভ-মিরর আউটপুট (রিপোতে কমিট); ব্যবহারকারীর Windows-এ আউটপুট যাবে F:/TermPaperNew/Analysis-এ।

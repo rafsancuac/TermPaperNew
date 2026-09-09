@@ -1,0 +1,36 @@
+MS-499 R analysis session
+ 2026-09-09 08:18:27 
+Input : /home/user/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx 
+Output: /home/user/TermPaperNew/analysis_outputs_r 
+
+  table  T1_Respondent_Profile.csv                  (5 rows)
+  table  T2_Business_Scale.csv                      (3 rows)
+  table  T2b_Channel_Patterns.csv                   (30 rows)
+  table  T3_Price_Chain.csv                         (11 rows)
+  table  T4_Marketing_Costs.csv                     (21 rows)
+  table  T5_Payment_Methods.csv                     (7 rows)
+  table  T6_Problems.csv                            (12 rows)
+  table  T7_Market_Infrastructure.csv               (6 rows)
+  table  T8_Consumer_Behaviour.csv                  (16 rows)
+  table  T9_Other_Fish.csv                          (8 rows)
+  table  T10_Margin_Summary.csv                     (5 rows)
+  table  T11_Retail_Price_by_Market.csv             (10 rows)
+  table  T12_Pair_Detail.csv                        (16 rows)
+  table  T12b_Wilcoxon_Result.csv                   (7 rows)
+  table  T13_Species_Market_Spread.csv              (60 rows)
+  table  T14_Species_Market_KruskalWallis.csv       (10 rows)
+  table  T14b_Dunn_Holm_Posthoc.csv                 (41 rows)
+  table  T15_Payment_Actor_ChiSquare.csv            (5 rows)
+  table  T16_Stratum_Margin_MannWhitney.csv         (6 rows)
+  table  T17_Retailer_MC_Profit_Spearman.csv        (31 rows)
+  table  T18_ShapiroWilk_Screening.csv              (5 rows)
+[08:18:30] Figures C1-C8 written
+Workbook written: /home/user/TermPaperNew/analysis_outputs_r/R_Analysis_Summary.xlsx 
+
+---------------- QUALITY GATES ----------------
+Margins telescope: A+B+R = 246.39 vs spread = 246.39  [PASS]
+PS + spread% = 100: PS 70.9%  [PASS]
+T3 ALL matches T10: 70.9% vs 70.9%  [PASS]
+-----------------------------------------------
+
+DONE - R analysis outputs in: /home/user/TermPaperNew/analysis_outputs_r 

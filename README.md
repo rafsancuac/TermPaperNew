@@ -92,6 +92,29 @@ python scripts/run_analysis.py --data path/to/filled.xlsx
 
 বিস্তারিত: `scripts/README.md`
 
+## R অ্যানালাইসিস স্যুট (`scripts/R/`) — পুরো অ্যানালাইসিসের R ভার্সন
+
+রেজাল্ট-সেকশনের (T1–T18 + C1–C8) একটি পূর্ণাঙ্গ, প্রফেশনাল R স্যুট — Python পাইপলাইনের (run_analysis.py + extend_analysis.py) প্রতিটি নিয়ম/সংখ্যা হুবহু মিরর করে:
+
+| ফাইল | কাজ |
+|---|---|
+| `scripts/R/config.R` | **শুধু এখানে** ইনপুট ও আউটপুট বদলান: `INPUT_FILE` (আসল ডাটার ফাইল এলে এখানে পাথ দিন) ও `OUTPUT_DIR` (Windows-ডিফল্ট `F:/TermPaperNew/Analysis`) |
+| `scripts/R/run_all.R` | মাস্টার রানার — `source("scripts/R/run_all.R")` (রিপো-রুট থেকে) দিলেই সব |
+| `scripts/R/tables_descriptive.R` | T1–T11 + T2b (প্রোফাইল, স্কেল, চ্যানেল, দাম-চেইন, খরচ, পেমেন্ট, সমস্যা, মার্কেট, ভোক্তা, অন্যান্য মাছ, মার্জিন, মার্কেটভেদে দাম) |
+| `scripts/R/tables_inferential.R` | T12–T18 (Wilcoxon, species×market KW, Dunn–Holm, payment×actor χ²+G+exact-Fisher, স্তর MWU, Spearman, Shapiro–Wilk) |
+| `scripts/R/figures.R` | C1–C8 ফিগার (PNG, ৩০০ dpi, Times New Roman) |
+| `scripts/R/excel_out.R` | স্টাইল-সহ `R_Analysis_Summary.xlsx` (সব টেবিল + Index) + quality gates (মার্জিন-টেলিস্কোপ, PS+spread=100) |
+| `scripts/compare_r_py.py` | R-আউটপুট বনাম Python-আউটপুট সেল-ফর-সেল তুলনা (রেফারেন্স যাচাই) |
+
+চালানোর নিয়ম (নিজের Windows R/RStudio-তে):
+
+```r
+setwd("path/to/TermPaperNew")
+source("scripts/R/run_all.R")     # install.packages(c("readxl","openxlsx")) একবার
+```
+
+আউটপুট: `F:/TermPaperNew/Analysis/`-এর ভেতরে `tables/*.csv`, `charts/C1–C8.png`, `R_Analysis_Summary.xlsx`, `run_log.txt`। বর্তমান (সিমুলেটেড) ডাটাতেও ২১টি টেবিলের প্রতিটি সেল Python-আউটপুটের সাথে হুবহু মেলে (`python scripts/compare_r_py.py` → 0 diff)। **আসল ডাটা এলে শুধু `config.R`-এর `INPUT_FILE` বদলান** — R-ও Python-ও একই সংখ্যা দেবে।
+
 ## আসল ডাটা দিয়ে রিপ্লেস করার নিয়ম
 
 1. `03_data_entry_template/` থেকে খালি টেমপ্লেটের একটা কপি নিয়ে কাজ করুন (বা `04_data_filled/`-এর ফাইলেই)।
