@@ -32,6 +32,7 @@ TermPaperNew/
 └── docs/
     ├── DATA_DICTIONARY.md          প্রতিটি শিট-কলামের ব্যাখ্যা, ড্রপডাউন মান, K/D ফ্ল্যাগ, Pair_ID
     ├── WRITING_GUIDE.md            কোন টেবিল/চার্ট পেপারের কোথায় বসবে + সংখ্যাসহ ব্যাখ্যা
+    ├── LITERATURE_NOTES.md         অধ্যায় ১-২-এর জন্য ১৩+ প্রকাশিত রেফারেন্স + দাম-বাস্তবতা যাচাই
     ├── MASTER_PROMPT.md            অন্য AI/মানুষকে কাজ হস্তান্তরের রেডি প্রম্পট-প্যাকেজ
     ├── SUPERVISOR_REVIEW.md        সুপারভাইজর-রিভিউ রিপোর্ট (ত্রুটি, ফিক্স, বাস্তবতা-চেক)
     └── worklog.md                  পুরো কাজের ধাপে-ধাপে লগ
@@ -85,6 +86,7 @@ python scripts/run_analysis.py --data path/to/filled.xlsx
 | `extend_analysis.py` | **পরিসংখ্যান-এক্সটেনশন** (run_analysis-এর পর চালান) — T12–T17 (Wilcoxon, species×market spread ও Kruskal–Wallis, Dunn–Holm, payment×actor χ², স্তরভেদে মার্জিন MWU, খুচরা MC–মুনাফা Spearman) + C8 চার্ট + Analysis_Summary.xlsx-এ শিট |
 | `fill_survey_data.py` | টেমপ্লেটে সিমুলেটেড ডাটা ভরে (seed বদলালে নতুন ডাটাসেট) |
 | `verify_filled.py` | QC_Check, ড্যাশবোর্ড, চেইন-সামঞ্জস্য, Pair_ID মিল যাচাই করে (Status কলাম সঠিক কলাম থেকে পড়ে; ব্যর্থ হলে non-zero exit) |
+| `review_audit.py` | **স্বাধীন ডাটা-অডিট** — ৬৫টি ডীপ-চেক (কোটা/বয়স-অভিজ্ঞতা/ভলিউম-অর্ডারিং/চেইন/প্যার/ট্যাগ-মিল/GPS/আউটলায়ার + T3/T10 পুনঃগণনা) — SUPERVISOR_REVIEW-এর পরিপূরক |
 | `extract_pdfs.py` | 01_source_pdfs থেকে টেক্সট বের করে 02_extracted_text এ লেখে |
 | `inspect_template.py` ইত্যাদি (৪টি) + `explore_issues.py` | টেমপ্লেট/ডাটার কাঠামো ও অডিট-প্রোব দেখায় (ডেভ টুল) |
 

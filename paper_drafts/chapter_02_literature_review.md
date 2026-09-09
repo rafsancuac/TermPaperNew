@@ -2,6 +2,8 @@
 
 *(Draft prepared for MS-499 "Marine Fish Marketing System of Chattogram, Bangladesh". Numbers in Chapter 4 must be re-pulled after real data entry — see footer.)*
 
+> **Citation upgrade (সুপারভাইজর-নোট):** এই ড্রাফটের কিছু ইন-টেক্সট সাইটেশন এখনো ভাসা (যেমন "value-chain analysis, coastal Bangladesh", "2022")। **`docs/LITERATURE_NOTES.md`-এ ১৩+ যাচাইকৃত রেফারেন্স তালিকা আছে** (Jahan 2024, Islam 2001, Islam 2014, Rafi 2024, Yasmin 2024, Nadia 2022, Dipty 2026, Shafiuddin 2021, Shamsuddoha 2007, Mandal 2025 ইত্যাদি) — চূড়ান্ত রেফারেন্স-তালিকা বানানোর সময় প্রতিটি ভাসা সাইটেশন ওখান থেকে পূর্ণ নাম-সাল-জার্নাল দিয়ে বসিয়ে নিন।
+
 ## 2.1 Conceptual framework
 
 The analytical vocabulary used throughout this study follows the classic agricultural-marketing tradition. Kohls and Uhl (1980) define the **price spread** as the difference between what the consumer pays and what the producer receives, and decompose it into the margins of the intermediaries plus the marketing costs they incur; Shepherd's (1965) efficiency ratio and the producer-side formulation of Acharya and Agarwal (1987) translate that decomposition into summary indices. The **producer's share** (PS%) — producer price expressed as a percentage of the consumer price — remains the most widely reported summary statistic because it can be derived from two prices alone and is comparable across studies and commodities. In Bangladesh fish-marketing studies these ratios are almost always reported for the auction-mediated channel in which *aratdars* (commission agents operating the wholesale *arats*), *beparis/farias* (mobile wholesalers), and *khuchra* retailers form the backbone between landing centres and consumers.

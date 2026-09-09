@@ -45,14 +45,22 @@ REPOSITORY MAP (TermPaperNew)
 scripts/           run_analysis.py (main pipeline: 12 tables + 7 charts +
                    Analysis_Summary.xlsx), extend_analysis.py (statistical
                    extension: T12–T17 + C8; run AFTER run_analysis.py),
-                   verify_filled.py (24 QC checks), fill_survey_data.py
+                   verify_filled.py (24 QC checks), review_audit.py (64
+                   independent data-audit checks), fill_survey_data.py
                    (regenerate simulated data, seed=20260302),
                    extract_pdfs.py, inspect_*.py, explore_issues.py.
 analysis_outputs/  tables/ (T1–T11, T2b, T12–T17; CSV utf-8-sig),
                    charts/ (C1–C8, PNG 150 dpi), Analysis_Summary.xlsx
                    (all tables + Index).
+paper_drafts/      chapter 2 (literature review skeleton) and chapter 4
+                   (results & discussion) drafts with [SIMULATED] notes.
 docs/              DATA_DICTIONARY.md (every sheet & column explained),
                    WRITING_GUIDE.md (chapter→table map + current numbers),
+                   LITERATURE_NOTES.md (13+ published references for
+                   Chapters 1-2 + price-realism verification),
+                   SUPERVISOR_REVIEW.md (supervisor-level audit: found &
+                   fixed pipeline bugs, new methodology-consistent chain
+                   convention — read before extending the analysis),
                    worklog.md (full process log), MASTER_PROMPT.md (this).
 
 SURVEY DESIGN (Methodology V4)
