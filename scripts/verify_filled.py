@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Verify the filled workbook: QC values, dashboard, chain consistency, validations."""
+import openpyxl
+
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+
+# ---------- cached values (post-recalc) ----------
+wbv = openpyxl.load_workbook(OUT, data_only=True)
+
+print("=== QC_Check (values) ===")
+ws = wbv["QC_Check"]
+fails = 0
+for r in range(6, 30):
+    label = ws.cell(row=r, column=2).value
+    val = ws.cell(row=r, column=3).value
+    status = ws.cell(row=r, column=4).value
+    rule = ws.cell(row=r, column=5).value
+    if label:
+        print(f"  {str(label)[:58]:58s} = {val}  [{status}]")
+        if status not in ("OK", "TARGET MET", "Info", "COMPLETE", "All matched",
+                          "No pairs yet") and status is not None:
+            fails += 1
+print(f"  >>> non-passing checks: {fails}")
+
+print("\n=== Progress_Dashboard (values) ===")
+ws = wbv["Progress_Dashboard"]
+for r in range(5, 13):
+    cells = [ws.cell(row=r, column=c).value for c in range(2, 9)]
+    print("  ", [str(x)[:18] if x is not None else "" for x in cells])
+for r in range(15, 25):
+    label = ws.cell(row=r, column=2).value
+    val = ws.cell(row=r, column=3).value
+    if label:
+        print(f"  {str(label)[:45]:45s} = {val}")
+
+# ---------- formula workbook (validations survived?) ----------
+wbf = openpyxl.load_workbook(OUT)
+print("\n=== Data validation survival check ===")
+for name in ["Form_A_Aratdar", "Form_B_Bepari_Faria", "Form_R_Khuchra", "Form_C_Consumer",
+             "Price_Observations", "Consumer_Purchases_Focal", "Form_M_Market_Observation"]:
+    n = len(wbf[name].data_validations.dataValidation)
+    print(f"  {name}: {n} validation rules")
+
+print("\n=== Blue formula columns intact (spot) ===")
+ws = wbf["Price_Observations"]
+print("  Price_Obs J5:", ws["J5"].value)
+print("  Form_A J5 (cap kg):", wbf["Form_A_Aratdar"]["J5"].value)
+
+# ---------- chain consistency spot checks ----------
+print("\n=== Chain consistency (S01 Ilish @ M1, BDT/kg) ===")
+ws = wbv["Price_Observations"]
+rows = []
+for r in range(5, 505):
+    if ws.cell(row=r, column=6).value == "S01" and ws.cell(row=r, column=4).value == "M1":
+        rows.append((r, ws.cell(row=r, column=3).value, ws.cell(row=r, column=5).value,
+                     ws.cell(row=r, column=10).value, ws.cell(row=r, column=11).value))
+for r in rows[:6]:
+    print(f"  row{r[0]} {r[1]} {r[2]:13s} buy={r[3]} sell={r[4]}")
+
+print("\n=== Consumer S01 prices @ M1 (should be near retail sell) ===")
+ws = wbv["Consumer_Purchases_Focal"]
+for r in range(5, 100):
+    if ws.cell(row=r, column=4).value == "S01" and ws.cell(row=r, column=3).value == "M1":
+        print(f"  row{r}: {ws.cell(row=r, column=2).value} paid={ws.cell(row=r, column=9).value}"
+              f" qty={ws.cell(row=r, column=12).value}")
+
+print("\n=== Pair price matching check ===")
+ws = wbv["Price_Observations"]
+pair_rows = {}
+for r in range(5, 505):
+    pid = ws.cell(row=r, column=15).value
+    if pid:
+        pair_rows.setdefault(pid, []).append(
+            (ws.cell(row=r, column=3).value, ws.cell(row=r, column=6).value,
+             ws.cell(row=r, column=10).value, ws.cell(row=r, column=11).value))
+for pid, lst in list(pair_rows.items())[:5]:
+    print(f"  {pid}: {lst}")
+
+print("\n=== Payment sums (Form_A sample) ===")
+ws = wbv["Form_A_Aratdar"]
+bad = 0
+for r in range(5, 41):
+    y, z, aa = (ws.cell(row=r, column=c).value for c in (25, 26, 27))
+    if y is not None and (y + z + aa) != 100:
+        bad += 1
+        print(f"  BAD row {r}: {y}+{z}+{aa}={y+z+aa}")
+print(f"  Form_A payment rows not summing 100: {bad}")
+
+print("\n=== Sample filled rows ===")
+ws = wbv["Form_A_Aratdar"]
+hdr = [ws.cell(row=4, column=c).value for c in range(2, 16)]
+row5 = [ws.cell(row=5, column=c).value for c in range(2, 16)]
+for h, v in zip(hdr, row5):
+    print(f"    {str(h)[:34]:34s} = {v}")
+
+print("\n=== K/D flag counts (Price_Obs) ===")
+kbuy = ksell = dbuy = dsell = 0
+for r in range(5, 505):
+    g, h = ws.cell(row=r, column=7).value, ws.cell(row=r, column=8).value
+    # re-open Price_Obs (ws was Form_A above)
+ws = wbv["Price_Observations"]
+for r in range(5, 505):
+    g = ws.cell(row=r, column=7).value
+    h = ws.cell(row=r, column=8).value
+    kbuy += (g == "K"); dbuy += (g == "D")
+    ksell += (h == "K"); dsell += (h == "D")
+print(f"  buy: K={kbuy} D={dbuy} | sell: K={ksell} D={dsell}")

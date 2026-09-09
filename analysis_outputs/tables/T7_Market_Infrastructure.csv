@@ -1,0 +1,7 @@
+﻿Market,Market_name,Obs_date,Type,Trading_hours,Retail_stalls,Transport_access,Platform,Roofing,Drainage,Electricity,Ice,Sanitation,Water_supply,Fee_arrangement,Fee_rate_note,GPS
+M1,Fishery Ghat,03/03/2026,Mixed,03:30-13:00,210,Good,Medium,Partial,Medium,Irregular,Available,Poor,Irregular,Aratdar,2.5-5% commission per lot; daily stall fee BDT 30-60,"22.3370, 91.8312"
+M2,Chawkbazar,04/03/2026,Retail,06:00-20:00,160,Good,Good,Complete,Medium,Regular,Available,Medium,Regular,Committee,Daily toll BDT 50 per stall; monthly cleaning levy,"22.3392, 91.8366"
+M3,Kazir Dewri,05/03/2026,Retail,06:30-19:30,85,Medium,Medium,Partial,Poor,Regular,Available,Medium,Regular,Committee,Daily toll BDT 40 per stall,"22.3415, 91.8301"
+M4,Karnaphuli Complex,06/03/2026,Retail,06:00-20:00,120,Good,Good,Complete,Good,Regular,Available,Good,Regular,Committee,Daily toll BDT 60; covered modern shed,"22.3318, 91.8178"
+M5,Bahaddarhat,07/03/2026,Retail,06:30-20:00,110,Medium,Good,Complete,Medium,Regular,Available,Medium,Regular,Mixed,Committee toll plus informal entry charge for vans,"22.3611, 91.8230"
+M6,Patenga,03/03/2026,Mixed,04:00-12:30,65,Medium,Poor,Partial,Poor,Irregular,Available,Poor,Irregular,Committee,Landing-side fee per basket; BDT 20-40 per maund handled,"22.2786, 91.7991"

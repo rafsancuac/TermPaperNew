@@ -1,0 +1,12 @@
+﻿Species_code,Local_name,English_name,n_price_obs,Producer_BDT_kg,Aratdar_sell_BDT_kg,Bepari_sell_BDT_kg,Retailer_sell_BDT_kg,Consumer_paid_BDT_kg,Aratdar_margin_BDT_kg,Bepari_margin_BDT_kg,Retailer_margin_BDT_kg,Total_spread_BDT_kg,Producer_share_pct
+S01,Ilish,Hilsa shad,71,1062.24,1113.6,1236.41,1486.96,1420.0,51.36,122.81,250.55,357.76,74.8
+S02,Rupchanda,Silver pomfret,64,1183.09,1238.49,1378.04,1619.16,1615.0,55.4,139.55,241.12,431.91,73.3
+S03,Lakkha,Indian salmon (four-finger threadfin),52,767.02,800.69,886.61,1069.64,1033.33,33.67,85.92,183.03,266.31,74.2
+S04,Koral/Kurl,Asian sea bass,46,678.25,707.64,762.77,933.44,885.0,29.39,55.13,170.67,206.75,76.6
+S05,Surma,Indian mackerel,74,427.85,447.15,501.77,581.23,585.0,19.3,54.62,79.46,157.15,73.1
+S06,Churi,Largehead ribbonfish,63,324.76,336.93,380.42,457.13,446.54,12.17,43.49,76.71,121.78,72.7
+S07,Poa,Pama croaker,29,376.47,393.74,450.16,545.45,530.0,17.27,56.42,95.29,153.53,71.0
+S08,Kankoita,Thorny/Indian anchovy,9,236.69,247.41,279.01,325.0,330.0,10.72,31.6,45.99,93.31,71.7
+S09,Loitta,Bombay duck,15,194.27,203.64,234.46,263.01,267.5,9.37,30.82,28.55,73.23,72.6
+S10,Harina,Chacunda gizzard shad,6,164.79,174.17,179.53,230.0,215.0,9.38,5.36,50.47,50.21,76.6
+ALL,Mean of species means,-,429,541.54,566.35,628.92,751.1,732.74,24.81,62.57,122.18,191.2,73.9

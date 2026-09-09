@@ -1,0 +1,376 @@
+--- PAGE 1 ---
+Marketing System of Some Commercially Important Marine Fish
+Species in the Chattogram Region of Bangladesh
+3. MATERIALS AND METHODS
+3.1 Description of the study area
+The study area covers the marine fish marketing network of the Chattogram metropolitan
+region, the principal coastal trade hub of Bangladesh through which a large share of the
+country’s marine landings passes before reaching inland markets (DoF, 2024). Chattogram is
+selected because it combines all structural segments of the marine fish channel within one
+urban economy: beach landing points, wholesale assembly markets, intermediary trading
+yards (arats), and dense retail neighbourhoods.
+Six retail-and-wholesale fish markets (arats) constitute the empirical frame: Fishery Ghat and
+Patenga, both physically linked to a landing point so that first-sale prices can be observed
+directly; and Chawkbazar, Kazir Dewri, Karnaphuli Complex and Bahaddarhat, four retail
+markets distributed across old-town, central and newer residential areas so that consumer-side
+demand heterogeneity is represented. The final six were fixed using three criteria, direct
+landing-point access, wholesale-channel coverage, and geographic spread across the city and
+unlike a purely convenience-based selection, four of the six (Fishery Ghat, Chawkbazar,
+Kazir Dewri, Karnaphuli Complex) repeat the sites of the author’s earlier 2019 baseline
+study, which supports a decade-level comparison, while Bahaddarhat and Patenga extend the
+frame to a newer residential retail market and a second landing point.
+Table 3.1: Study markets, code prefixes and channel position
+Market Code Channel position Primary analytical contribution
+Landing-linked wholesale-cum- First-sale (producer-side) price
+Fishery Ghat M1
+retail observations
+Chawkbazar M2 Retail Retail prices and trade volume quotes
+Kazir Dewri M3 Retail Retail prices and vendor practices
+Karnaphuli Retail prices; comparability with the 2019
+M4 Retail
+Complex baseline
+Bahaddarhat M5 Retail Newer-generation retail turnover
+Coast-side buy prices supporting
+Patenga M6 Landing-linked retail
+producer-share estimation
+3.2 Study period and research design
+The investigation follows a descriptive-cum-analytical cross-sectional survey design executed
+within a ten-day operational window: one preparation day including pilot testing,
+approximately five consecutive days of primary data collection distributed over different
+weekday market sessions, one reserve day for weather or availability contingencies, and the
+--- PAGE 2 ---
+remaining days for data entry, verification and analysis. Field scheduling spreads each arat
+across different weekdays so that systematic differences between busy and slack trading
+sessions do not contaminate between-market price comparisons. The single-season snapshot
+character of this design is reported transparently as a limitation in Section 3.11, and temporal
+interpretation is restricted to the survey period.
+The unit of inquiry is an individual market actor interviewed once, whereas the unit of price
+observation is one respondent-by-species quote expressed in Bangladeshi taka (BDT) per
+kilogram under fresh, ice-touched, whole-fish condition. Because respondents transact in
+heterogeneous lots, quantities quoted in maunds are converted using 1 maund = 37.32 kg, and
+monetary values are standardised to per-kilogram terms during data preparation. Prices refer
+to transactions on the interview day, supplemented by the previous high-volume day when
+trade was thin, and the reference day is recorded on every form.
+3.3 Target population and sampling procedure
+3.3.1 Population definition
+The target population comprises all market intermediaries handling the selected marine fish
+species at the six study arats together with purchasing consumers at those arats. Three
+operator categories define the sampling strata. An aratdar operates the physical arat
+infrastructure, provides trading space plus services such as weighing facilities and auction
+coordination, and earns commission or lease income on transactions routed through his
+premises — he is a commission-earning facilitator, not the owner of the fish, which is
+carried through into the questionnaire design in Section 3.5. A bepari/faria is a mobile
+wholesaler who buys at landing points or upstream yards, transports consignments, and sells
+through arats either to retailers or to other wholesalers. A khuchra (retail) vendor sells
+directly to end-consumers from fixed stalls or vending spots inside the market.
+3.3.2 Sample size determination
+No complete census register of operators exists in these informal markets, so a planning
+benchmark is first obtained from Cochran’s (1977) single-proportion formula, adopting a 95
+percent confidence level (Z = 1.96), maximum response variance (p = q = 0.5), and an eight
+percent permissible error (relaxed from the conventional five percent given fixed field
+resources):
+n₀ = Z² p q / e² = (1.96)²(0.5)(0.5) / (0.08)² ≈ 150 …………… (3.1)
+As a robustness check, Yamane’s (1967) finite-population formula, applied to an illustrative
+frame of N = 1,000 operators that plausibly exceeds the number of active intermediaries
+trading across six arats during any session, with the same e = 0.08:
+n = N / (1 + N e²) = 1,000 / (1 + 1,000 × 0.0064) ≈ 135 …………….. (3.2)
+Both benchmarks (n₀ ≈ 150; n ≈ 135) set an upper planning ceiling. It should be noted that
+Cochran’s formula is designed for estimating a single population proportion; the study’s
+actual inferential targets are continuous price and margin comparisons (Section 3.8), for
+--- PAGE 3 ---
+which a formal power calculation against an expected effect size would be the
+methodologically ideal approach. In the absence of a reliable prior effect-size estimate for
+this market, the proportion-based ceiling is used only as a planning bound, and the field target
+actually applied is fixed independently below, on resource and design grounds rather than on
+the ceiling itself.
+Given the ten-day field window across six markets, the applied field target is 120 valid
+interviews, allocated equally across the three trader strata (5 aratdars + 5 beparis/farias + 5
+khuchra retailers = 15 traders per market) plus 5 exit-intercepted consumers per market,
+across six markets (Table 3.3). This is below the Cochran ceiling of 150 but is deliberately
+chosen over an unequal, retail-heavy split so that each trader stratum carries equal analytical
+weight in the between-stratum comparisons of Section 3.8; the trade-off — fewer total
+interviews in exchange for balanced strata — is stated here explicitly rather than left implicit.
+3.3.3 Allocation and selection of respondents
+Table 3.3: Quota allocation of 120 respondents across the six markets
+Khuchra Trader
+Market Aratdar Bepari/Faria Consumer Total
+retailer subtotal
+M1 Fishery Ghat 5 5 5 15 5 20
+M2 Chawkbazar 5 5 5 15 5 20
+M3 Kazir Dewri 5 5 5 15 5 20
+M4 Karnaphuli
+5 5 5 15 5 20
+Complex
+M5 Bahaddarhat 5 5 5 15 5 20
+M6 Patenga 5 5 5 15 5 20
+Total 30 30 30 90 30 120
+Markets themselves constitute the primary stratum and were purposively nominated on the
+criteria in Section 3.1, because informal operator registers cannot provide an equal-
+probability frame. Within each selected market, aratdar and bepari/faria participants are
+drawn purposively among operators active during the survey session, prioritising informants
+handling the focal species, while khuchra vendors are taken successively along the market
+rows until the quota fills. Consumer observations use systematic exit interception of
+purchasers leaving the market with visible fish purchases. This stratified purposive-cum-
+quota procedure is disclosed honestly rather than presented as probability sampling, and
+inferential results are therefore interpreted as analytical generalisation within the studied
+system rather than statistical generalisation to a wider population.
+3.3.4 Price matching protocol
+To validate quoted margins against actually traded prices, each trader interview records the
+respondent’s principal supply linkage — from whom the respondent purchased and to whom
+the respondent sold during the session. Whenever a retailer reports purchasing a surveyed
+species on the interview day and the corresponding seller is also interviewed, the transaction
+--- PAGE 4 ---
+receives a common pair identifier linking buyer and seller forms. Matched pairs enable
+Wilcoxon signed-rank validation of self-reported buy-versus-sell consistency and add an
+independent quality screen on stated margins. Given the compressed schedule, the number of
+genuinely matched pairs is expected to be modest (realistically a handful per market); this test
+should therefore be read as a diagnostic quality check rather than a fully powered hypothesis
+test, and the achieved number of matched pairs should be reported alongside the result.
+3.4 Selection of fish species
+Ten commercially important marine species form the analytical core of the study, selected
+against four criteria: persistent presence across all six survey arats during preliminary
+reconnaissance; substantial share in daily trade volume or value at Chattogram retail outlets;
+coverage of high-, medium- and low-price tiers so that margin behaviour can be compared
+across market segments; and documented importance in national marine fisheries statistics.
+Scientific names throughout Table 3.4 follow FishBase (2026).
+Table 3.4: 10 marine fish species selected for this study
+Code Local name English common name Scientific name Tier
+S01 Ilish Hilsa shad Tenualosa ilisha High
+S02 Rupchanda Silver pomfret Pampus argenteus High
+Indian salmon (four-finger Eleutheronema
+S03 Lakkha High
+threadfin) tetradactylum
+S04 Koral/Kurl Asian sea bass Lates calcarifer High
+S05 Surma Indian mackerel Rastrelliger kanagurta Medium
+S06 Churi Largehead ribbonfish Trichiurus lepturus Medium
+S07 Poa Pama croaker Otolithoides pama Medium
+Low-
+S08 Kankoita Thorny/Indian anchovy Stolephorus indicus
+volume
+S09 Loitta Bombay duck Harpadon nehereus Low
+S10 Harina Chacunda gizzard shad Anodontostoma chacunda Low
+Species S03 (previously Bagda chingri / giant tiger prawn, Penaeus monodon, in the initial
+candidate list) has been replaced with Lakkha (Eleutheronema tetradactylum), a high-value
+marine finfish, so that all ten entries are true fish and consistent with the study’s title and
+scope; prawn is a crustacean and its inclusion in a ‘marine fish species’ study would be a
+taxonomic inconsistency. Species S08 is narrowed to Stolephorus indicus specifically, rather
+than a mixed anchovy genus group, so that each code maps to one identifiable species for
+per-species price analysis.
+Should the pilot round reveal that any species is scarcely transacted at the study markets, a
+pre-specified substitution rule applies: the affected species is replaced by the closest-tier
+available alternative observed during the pilot, the change and its justification are recorded
+with date and supervisor acknowledgement before large-scale collection begins, and no
+--- PAGE 5 ---
+further substitutions occur thereafter so that the instrument remains stable throughout the
+survey.
+3.5 Instruments and data collection procedure
+Data were collected through pre-structured, interviewer-administered instruments prepared in
+Bangla to guarantee conceptual equivalence with respondents, accompanied by an English
+analytical specification for the researcher. The instrument battery comprises five coordinated
+forms whose items map one-to-one onto the variables defined in Section 3.6; nothing outside
+these fields was collected, in line with the minimised-data principle adopted for this study.
+Each physical Bangla form carries its Form ID (A, B, R, M or C) printed in its header so that
+field forms, data entry and this methodology stay unambiguously cross-referenced.
+Trader questionnaires (Form A – Aratdar; Form B – Bepari/Faria; Form R – Khuchra
+retailer). A shared structural template underlies all three, with actor-specific filtering.
+Common modules capture basic demographics (age, education, duration in marine fish trade),
+principal supply linkage, quantities handled per day in kilograms, buy-and-sell quotations for
+each focal species, mode of payment (cash, bKash/Nagad, credit), and actor-specific cost
+modules. On Form A, the price-grid columns record the auction-clearing prices the aratdar
+facilitates — what the fisherman receives and what the bepari pays — as pass-through prices,
+not the aratdar’s own trading margin; his income is captured separately as commission/lease
+income in the cost module, so that his margin is not double-counted once as a price spread
+and again as commission. The Form B module adds transport fares, icing quantity and
+expenditure, commission paid to aratdars, and transit damage percentages. Form R covers
+stall rent, icing cost, wash-water and tool expenses, self-reported spoilage percentages, and
+customer composition.
+Market observation checklist (Form M). One checklist per market, completed by direct
+physical observation of twelve infrastructure characteristics (market type and hours, retail
+stall count, transport access, platform condition, roofing, drainage, electricity, ice availability,
+sanitation, water supply, and lease/toll arrangement), each marked with its evidence source
+(direct observation vs. verbal confirmation) plus GPS coordinates and photo references.
+Consumer exit slip (Form C). Five purchasers leaving each market complete a two-to-three-
+minute intercept slip recording focal-species purchases with price paid, quantities, any other
+fish bought, and payment mode an independent consumer-side check on retailer sell prices.
+Supplementary tag-price sheet (optional). Where field time permits, posted or spoken
+display prices of all fish observable at each market are transcribed once per visit, at zero
+interview burden, enriching the descriptive appendix without entering the formal hypothesis
+tests.
+3.5.1 Interviewing schedule and pilot
+Interviews are conducted during the morning trading window, when wholesale arrivals and
+early transactions concentrate, and extend into late-morning retail peaks at retail yards.
+Fieldwork opens with a one-day pilot at one market on approximately five respondents
+--- PAGE 6 ---
+covering every stratum: interviewer phrasing, skip-pattern integrity, species recognisability,
+maund-to-kilogram conversions and response times are checked, after which only supervisor-
+approved corrections are applied. Questionnaire and species-list versions are frozen before
+systematic collection begins.
+3.6 Variables and their measurement
+Table 3.5 summarises the measured variables, their originating instrument fields,
+measurement scales and intended analytical roles.
+Table 3.5: Variable definitions, instrumentation and analytical roles
+Variable Instrument source Scale / unit Analytical role
+Respondent identifiers Header block, all forms Codes M1–M6, actor Stratification and linkage keys
+class, serial
+Age; education; trade Trader socio- Years; grade; years Actor profile descriptive
+experience economics module statistics
+Quantity handled Trader trade module kg/day (maund Volume weights; cost
+converted) normalisation
+Buy price by species Species grid (traders) BDT/kg Producer-side price proxy (Pₚ)
+Sell price by species Species grid (traders); BDT/kg Retail price anchor (Pᵣ); margin
+Form C construction
+Pair identifier Link-tracing fields Match code Wilcoxon signed-rank
+validation sample
+Marketing costs Actor-specific cost BDT + frequency codes Per-kilogram marketing cost,
+modules MC
+Commission Form A, B modules % per lot or BDT/kg Channel margin decomposition
+Damage / spoilage Self-reported % of lot value Loss adjustment; robustness
+percentages note
+Payment mode mix Payment module, all Cash / MFS / credit Chi-square test of mode
+forms shares adoption
+Market facilities Form M observation Graded checklist items Contextual profile of arats
+Tag prices Optional sheet BDT/kg, all species Appendix descriptive diversity
+observed table
+3.7 Analytical framework for marketing performance
+3.7.1 Marketing cost
+For every trader i in stratum k, total marketing cost per kilogram is the sum of itemised cash
+expenses (rent/toll, electricity where applicable, transport including loading/unloading,
+wages, commission paid, icing, tools and washing water, and other sundries), normalised to
+the kilogram basis by quantity handled:
+--- PAGE 7 ---
+MCₖᵢ = ( Σ cᵣᵢ ) / Qₖᵢ , r = 1 … R ……………….. (3.3)
+where cᵣᵢ = expense on cost item r by respondent i; Qₖᵢ = quantity handled per day by
+respondent i in stratum k; R = number of applicable cost items.
+3.7.2 Segment margins and profit
+The absolute margin earned at any channel segment equals the spread between the
+respondent’s recorded selling and buying prices for the same species-day quote, and segment
+profit deducts marketing cost from that spread:
+Mₖᵢ = Pₛᵢ − Pᵇᵢ ……………………(3.4)
+πₖᵢ = Mₖᵢ − MCₖᵢ ………………… (3.5)
+where Pₛᵢ and Pᵇᵢ = selling and buying prices per kilogram quoted by respondent i; πₖᵢ = net
+profit of the segment operator per kilogram.
+3.7.3 Channel-level indicators
+Following the marketing-margin framework of Kohls and Uhl (1980), four standard chain-
+level indicators are computed per species and market combination, using mean prices over
+valid observations, where Pᵣ = mean retail price per kilogram (validated by consumer slips)
+and Pₚ = mean producer-side, first-sale price per kilogram:
+Price spread = Pᵣ − Pₚ …………………..(3.6)
+GMM% = [ (Pᵣ − Pₚ) / Pᵣ ] × 100 ………………. (3.7)
+NMM% = [ (Pᵣ − Pₚ − ΣMC) / Pᵣ ] × 100 ………….. (3.8)
+PS% = ( Pₚ / Pᵣ ) × 100 …………. (3.9)
+where ΣMC = summed per-kilogram marketing costs of all surveyed segments in the chain;
+GMM% = gross marketing margin percentage; NMM% = net marketing margin percentage;
+PS% = producer’s share of the consumer’s taka.
+3.7.4 Marketing efficiency
+Operational efficiency follows Shepherd’s (1965) ratio of output value to input costs, applied
+on a per-kilogram chain basis; values above unity indicate that more of the final price
+remains as product value than is consumed by marketing services:
+ME = Pᵣ / ( ΣMC + ΣM ) ……………… (3.10)
+where ME = Shepherd-type efficiency index; ΣM = summed segment margins along the
+chain. As a complementary producer-referenced measure, following Acharya and Agarwal’s
+(1987) convention that efficiency assessment should also be judged from the producer’s side,
+the same ratio is recomputed with Pₚ (producer price) in place of Pᵣ; the two versions are
+reported side by side rather than treated as interchangeable, since they answer different
+--- PAGE 8 ---
+questions (value delivered to the consumer per unit cost, versus value retained by the
+producer per unit cost).
+3.8 Statistical analysis
+Analysis runs in R statistical software (R Core Team, 2025) with an annotated script retained
+for full reproducibility. Price and margin distributions in informal fish markets rarely satisfy
+normality or homogeneity of variance confirmed here by Shapiro-Wilk screening on the
+pooled series before any test is applied, so the inferential battery relies on distribution-free
+procedures throughout, evaluated two-sidedly at the five percent significance level. Table 3.6
+maps each research question onto its variable set and designated test, fixing the analytic plan
+before data inspection.
+Table 3.6: Analytical questions mapped to statistical tests and decision rules (α = 0.05)
+Research question Data Test statistic Decision rule
+Do prices of the same Species-wise price Kruskal-Wallis H (Kruskal & Reject H₀ when p < 0.05
+species differ across observations by Wallis, 1952); post-hoc Dunn
+markets? market (n ≥ 5 cells) (Dunn, 1964) with Holm
+adjustment
+Do margins differ Segment margins by Mann-Whitney U per pair of Reject H₀ when p < 0.05
+across trader stratum strata
+categories?
+Are self-reported Matched pair Wilcoxon signed-rank on Non-significance
+buy-sell quotes identifiers paired differences corroborates consistency
+internally consistent?
+Does payment-mode Mode mixes by actor Chi-square; Fisher fallback for Reject H₀ when p < 0.05
+adoption differ across class sparse cells
+actor types?
+Is marketing cost Per-kilogram MC Spearman rank correlation Sign and strength of rho,
+associated with versus π pairs 95% CI
+segment profit?
+Normality screening Pooled price and Shapiro-Wilk W p > 0.05 needed to justify
+preceding all tests margin series parametric alternatives; else
+nonparametric used
+Multiple pairwise contrasts following significant omnibus tests use Holm’s (1979) step-down
+familywise error control. Because species compositions differ across respondents, inter-
+market comparisons are always executed within a single species, never pooled across species.
+Species appearing at fewer than three markets with fewer than five observations per cell are
+reported descriptively only.
+3.9 Data quality assurance
+Interviewers receive one structured training session covering consent administration, species
+coding, maund-to-kilogram conversion, skip patterns and the pair-linking rule, immediately
+--- PAGE 9 ---
+followed by the pilot round (Section 3.5.1). Completed forms are checked same-day against
+arithmetic range constraints, and daily field debriefs resolve anomalies while memory
+remains fresh. Approximately ten percent of trader respondents are re-approached through
+short callback verification of key fields (quantity handled, commission rates). During entry,
+respondent identifiers are screened for duplication, pair identifiers are reconciled across
+linked forms, and implausible entries are flagged rather than deleted so that exclusion
+decisions remain documented and traceable. Buy-price records that traders decline to disclose
+retain their analytical role under an explicitly flagged proxy convention approved before
+analysis.
+3.10 Ethical considerations
+Participation is voluntary and based on verbal informed consent:
+I. the interviewer reads a standard statement in Bangla explaining the study purpose, the
+academic-only use of information, anonymity protections, and the right to decline any
+question or withdraw entirely without consequence;
+II. personal identifiers are replaced by coded IDs at collection time, contact details are
+not recorded on forms, and electronic files reside exclusively on a password-protected
+device accessible to the researcher;
+III. reported results aggregate to group level so that no individual operator can be
+identified from published tables or figures;
+IV. the protocol follows the academic norms of the departmental term-paper course, and
+supervisor endorsement of instruments constitutes the institutional review of the
+survey plan.
+3.11 Limitations of the methodology
+Five limitations bound the interpretation of findings.
+a) The cross-sectional design captures one seasonal episode; margins in marine markets
+vary intra-week and seasonally, so temporal extrapolation beyond the survey window
+is avoided, and any seasonal claim in the discussion should be sourced from prior
+published data rather than presented as a within-study finding.
+b) Purposive nomination of markets combined with quota-convenience selection within
+strata precludes design-based population inference; results generalise analytically to
+comparable channel settings rather than statistically to all Chattogram operators.
+c) Producer-side prices are proxied from first-sale quotations at landings-linked markets
+rather than from boat-level fisher interviews, and this proxy status is carried explicitly
+into the producer-share calculations.
+d) Cost and loss variables rest partly on respondent recall and self-assessment, especially
+spoilage percentages; day-referencing of quantities and percentage-format questioning
+mitigate but cannot eliminate recall error.
+--- PAGE 10 ---
+e) The field sample size (120) was fixed on resource and stratum-balance grounds rather
+than derived from a power calculation matched to the study’s actual continuous-
+variable tests; the Cochran/Yamane figures in Section 3.3.2 should be read as a
+proportion-based planning ceiling, not as a formal power guarantee for the Kruskal-
+Wallis/Mann-Whitney comparisons in Section 3.8.
+References
+Acharya, S. S., & Agarwal, N. L. (1987). Agricultural marketing in India. Oxford & IBH
+Publishing.
+Cochran, W. G. (1977). Sampling techniques (3rd ed.). John Wiley & Sons.
+Department of Fisheries (DoF). (2024). Yearbook of fisheries statistics of Bangladesh 2023–
+24 (Vol. 41). Fisheries Resources Survey System, Ministry of Fisheries and Livestock,
+Government of Bangladesh.
+Dunn, O. J. (1964). Multiple comparisons using rank sums. Technometrics, 6(3), 241–252.
+FishBase. (2026). FishBase world database of fishes. https://www.fishbase.se
+Holm, S. (1979). A simple sequentially rejective multiple test procedure. Scandinavian
+Journal of Statistics, 6(2), 65–70.
+Kohls, R. L., & Uhl, J. N. (1980). Marketing of agricultural products. Macmillan.
+Kruskal, W. H., & Wallis, W. A. (1952). Use of ranks in one-criterion variance analysis. The
+Annals of Mathematical Statistics, 23(3), 525–540.
+R Core Team. (2025). R: A language and environment for statistical computing. R
+Foundation for Statistical Computing. https://www.R-project.org/
+Shepherd, G. S. (1965). Marketing farm products: Economic analysis (6th ed.). Iowa State
+University Press.
+Yamane, T. (1967). Statistics: An introductory analysis (2nd ed.). Harper & Row.

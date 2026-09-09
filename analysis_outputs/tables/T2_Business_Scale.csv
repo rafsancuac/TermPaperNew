@@ -1,0 +1,4 @@
+﻿Actor,n,Daily_capacity_kg_mean,Daily_capacity_kg_sd,Daily_capacity_kg_median,Daily_capacity_kg_min,Daily_capacity_kg_max,Workers_mean,Worker_wage_BDT_day_mean,Trips_per_period_mean,Ice_use_kg_day_mean,Spoilage_pct_mean
+Aratdar,30,797.4,272.75,821.0,373.2,1306.2,5.37,636.67,,,
+Bepari/Faria,30,204.51,107.05,186.6,44.8,410.5,,,1.9,79.97,
+Retailer,30,99.95,27.47,103.5,59.0,146.0,,,,,5.43
