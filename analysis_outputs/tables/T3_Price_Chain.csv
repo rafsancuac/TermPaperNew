@@ -1,12 +1,12 @@
-﻿Species_code,Local_name,English_name,n_price_obs,Retail_markets_n,Reporting_status,Producer_BDT_kg,Aratdar_sell_BDT_kg,Bepari_sell_BDT_kg,Retailer_sell_BDT_kg,Consumer_paid_BDT_kg,Aratdar_margin_BDT_kg,Bepari_margin_BDT_kg,Retailer_margin_BDT_kg,Total_spread_BDT_kg,Producer_share_pct
-S01,Ilish,Hilsa shad,71,6.0,,1031.62,1083.3,1236.41,1486.96,1420.0,51.68,153.11,183.59,388.38,72.6
-S02,Rupchanda,Silver pomfret,64,6.0,,1110.67,1165.59,1378.04,1619.16,1615.0,54.92,212.45,236.96,504.33,68.8
-S03,Lakkha,Indian salmon (four-finger threadfin),52,4.0,,735.53,771.7,886.61,1069.64,1033.33,36.17,114.91,146.72,297.8,71.2
-S04,Koral/Kurl,Asian sea bass,46,5.0,,660.95,687.75,762.77,933.44,885.0,26.8,75.02,122.23,224.05,74.7
-S05,Surma,Indian mackerel,74,6.0,,407.79,428.72,501.77,581.23,585.0,20.93,73.05,83.23,177.21,69.7
-S06,Churi,Largehead ribbonfish,63,6.0,,314.1,323.55,380.42,457.13,446.54,9.45,56.87,66.12,132.44,70.3
-S07,Poa,Pama croaker,29,5.0,,361.74,377.81,450.16,545.45,530.0,16.07,72.35,79.84,168.26,68.3
-S08,Kankoita,Thorny/Indian anchovy,9,2.0,Descriptive-only (Method 3.8),231.78,241.16,279.01,325.0,330.0,9.38,37.85,50.99,98.22,70.2
-S09,Loitta,Bombay duck,15,2.0,Descriptive-only (Method 3.8),188.91,195.61,234.46,263.01,267.5,6.7,38.85,33.04,78.59,70.6
-S10,Harina,Chacunda gizzard shad,6,1.0,Descriptive-only (Method 3.8),163.45,,179.53,230.0,215.0,,,,,76.0
-ALL,"Mean of species means (chain-complete: S01, S02, S03, S04, S05, S06, S07, S08, S09)",-,423,,Pooled over chain-complete species,560.34,586.13,678.85,809.0,790.26,25.79,92.72,111.41,229.92,70.9
+﻿Species_code,Local_name,English_name,n_price_obs,Retail_markets_n,Consumer_paid_n,Reporting_status,Producer_BDT_kg,Aratdar_sell_BDT_kg,Bepari_sell_BDT_kg,Retailer_sell_BDT_kg,Consumer_paid_BDT_kg,Aratdar_margin_BDT_kg,Bepari_margin_BDT_kg,Retailer_margin_BDT_kg,Total_spread_BDT_kg,Producer_share_pct
+S01,Ilish,Hilsa shad,71,6.0,6.0,,1031.62,1083.3,1236.41,1486.96,1420.0,51.68,153.11,183.59,388.38,72.6
+S02,Rupchanda,Silver pomfret,64,6.0,3.0,,1110.67,1165.59,1378.04,1619.16,1615.0,54.92,212.45,236.96,504.33,68.8
+S03,Lakkha,Indian salmon (four-finger threadfin),52,4.0,3.0,,735.53,771.7,886.61,1069.64,1033.33,36.17,114.91,146.72,297.8,71.2
+S04,Koral/Kurl,Asian sea bass,46,5.0,4.0,,660.95,687.75,762.77,933.44,885.0,26.8,75.02,122.23,224.05,74.7
+S05,Surma,Indian mackerel,74,6.0,8.0,,407.79,428.72,501.77,581.23,585.0,20.93,73.05,83.23,177.21,69.7
+S06,Churi,Largehead ribbonfish,63,6.0,13.0,,314.1,323.55,380.42,457.13,446.54,9.45,56.87,66.12,132.44,70.3
+S07,Poa,Pama croaker,29,5.0,7.0,,361.74,377.81,450.16,545.45,530.0,16.07,72.35,79.84,168.26,68.3
+S08,Kankoita,Thorny/Indian anchovy,9,2.0,1.0,Descriptive-only (Method 3.8): retail quotes in 2 market(s); consumer quotes n=1 (<3; share not reported),231.78,241.16,279.01,325.0,330.0,,,,,
+S09,Loitta,Bombay duck,15,2.0,6.0,Descriptive-only (Method 3.8): retail quotes in 2 market(s),188.91,195.61,234.46,263.01,267.5,6.7,38.85,33.04,78.59,70.6
+S10,Harina,Chacunda gizzard shad,6,1.0,1.0,Descriptive-only (Method 3.8): retail quotes in 1 market(s); consumer quotes n=1 (<3; share not reported),163.45,,179.53,230.0,215.0,,,,,
+ALL,"Mean of species means (chain-complete: S01, S02, S03, S04, S05, S06, S07, S09)",-,414,,,Pooled over 8 chain-complete species (consumer n >= 3),601.41,629.25,728.83,869.5,847.8,27.84,99.58,118.97,246.39,70.9

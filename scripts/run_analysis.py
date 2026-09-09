@@ -41,6 +41,11 @@ MAUND = 37.32  # 1 maund = 37.32 kg (template Unit_Converter)
 # and Patenga. Producer-side and auction (aratdar sell) series are therefore
 # restricted to these markets; wholesale/retail series cover all six markets.
 LANDING_MARKETS = ("M1", "M6")
+# Minimum number of consumer-paid observations (Form C slips) required before
+# a species-level producer's share / chain margin is reported. Species whose
+# consumer price rests on 1-2 slips (e.g. S08 Kankoita, S10 Harina in the
+# simulated set) are reported with prices only; their share cells stay blank.
+MIN_CONS = 3
 
 TBL_DIR = os.path.join(ROOT, "analysis_outputs", "tables")
 CH_DIR = os.path.join(ROOT, "analysis_outputs", "charts")
@@ -321,13 +326,13 @@ def t3_chain(d):
     - Segment margins are differences of consecutive level means, so on any
       species with all levels present the margins telescope to the total
       spread (consumer - producer) exactly.
-    - Species without a full chain (all four chain levels observed) are
-      shown descriptively with blank margins; the ALL row and Table 10 pool
-      only chain-complete species (state this in the Methods chapter).
+    - Chain-complete requires all four level means AND at least MIN_CONS
+      consumer-paid observations; otherwise prices are shown but margins and
+      the producer's share stay blank (species excluded from the ALL pool).
     - Methodology Sec. 3.8: species observed in fewer than three markets are
-      reported descriptively only. Reporting_status flags such species
-      (currently S08 Kankoita, S09 Loitta, S10 Harina); Retail_markets_n
-      counts markets with >=1 retailer sell quote for the species.
+      reported descriptively only. Reporting_status lists the reasons
+      (retail-market coverage, consumer-quote count); Retail_markets_n and
+      Consumer_paid_n report the underlying sample sizes.
     """
     po = d["PO"]
     cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
@@ -341,13 +346,26 @@ def t3_chain(d):
                        if any(r.get("Actor_type") == "Khuchra"
                               and r.get("Market") == m and r.get("Species_code") == code
                               and r["sell_kg"] is not None for r in po)]
-        status = "" if len(ret_markets) >= 3 else "Descriptive-only (Method 3.8)"
+        cons_vals = [r["price_kg"] for r in cpf_yes
+                     if r.get("Species_code") == code and r["price_kg"] is not None]
+        cons_n = len(cons_vals)
         prod = _po_mean(po, "Aratdar", "buy_kg", code, LANDING_MARKETS)
         arat = _po_mean(po, "Aratdar", "sell_kg", code, LANDING_MARKETS)
         bep = _po_mean(po, "Bepari_Faria", "sell_kg", code)
         ret = _po_mean(po, "Khuchra", "sell_kg", code)
-        cons = _cons_mean(cpf_yes, code)
-        complete = all(x is not None for x in (prod, arat, bep, cons))
+        cons = round(float(np.mean(cons_vals)), 2) if cons_vals else None
+        complete = (all(x is not None for x in (prod, arat, bep, cons))
+                    and cons_n >= MIN_CONS)
+
+        reasons = []
+        if len(ret_markets) < 3:
+            reasons.append(f"retail quotes in {len(ret_markets)} market(s)")
+        if cons_n == 0:
+            reasons.append("no consumer quotes")
+        elif cons_n < MIN_CONS:
+            reasons.append(f"consumer quotes n={cons_n} (<{MIN_CONS}; share not reported)")
+        status = ("Descriptive-only (Method 3.8): " + "; ".join(reasons)
+                  if reasons else "")
 
         def diff(a, b):
             return round(a - b, 2) if (a is not None and b is not None) else None
@@ -356,6 +374,7 @@ def t3_chain(d):
             "Species_code": code, "Local_name": sp["Local_name"],
             "English_name": sp["English_common_name"], "n_price_obs": n_obs,
             "Retail_markets_n": len(ret_markets),
+            "Consumer_paid_n": cons_n,
             "Reporting_status": status,
             "Producer_BDT_kg": prod, "Aratdar_sell_BDT_kg": arat,
             "Bepari_sell_BDT_kg": bep, "Retailer_sell_BDT_kg": ret,
@@ -365,7 +384,8 @@ def t3_chain(d):
             "Retailer_margin_BDT_kg": diff(cons, bep) if complete else None,
             "Total_spread_BDT_kg": diff(cons, prod) if complete else None,
             "Producer_share_pct": (round(100.0 * prod / cons, 1)
-                                   if (prod is not None and cons) else None),
+                                   if (prod is not None and cons and complete)
+                                   else None),
         }
         rows.append(row)
 
@@ -388,7 +408,9 @@ def t3_chain(d):
     rows.append({
         "Species_code": "ALL", "Local_name": f"Mean of species means (chain-complete: {', '.join(codes_all)})",
         "English_name": "-", "n_price_obs": n_all,
-        "Retail_markets_n": None, "Reporting_status": "Pooled over chain-complete species",
+        "Retail_markets_n": None, "Consumer_paid_n": None,
+        "Reporting_status": f"Pooled over {len(full)} chain-complete species "
+                            f"(consumer n >= {MIN_CONS})",
         "Producer_BDT_kg": prod_p, "Aratdar_sell_BDT_kg": arat_p,
         "Bepari_sell_BDT_kg": bep_p, "Retailer_sell_BDT_kg": ret_p,
         "Consumer_paid_BDT_kg": cons_p,
@@ -405,10 +427,11 @@ def t3_chain(d):
             "(descriptive; margins use the consumer-paid anchor); Consumer = focal-species "
             "purchases actually paid (Form C). Margins = differences of consecutive level means "
             "and telescope to the total spread. K/D-flagged prices excluded. Species without a "
-            "complete chain show blank margins and are excluded from ALL (see Local_name note). "
-            "Reporting_status marks species observed in fewer than three markets as "
-            "descriptive-only (Methodology 3.8): S08/S09/S10 quotes are few and their share "
-            "figures are indicative, not inferential.")
+            "complete chain - or with fewer than MIN_CONS consumer-paid observations - show "
+            "prices but blank margins/share and are excluded from ALL (see Local_name note); "
+            "Consumer_paid_n reports the actual number of consumer slips behind each share. "
+            "Reporting_status lists Method 3.8 descriptive-only reasons (S08/S09/S10 in the "
+            "current set).")
     return "T3_Price_Chain", "Table 3. Price chain by species (BDT per kg)", df, note
 
 
@@ -616,12 +639,16 @@ def t10_margins(d):
     cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
     codes = [c for c in sorted(d["SP"].keys())]
 
-    # chain-complete species set (same rule as Table 3)
+    # chain-complete species set (same rule as Table 3): all four level means
+    # AND at least MIN_CONS consumer-paid observations
     chain_codes = []
     for c in codes:
+        cons_n = sum(1 for r in cpf_yes
+                     if r.get("Species_code") == c and r["price_kg"] is not None)
         if (_po_mean(po, "Aratdar", "buy_kg", c, LANDING_MARKETS) is not None
                 and _po_mean(po, "Aratdar", "sell_kg", c, LANDING_MARKETS) is not None
                 and _po_mean(po, "Bepari_Faria", "sell_kg", c) is not None
+                and cons_n >= MIN_CONS
                 and _cons_mean(cpf_yes, c) is not None):
             chain_codes.append(c)
     if not chain_codes:

@@ -107,10 +107,14 @@ CURRENT STATUS & HEADLINE (SIMULATED) RESULTS
   (14 usable); 6 market-observation rows; 7 collection-log visits.
 - Producer's (fisher's) share of consumer price: 70.9% (producer price =
   Form A buy quotes at landing-linked markets M1/M6 only; Methodology 3.11c).
-- Channel margins (chain-complete species S01–S09, % of consumer taka):
-  Aratdar ≈ 25.8 BDT/kg (3.3%), Bepari/Faria ≈ 92.7 (11.7%),
-  Retailer (consumer-anchored) ≈ 111.4 (14.1%); total spread 229.9 (29.1%);
+- Channel margins (8 chain-complete species = S01–S07, S09; % of consumer
+  taka): Aratdar ≈ 27.8 BDT/kg (3.3%), Bepari/Faria ≈ 99.6 (11.7%),
+  Retailer (consumer-anchored) ≈ 119.0 (14.0%); total spread 246.4 (29.1%);
   margins + share = exactly 100%.
+- Chain-complete = all four stages present AND ≥3 consumer-paid quotes
+  (MIN_CONS). S08 Kankoita and S10 Harina rest on a single consumer quote
+  each → their share cells are blank (descriptive only); T3 carries a
+  Consumer_paid_n column so every share's sample size is visible.
 - Ilish chain example: fisher ≈1,032 → auction ≈1,083 → bepari ≈1,236 →
   consumer ≈1,420 BDT/kg.
 - Retailer vendor quotes average ≈2.5% ABOVE consumer-paid prices (bargaining
@@ -138,8 +142,11 @@ python scripts/fill_survey_data.py                # regenerate simulated
 METHOD NOTES (for analysis & writing)
 - Margin = next-level price − previous-level price, per kg; species-level
   means, then composition-consistent aggregate over CHAIN-COMPLETE species
-  (state this in the Methodology chapter; S10 Harina currently excluded —
-  no landing-market auction sell quote).
+  (state this in the Methodology chapter). Complete = all four stages AND
+  ≥3 consumer-paid quotes (MIN_CONS): currently 8 species (S01–S07, S09);
+  S10 Harina excluded (no landing-market auction sell quote), S08 Kankoita
+  excluded (consumer n=1) — both reported descriptively with blank share
+  cells.
 - Producer price (fisher first-sale) is proxied ONLY from Form A buy quotes
   at landing-linked markets M1 Fishery Ghat & M6 Patenga; retail price P_r
   is the consumer-paid anchor (Form C slips) and the retailer margin is
@@ -235,13 +242,15 @@ species, 2–7 March 2026. Chain: fisher → Aratdar (auction) → Bepari →
 retailer → consumer; 1 maund = 37.32 kg; producer's share = fisher price
 ÷ consumer price (producer price = landing markets M1/M6 only; retail
 price = consumer-paid). Current dataset (SIMULATED, for drafting only)
-gives: producer's share 70.9%; margins (% of consumer taka) Aratdar 25.8
-(3.3%), Bepari/Faria 92.7 (11.7%), Retailer 111.4 (14.1%) — additive to
-100; Ilish chain ≈1,032→1,083→1,236→1,420 BDT/kg; MFS use rises
-down-chain (retail ~29%); consumer MFS ~57%; top problems spoilage 31%,
-syndicate 31%, import competition 29%. Species S08/S09/S10 are
-descriptive-only (Method 3.8). TASK: <এখানে কাজ লিখুন — e.g., "draft
-Chapter 4.3 (price chain & margins) from the numbers above">.
+gives: producer's share 70.9%; margins (% of consumer taka) Aratdar 27.8
+(3.3%), Bepari/Faria 99.6 (11.7%), Retailer 119.0 (14.0%) — additive to
+100; total spread 246.4 (29.1%); Ilish chain ≈1,032→1,083→1,236→1,420
+BDT/kg; MFS use rises down-chain (retail ~29%); consumer MFS ~57%; top
+problems spoilage 31%, syndicate 31%, import competition 29%. Pooled
+chain stats cover 8 species (S01–S07, S09); S08/S10 producer shares are
+NOT reported (single consumer quote each; Consumer_paid_n in Table 3),
+S09 is descriptive-only for market coverage. TASK: <এখানে কাজ লিখুন —
+e.g., "draft Chapter 4.3 (price chain & margins) from the numbers above">.
 I will paste the exact tables next. [Then paste the relevant CSV contents.]
 ```
 

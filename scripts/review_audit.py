@@ -298,13 +298,15 @@ def main(path):
     rep("PASS" if not row_bad else "FAIL", "Sell >= Buy within each observation",
         str(row_bad[:5]) if row_bad else f"all {len(PO)} rows")
 
-    # margin sanity per stage (new convention; chain-complete species only)
+    # margin sanity per stage (new convention; chain-complete species only -
+    # completeness matches the pipeline rule: all four stages present AND at
+    # least 3 consumer-paid observations, MIN_CONS in run_analysis.py)
     mgn = defaultdict(list)
     chain_complete = []
     for sp in SPECIES:
         c = chain[sp]
         if not (c["producer"] and c["aratdar_sell"] and c["bepari_sell"]
-                and c["consumer_paid"]):
+                and c["consumer_paid"]) or len(c["consumer_paid"]) < 3:
             continue
         chain_complete.append(sp)
         mgn["aratdar"].append(np.mean(c["aratdar_sell"]) - np.mean(c["producer"]))
@@ -544,12 +546,14 @@ def main(path):
             t3 = {r["Species_code"]: r for r in csv.DictReader(fh)}
         dev = []
         for sp, sh in share.items():
-            t3v = float(t3[sp]["Producer_share_pct"]) if sp in t3 else None
-            if t3v and abs(sh - t3v) > 1.0:
+            cell = (t3[sp]["Producer_share_pct"] if sp in t3 else "") or ""
+            t3v = float(cell) if str(cell).strip() not in ("", "nan") else None
+            if t3v is not None and abs(sh - t3v) > 1.0:
                 dev.append((sp, round(sh, 1), t3v))
         rep("PASS" if not dev else "WARN",
             "Recomputed per-species share matches T3 (±1pt)",
-            str(dev) if dev else "all 10 species match")
+            str(dev) if dev else "all reported species match (blank cells = share "
+                                 "suppressed on low consumer n, as flagged in T3)")
     if os.path.exists(t10_path) and comp_share:
         with open(t10_path, encoding="utf-8-sig") as fh:
             t10 = {r["Level"]: r for r in csv.DictReader(fh)}

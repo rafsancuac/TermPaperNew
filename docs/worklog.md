@@ -126,3 +126,15 @@ Work Log:
 Stage Summary:
 - মার্জ সম্পূর্ণ: রিপো = Task 5 (পাইপলাইন-ফিক্স + স্ট্যাট-এক্সটেনশন + ড্রাফট) + Task 6 (স্বাধীন যাচাই + লিটারেচার-প্যাক); ০ ফেটাল ইস্যু, বাকি ৩টি WARN ডকুমেন্টেড
 - LITERATURE_NOTES.md chapter_02 ড্রাফটের সিটেশন-ভিত্তি দেয়; review_audit.py আসল ডাটা এলে পুনঃব্যবহারযোগ্য
+---
+Task ID: 7
+Agent: Arena.ai research assistant
+Task: তৃতীয় রিভিউয়ারের (রাউন্ড ৩) ৩টি নতুন দাবি যাচাই ও ফিক্স (২০২৬-০৯-০৯)
+
+Work Log:
+- #8 (verify_filled.py কলাম-সোয়াপ): বর্তমান ফাইলে column=4=Rule/column=5=Status, আউটপুট "checks read: 24; non-passing: 0", exit 0 — রাউন্ড ১-এর কমিট 7296015-এ ফিক্সড; দাবিটি পুরোনো ভার্সনের বিরুদ্ধে। → প্রমাণ-সহ নথিভুক্ত।
+- #9 (T6 nondeterminism): কমিট 149864a-তে tie-break-সহ সর্ট; ৩টি টানা রানে T6-এর MD5 অভিন্ন — ফিক্সড প্রমাণিত।
+- #10 (S08/S10-এর PS = n=1 ভোক্তার ওপর): raw Consumer_Purchases_Focal থেকে যাচাই — সত্যি (S08:1, S10:1; S02/S03:3)। ফিক্স: MIN_CONS=3; T3-তে Consumer_paid_n কলাম; S08/S10-এর PS/মার্জিন/spread ব্ল্যাংক + Reporting_status-কারণ; পুল = ৮ প্রজাতি (S01–S07, S09); T10-ও একই নিয়মে; review_audit-এর পুনঃগণনা একই নিয়মে হালনাগাদ।
+- নতুন সংখ্যা: PS 70.9%; মার্জিন A 27.84 (3.3%) / B 99.58 (11.7%) / R 118.97 (14.0%); spread 246.39 (29.1%); A+B+R=spread; PS+margin=100%।
+- review_audit: PASS=62 / WARN=3 (নথিভুক্ত: pair-অ্যালাইনমেন্ট, crustacean-দাম-ব্যান্ড, S08/S10-কভারেজ) / FAIL=0।
+- ডক/ড্রাফট হালনাগাদ: README, WRITING_GUIDE (#2/#6 + ৪.৩ সারি), MASTER_PROMPT (৩ জায়গা), chapter_04 (৪.৩/৪.৪/৪.১০), SUPERVISOR_REVIEW (সেকশন ৩ + পরিশিষ্ট C), worklog।
