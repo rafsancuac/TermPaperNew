@@ -1,0 +1,17 @@
+﻿Pair_ID,Market,Species_code,Seller_ID,Seller_actor,Seller_sell_BDT_kg,Buyer_ID,Buyer_actor,Buyer_buy_BDT_kg,Diff_BDT_kg,Complete
+PAIR-M1-01,M1,S01,M1-A-03,Aratdar,1024.92,M1-R-01,Khuchra,1030.0,-5.08,True
+PAIR-M1-02,M1,S02,M1-A-04,Aratdar,1145.5,M1-R-04,Khuchra,1145.0,0.5,True
+PAIR-M1-03,M1,S01,M1-A-05,Aratdar,1004.82,M1-R-02,Khuchra,1005.0,-0.18,True
+PAIR-M2-01,M2,S05,M2-A-05,Aratdar,435.42,M2-R-02,Khuchra,435.0,0.42,True
+PAIR-M2-02,M2,S02,M2-A-02,Aratdar,1292.87,M2-R-05,Khuchra,1290.0,2.87,True
+PAIR-M3-01,M3,S01,M3-A-03,Aratdar,1091.91,M3-R-01,Khuchra,1095.0,-3.09,True
+PAIR-M3-02,M3,S06,,,,,,,,False
+PAIR-M3-03,M3,S05,M3-A-01,Aratdar,468.92,M3-R-02,Khuchra,465.0,3.92,True
+PAIR-M4-01,M4,S02,M4-A-04,Aratdar,1205.79,M4-R-03,Khuchra,1205.0,0.79,True
+PAIR-M4-02,M4,S07,M4-A-03,Aratdar,401.93,M4-R-05,Khuchra,401.93,0.0,True
+PAIR-M5-01,M5,S05,M5-A-04,Aratdar,468.92,M5-R-03,Khuchra,465.0,3.92,True
+PAIR-M5-02,M5,S01,M5-A-02,Aratdar,1138.8,M5-R-01,Khuchra,1135.0,3.8,True
+PAIR-M5-03,M5,S07,,,,,,,,False
+PAIR-M6-01,M6,S02,M6-A-04,Aratdar,1185.69,M6-R-05,Khuchra,1185.0,0.69,True
+PAIR-M6-02,M6,S05,M6-A-01,Aratdar,415.33,M6-R-04,Khuchra,415.0,0.33,True
+PAIR-M6-03,M6,S05,M6-A-02,Aratdar,422.03,M6-R-03,Khuchra,420.0,2.03,True

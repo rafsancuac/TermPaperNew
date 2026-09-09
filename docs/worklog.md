@@ -71,3 +71,23 @@ Stage Summary:
 - রিপো লাইভ: https://github.com/rafsancuac/TermPaperNew (main, HEAD abcb013)
 - ৫৩+ ফাইল অনলাইনে: ৮ PDF, ৮ txt, টেমপ্লেট+ফিলড এক্সেল, ১২ টেবিল + ৭ চার্ট, Analysis_Summary.xlsx, ১০ স্ক্রিপ্ট, ৫ ডকুমেন্ট (MASTER_PROMPT.md-সহ)
 - ব্যবহারকারীকে পরামর্শ: চ্যাটে শেয়ার করা PAT পরে revoke/regenerate করা উচিত
+
+---
+Task ID: 5
+Agent: Arena.ai research assistant (supervisor/reviewer role)
+Task: রিপোর ডাটা/স্ক্রিপ্ট/ডক সুপারভাইজর-রিভিউ + Wilcoxon/species×market এক্সটেনশন + লেখা-প্রস্তুতি
+
+Work Log:
+- বেসলাইন রিরান: verify_filled.py (সব QC মান পাস) ও run_analysis.py (T1–T11+T2b, C1–C7, Analysis_Summary.xlsx)।
+- **verify_filled.py-এ কলাম-অদলবদল বাগ শনাক্ত ও ঠিক**: QC_Check-এর Status কলাম E, Rule D — আগের স্ক্রিপ্ট উল্টো পড়ত (D-কে status ধরে), তাই সব পাস হলেও "non-passing checks: 24" ছাপত। ঠিক করা হয়েছে (PASS/FAIL প্রিন্ট, checks read, fail হলে exit code 1)।
+- **মূল মার্জিন টেবিলের গাণিতিক অসামঞ্জস্য শনাক্ত ও run_analysis.py-তে ঠিক** (T3/T10): পুরোনো কনভেনশনে A+B+R+PS = ১০২.৫% (>১০০)। কারণ: (১) producer-দামে M2–M5 আরাতদার-কেনা (প্রথম-বিক্রয় নয়) মেশানো ছিল; (২) খুচরা মার্জিন retailer-উদ্ধৃতি থেকে, আর PS/স্প্রেড ভোক্তা-প্রদেয় দাম থেকে — ২.৫% ফাঁক। সমাধান: producer ও নিলাম-বেচা শুধু ল্যান্ডিং-বাজার M1/M6; খুচরা মার্জিন = ভোক্তা-প্রদেয় − বেপারি-বেচা; ALL/T10 চেইন-সম্পূর্ণ প্রজাতিতে (S01–S09; S10 বাদ — ল্যান্ডিং-এ আরাতদার-বেচা নেই)। নতুন ফল: **PS ৭০.৯%, মার্জিন A ২৫.৮ (৩.৩%) / B ৯২.৭ (১১.৭%) / R ১১১.৪ (১৪.১%), স্প্রেড ২২৯.৯ (২৯.১%) → ১০০%-এ হুবহু মেলে**।
+- **extend_analysis.py** (নতুন): T12 জোড়া-বিস্তার + T12b Wilcoxon (১৪ পূর্ণ জোড়া; W=২৩, p=০.১১৬ → সামঞ্জস্যপূর্ণ); T13 species×market spread; T14 KW (exploratory n≥৩: S01–S03/S05/S06 p<০.০৫) + T14b Dunn–Holm (S01-এ শুধু Fishery Ghat–Bahaddarhat তুলনাটিই টিকে থাকে); T15 পেমেন্ট×অভিনেতা χ² (p=০.৮৭, G-test ০.৮৮); T16 স্তরভেদে মার্জিন MWU (সব p<০.০০০১); T17 খুচরা MC–মুনাফা Spearman (rho=০.৪৩, p=০.০১৮); C8 চার্ট; সব Analysis_Summary.xlsx-এ (Index-সহ ২০ শিট)।
+- পেয়ার-অ্যালাইনমেন্ট বাগ ঠিক: চ্যানেল-অর্ডার মানা হয় না এমন জোড়া বাতিল (PAIR-M3-02 ও M5-03 অসম্পূর্ণ)।
+- ডক হালনাগাদ: README, docs/WRITING_GUIDE.md, docs/MASTER_PROMPT.md, scripts/README.md (নতুন সংখ্যা, run-order, T12–T17/C8 ম্যাপ; ক্যাপাসিটি ১,১০০→৭৯৭ ও ১২০→১০০ কেজি)।
+- লিটারেচার/রিয়ালিজম বেঞ্চমার্ক (ওয়েব সার্চ): সমুদ্রমৎস্য মার্জিন ২৬–৩০%, জেলের অংশ ৫৫–৭৬%; আড়তদার কমিশন ৩–৬%; বাংলাদেশ MFS অ্যাকাউন্ট >২১০ মিলিয়ন (FY25), খুচরায় নগদ ~৩৫% — সিমুলেটেড সংখ্যার সাথে সঙ্গতিপূর্ণ।
+- ড্রাফট: paper_drafts/chapter_02_literature_review.md ও chapter_04_results_and_discussion.md (টেবিল-সংখ্যা দিয়ে, [SIMULATED] ফুটনোটসহ)।
+- সম্পূর্ণ রিভিউ নোট: docs/SUPERVISOR_REVIEW.md (বাংলা, সুপারভাইজর-ভিউ)।
+
+Stage Summary:
+- সব এক্সটেনশন আউটপুট analysis_outputs/-এ; 04_data_filled/ অপরিবর্তিত (সিমুলেটেড); রিপো কমিট ও পুশ হয়েছে।
+- পরবর্তী: আসল ডাটা এলে হলুদ ঘরে → verify_filled (২৪/২৪) → run_analysis → extend_analysis → সংখ্যা হালনাগাদ।

@@ -1,12 +1,12 @@
 ﻿Species_code,Local_name,English_name,n_price_obs,Producer_BDT_kg,Aratdar_sell_BDT_kg,Bepari_sell_BDT_kg,Retailer_sell_BDT_kg,Consumer_paid_BDT_kg,Aratdar_margin_BDT_kg,Bepari_margin_BDT_kg,Retailer_margin_BDT_kg,Total_spread_BDT_kg,Producer_share_pct
-S01,Ilish,Hilsa shad,71,1062.24,1113.6,1236.41,1486.96,1420.0,51.36,122.81,250.55,357.76,74.8
-S02,Rupchanda,Silver pomfret,64,1183.09,1238.49,1378.04,1619.16,1615.0,55.4,139.55,241.12,431.91,73.3
-S03,Lakkha,Indian salmon (four-finger threadfin),52,767.02,800.69,886.61,1069.64,1033.33,33.67,85.92,183.03,266.31,74.2
-S04,Koral/Kurl,Asian sea bass,46,678.25,707.64,762.77,933.44,885.0,29.39,55.13,170.67,206.75,76.6
-S05,Surma,Indian mackerel,74,427.85,447.15,501.77,581.23,585.0,19.3,54.62,79.46,157.15,73.1
-S06,Churi,Largehead ribbonfish,63,324.76,336.93,380.42,457.13,446.54,12.17,43.49,76.71,121.78,72.7
-S07,Poa,Pama croaker,29,376.47,393.74,450.16,545.45,530.0,17.27,56.42,95.29,153.53,71.0
-S08,Kankoita,Thorny/Indian anchovy,9,236.69,247.41,279.01,325.0,330.0,10.72,31.6,45.99,93.31,71.7
-S09,Loitta,Bombay duck,15,194.27,203.64,234.46,263.01,267.5,9.37,30.82,28.55,73.23,72.6
-S10,Harina,Chacunda gizzard shad,6,164.79,174.17,179.53,230.0,215.0,9.38,5.36,50.47,50.21,76.6
-ALL,Mean of species means,-,429,541.54,566.35,628.92,751.1,732.74,24.81,62.57,122.18,191.2,73.9
+S01,Ilish,Hilsa shad,71,1031.62,1083.3,1236.41,1486.96,1420.0,51.68,153.11,183.59,388.38,72.6
+S02,Rupchanda,Silver pomfret,64,1110.67,1165.59,1378.04,1619.16,1615.0,54.92,212.45,236.96,504.33,68.8
+S03,Lakkha,Indian salmon (four-finger threadfin),52,735.53,771.7,886.61,1069.64,1033.33,36.17,114.91,146.72,297.8,71.2
+S04,Koral/Kurl,Asian sea bass,46,660.95,687.75,762.77,933.44,885.0,26.8,75.02,122.23,224.05,74.7
+S05,Surma,Indian mackerel,74,407.79,428.72,501.77,581.23,585.0,20.93,73.05,83.23,177.21,69.7
+S06,Churi,Largehead ribbonfish,63,314.1,323.55,380.42,457.13,446.54,9.45,56.87,66.12,132.44,70.3
+S07,Poa,Pama croaker,29,361.74,377.81,450.16,545.45,530.0,16.07,72.35,79.84,168.26,68.3
+S08,Kankoita,Thorny/Indian anchovy,9,231.78,241.16,279.01,325.0,330.0,9.38,37.85,50.99,98.22,70.2
+S09,Loitta,Bombay duck,15,188.91,195.61,234.46,263.01,267.5,6.7,38.85,33.04,78.59,70.6
+S10,Harina,Chacunda gizzard shad,6,163.45,,179.53,230.0,215.0,,,,,76.0
+ALL,"Mean of species means (chain-complete: S01, S02, S03, S04, S05, S06, S07, S08, S09)",-,423,560.34,586.13,678.85,809.0,790.26,25.79,92.72,111.41,229.92,70.9
