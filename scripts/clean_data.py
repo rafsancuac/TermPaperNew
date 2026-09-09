@@ -61,7 +61,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from run_analysis import (load_data, find_default_data, MAUND,
-                          LANDING_MARKETS, num)
+                          LANDING_MARKETS, MIN_CONS, num)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -328,7 +328,8 @@ def s4_outliers(d):
 # S5 - sensitivity: headline chain with vs without flagged outliers
 # ---------------------------------------------------------------------------
 def _chain_table(po, cpf_yes, species, drop_obs=None):
-    """Per-species chain means; mirrors run_analysis.t3_chain conventions."""
+    """Per-species chain means; mirrors run_analysis.t3_chain conventions
+    (chain-complete = all four level means AND >= MIN_CONS consumer quotes)."""
     drop_obs = drop_obs or set()
     out = {}
     for code in sorted(species):
@@ -347,7 +348,7 @@ def _chain_table(po, cpf_yes, species, drop_obs=None):
         arat = mean_of("Aratdar", "sell_kg")
         bep = mean_of("Bepari_Faria", "sell_kg")
         cons_m = round(float(np.mean(cons)), 2) if cons else None
-        if None not in (prod, arat, bep, cons_m):
+        if None not in (prod, arat, bep, cons_m) and len(cons) >= MIN_CONS:
             out[code] = {"producer": prod, "aratdar": arat, "bepari": bep,
                          "consumer": cons_m}
     return out
@@ -385,12 +386,12 @@ def s5_sensitivity(d, flags):
     bret = round(pooled(base, "consumer") - pooled(base, "bepari"), 2)
     rows.append({"Metric (chain-complete species, mean of species means)":
                  "Aratdar margin (BDT/kg)", "Baseline_all_valid":
-                 round(pooled(base, 'aratdar') - pooled(base, 'producer'), 2),
+                 round(pooled(base, "aratdar") - pooled(base, "producer"), 2),
                  "Outliers_excluded":
-                 round(pooled(sens, 'aratdar') - pooled(sens, 'producer'), 2),
+                 round(pooled(sens, "aratdar") - pooled(sens, "producer"), 2),
                  "Difference_BDT_kg": None})
     log("S5 sensitivity", "Headline chain recomputed without flagged outliers",
-        "Chain-complete species",
+        f"Chain-complete species (MIN_CONS={MIN_CONS})",
         f"producer share baseline={bps}% vs outlier-excluded={sps}%",
         "differences below ~2 percentage points are reported as robust")
     return pd.DataFrame(rows)

@@ -2,5 +2,5 @@
 Aratdar,30,12,13,5,40.0
 Bepari/Faria,30,13,14,3,43.3
 Retailer,30,11,16,3,36.7
-chi-square (actor x MFS frequency),90,,,,"chi2=1.22, df=4, p=0.8749, G-test p=0.8809"
+chi-square (actor x MFS frequency),90,,,,"chi2=1.22, df=4, p=0.8749, G-test p=0.8809, Fisher-exact p=0.8945"
 Cramer's V / smallest expected count,,,,,V=0.082 / min exp=3.67

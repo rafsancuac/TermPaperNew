@@ -91,9 +91,28 @@ Work Log:
 Stage Summary:
 - সব এক্সটেনশন আউটপুট analysis_outputs/-এ; 04_data_filled/ অপরিবর্তিত (সিমুলেটেড); রিপো কমিট ও পুশ হয়েছে।
 - পরবর্তী: আসল ডাটা এলে হলুদ ঘরে → verify_filled (২৪/২৪) → run_analysis → extend_analysis → সংখ্যা হালনাগাদ।
+---
+Task ID: 6a
+Agent: Arena.ai research assistant
+Task: দ্বিতীয় রিভিউয়ারের ৭টি দাবি যাচাই ও সে অনুযায়ী ফিক্স (২০২৬-০৯-০৯)
+
+Work Log:
+- দাবি-যাচাই: #1 (৩.৮ পরীক্ষা run_analysis-এ নেই → সত্যি ছিল; extend_analysis.py-ই সব পরীক্ষা চালায় — এ পর্বে Shapiro–Wilk T18 যোগ, run_analysis-এর শেষে NOTE-পয়েন্টার); #2 (spread ≠ মার্জিন-সমষ্টি → পূর্বের কমিটে সত্যি, H2/H3-এ ঠিক হয়েছে; এখন হুবহু মেলে); #3 (WRITING_GUIDE-এ ১,১০০/১২০ কেজি → সত্যি ছিল, H9-এ ঠিক; MASTER_PROMPT PART 5-এর ৭৩.৯% লাইন আজ ঠিক); #4 (হিলশা PS বনাম pooled গুলানোর ঝুঁকি — সংখ্যা-হালনাগাদে নিষ্পন্ন); #5 (S08/S09/S10 descriptive-নিয়ম — T3-তে Retail_markets_n + Reporting_status কলাম, ক্যাভিয়েট ডক/ড্রাফটে); #6 (R-বাক্য বনাম Python — টেক্সট-সংশোধনের নির্দেশনা WRITING_GUIDE #8); #7 (T9 টাইটেল → "Other aquatic products")।
+- T15: sparse-সেলে G-test-এর সাথে exact Freeman–Halton/Fisher 3×3 যোগ (স্যানিটি-টেস্ট: dense টেবিলে χ²-অনুমানের কাছাকাছি; আমাদের টেবিলে p=0.8945)।
+- T18 Shapiro–Wilk: পাঁচটি pooled সিরিজই non-normal (p<0.001) → §3.8-এর nonparametric যুক্তি মজবুত।
+- সাহিত্য-যাচাই (ওয়েব): Jahan et al. 2024 (JARD 74(4), DOI 10.17306/J.JARD.2024.00001) ✓; ২০২৫ ইলিশ-দাম (Dhaka retail ৯০০–২,২০০ Tk/kg, +২৯% YoY; Cox's Bazar ১–১.৪ কেজি ~১,৮০০ wholesale) ✓ → চ্যাপ্টার 2/4-এ যোগ; landing-city বনাম দূরবর্তী-চেইন PS-পার্থক্যের ব্যাখ্যা যোগ।
+- ড্রাফট/ডক আপডেট: chapter_02 (Jahan 2024 + দাম-ট্রেন্ড), chapter_04 (S08–S10 ক্যাভিয়েট, Shapiro/Fisher ফলাফল, রিয়েল-ডাটা মূল্যস্ফীতি-চেক নোট), WRITING_GUIDE (সাবধানতা ৬–৮, T18-ম্যাপ), MASTER_PROMPT (PART 4/5), SUPERVISOR_REVIEW.md পরিশিষ্ট B, worklog।
+- পাইপলাইন রিরান: verify ২৪/২৪ → run_analysis → extend_analysis (T18-সহ ৯ শিট) → Analysis_Summary ২১ শিট।
+
+Stage Summary:
+- ৭ দাবির মধ্যে ৩টি (১,৩,৫) বর্তমান-অবস্থায় সত্যি ছিল → ফিক্স; ২টি (২,৪) আগের পর্বে ফিক্সড; ২টি (৬,৭) নির্দেশনামূলক → সম্পন্ন; সাহিত্য-দাবি (Jahan 2024, দাম-ট্রেন্ড) যাচাই করে ড্রাফটে ঢোকানো হয়েছে। কমিট + পুশ হবে।
 
 ---
-Task ID: 6
+*(উপরের 6a ও নিচের 6b একই সময়ে চলা দুটি সমান্তরাল রিভিউ-সেশন — Arena.ai ও Super Z; উভয়ের আউটপুটই মার্জ করা হয়েছে।)*
+
+
+---
+Task ID: 6b
 Agent: Super Z (main agent, সমান্তরাল রিভিউ-সেশন)
 Task: সুপারভাইজার-রিভিউ + বাস্তবতা-যাচাই + রিসেন্ট-পেপার অনুসন্ধান; Task 5-এর Arena.ai কাজের সঙ্গে মার্জ
 
@@ -110,19 +129,43 @@ Stage Summary:
 
 ---
 Task ID: 7
+Agent: Arena.ai research assistant
+Task: তৃতীয় রিভিউয়ারের (রাউন্ড ৩) ৩টি নতুন দাবি যাচাই ও ফিক্স (২০২৬-০৯-০৯)
+
+Work Log:
+- #8 (verify_filled.py কলাম-সোয়াপ): বর্তমান ফাইলে column=4=Rule/column=5=Status, আউটপুট "checks read: 24; non-passing: 0", exit 0 — রাউন্ড ১-এর কমিট 7296015-এ ফিক্সড; দাবিটি পুরোনো ভার্সনের বিরুদ্ধে। → প্রমাণ-সহ নথিভুক্ত।
+- #9 (T6 nondeterminism): কমিট 149864a-তে tie-break-সহ সর্ট; ৩টি টানা রানে T6-এর MD5 অভিন্ন — ফিক্সড প্রমাণিত।
+- #10 (S08/S10-এর PS = n=1 ভোক্তার ওপর): raw Consumer_Purchases_Focal থেকে যাচাই — সত্যি (S08:1, S10:1; S02/S03:3)। ফিক্স: MIN_CONS=3; T3-তে Consumer_paid_n কলাম; S08/S10-এর PS/মার্জিন/spread ব্ল্যাংক + Reporting_status-কারণ; পুল = ৮ প্রজাতি (S01–S07, S09); T10-ও একই নিয়মে; review_audit-এর পুনঃগণনা একই নিয়মে হালনাগাদ।
+- নতুন সংখ্যা: PS 70.9%; মার্জিন A 27.84 (3.3%) / B 99.58 (11.7%) / R 118.97 (14.0%); spread 246.39 (29.1%); A+B+R=spread; PS+margin=100%।
+- review_audit: PASS=62 / WARN=3 (নথিভুক্ত: pair-অ্যালাইনমেন্ট, crustacean-দাম-ব্যান্ড, S08/S10-কভারেজ) / FAIL=0।
+- ডক/ড্রাফট হালনাগাদ: README, WRITING_GUIDE (#2/#6 + ৪.৩ সারি), MASTER_PROMPT (৩ জায়গা), chapter_04 (৪.৩/৪.৪/৪.১০), SUPERVISOR_REVIEW (সেকশন ৩ + পরিশিষ্ট C), worklog।
+---
+Task ID: 8
+Agent: Arena.ai research assistant
+Task: রেজাল্ট-সেকশনের জন্য সম্পূর্ণ R অ্যানালাইসিস স্যুট (scripts/R) — Python পাইপলাইনের প্রতিটি সংখ্যার সেল-ফর-সেল মিরর
+
+Work Log:
+- scripts/R/ লিখা: config.R (এক জায়গায় INPUT_FILE/OUTPUT_DIR; Windows-ডিফল্ট F:/TermPaperNew/Analysis), helpers.R (readxl-ভিত্তিক শিট-রিডার, numpy-bitwise np_sum/np_mean/np_sd, python-সমতুল্য round-half-even rp(), mc_names, Dunn-Holm), tables_descriptive.R (T1–T11+T2b), tables_inferential.R (T12–T18; হাতে-লেখা Freeman–Halton exact Fisher), figures.R (C1–C8, 300dpi, Times New Roman), excel_out.R (styled R_Analysis_Summary.xlsx + quality gates), run_all.R (মাস্টার)।
+- Python-সংখ্যার সাথে সেল-ফর-সেল মিল আনতে ৩টি গভীর গরমিল ধরা ও মিরর করা হয়েছে: (ক) readxl বনাম openpyxl-এর ফাঁকা-সারি/কলাম নীতি (drop_id + Obs_Date-require); (খ) numpy np.mean/np.std-এর নির্দিষ্ট summation-order (n<8 sequential; ≤128 আট-অ্যাকিউমুলেটর; নাহলে 8-গুণিতক-ভাগ) — R-তে np_sum() পোর্ট, ৫০০ এলোমেলো ভেক্টরে bitwise 0/1000 mismatch; (গ) R round() বনাম python round(): exact-decimal half-even — rp() (sprintf-নির্ভর exact expansion), ৭০,০৩৫ কেসে 0 mismatch।
+- সেল-ফর-সেল তুলনা স্ক্রিপ্ট scripts/compare_r_py.py → ২১/২১ টেবিল PASS (প্রতিটি সেল numeric-সমান, কলাম-অর্ডার/নাম হুবহু)। T2b-এর 'None'-ক্যাটাগরি সারি ও most_common টাই-অর্ডার, T5/T8/T9-এর tie-অর্ডার, T11-এর স্পেস-নাম, T12b-এর W-সংজ্ঞা, T14b-এর Holm-অর্ডার/আনরাউন্ডেড p, T15-এর লেবেল+exact-Fisher p=0.8945, T17-এর scipy t-approximation p=0.0177 — সব মিরর।
+- Quality gates: A+B+R=246.39=spread [PASS], PS 70.9% [PASS], T3-ALL=T10 70.9% [PASS]; টেবিল ২টি টানা রানে MD5-অভিন্ন (deterministic); run_log.txt + R_Analysis_Summary.xlsx (২২ শিট) আউটপুটে।
+- analysis_outputs_r/ = নন-উইন্ডোজ ডেভ-মিরর আউটপুট (রিপোতে কমিট); ব্যবহারকারীর Windows-এ আউটপুট যাবে F:/TermPaperNew/Analysis-এ।
+
+---
+Task ID: 9
 Agent: Super Z (main agent)
-Task: বর্তমান অবস্থা যাচাই + ডাটা-ক্লিনিং পাইপলাইন + প্রকাশনা-মানের চার্ট স্যুট v2 + R যাচাই-স্ক্রিপ্ট
+Task: বর্তমান অবস্থা যাচাই + ডাটা-ক্লিনিং পাইপলাইন + প্রকাশনা-মানের চার্ট স্যুট v2 + R যাচাই-স্ক্রিপ্ট (Task 7-8 মার্জের পর MIN_CONS কনভেনশনে হালনাগাদ)
 
 Work Log:
 - অবস্থা যাচাই: আনকমিটেড পরিবর্তনগুলো ছিল শুধু ফাইল-মোড (644→755) — core.fileMode=false দিয়ে নিরপেক্ষ; QC রিরান: verify_filled 24/24 PASS, run_analysis/extend_analysis পুনঃউৎপাদনযোগ্য (T6-এ শুধু tie-অর্ডার বদল), review_audit 62 PASS/3 WARN/0 FAIL
-- scripts/clean_data.py (নতুন): S1 কাঠামো (ID/কোটা/তারিখ/ডুপ্লিকেট) → S2 মিসিং-অডিট (K=48 buy, K=45+D=19 sell; প্রতি-ভ্যারিয়েবল রিপোর্ট) → S3 রেঞ্জ-লজিক (সব PASS) → S4 Tukey 1.5×IQR (৪০ গ্রুপ, ৮১৪ সেলের মধ্যে ১৭ ফ্ল্যাগ=২.১%, ফ্ল্যাগ-অনলি) → S5 সংবেদনশীলতা (PS ৭০.৯% → ৭০.৯%, রোবাস্ট) → 05_data_cleaned/ (৬ ফাইল: লগ, মিসিং-রিপোর্ট, আউটলায়ার-ফ্ল্যাগ, সংবেদনশীলতা, price_obs_cleaned.csv, CLEANING_REPORT.md)
-- scripts/make_charts_v2.py (নতুন): ১০টি প্রকাশনা-ফিগার → analysis_outputs/charts_v2/ — স্টাইল: Times New Roman (Liberation Serif metric-ইকুইভ্যালেন্ট), ১০০০ dpi, টাইটেল উপরে-কেন্দ্রে, লিজেন্ড (loc="outside lower center") প্লটের নিচে, পূর্ণ প্যারামিটার-নামের অক্ষ-লেবেল, মেজর+মাইনর গ্রিড, ভ্যালু-লেবেল; চার্ট-ধরন বৈচিত্র্য: F1 বার (মার্জিন), F2 বক্স (প্রজাতিভেদে দাম), F3 লাইন (চেইন-প্রগ্রেশন), F4 ডোনাট (ভোক্তা-দাম বিভাজন), F5 স্ট্যাকড বার (পেমেন্ট), F6 রাডার (অবকাঠামো ৩ বাজার×৭ সুবিধা), F7 রোজ (সমস্যা-ফ্রিকোয়েন্সি), F8 বার (বাজারভেদে দাম), A1 বক্স-লগ (ধারণক্ষমতা), A2 হরাইজন্টাল বার (PS প্রজাতিভেদে) + FIGURE_INDEX.csv
+- scripts/clean_data.py (নতুন): S1 কাঠামো (ID/কোটা/তারিখ/ডুপ্লিকেট) → S2 মিসিং-অডিট (K=48 buy, K=45+D=19 sell; প্রতি-ভ্যারিয়েবল রিপোর্ট) → S3 রেঞ্জ-লজিক (সব PASS) → S4 Tukey 1.5×IQR (৪০ গ্রুপ, ৮১৪ সেলের মধ্যে ১৭ ফ্ল্যাগ=২.১%, ফ্ল্যাগ-অনলি) → S5 সংবেদনশীলতা (MIN_CONS কনভেনশনে) → 05_data_cleaned/ (৬ ফাইল: লগ, মিসিং-রিপোর্ট, আউটলায়ার-ফ্ল্যাগ, সংবেদনশীলতা, price_obs_cleaned.csv, CLEANING_REPORT.md)
+- scripts/make_charts_v2.py (নতুন): ১০টি প্রকাশনা-ফিগার → analysis_outputs/charts_v2/ — স্টাইল: Times New Roman (Liberation Serif metric-ইকুইভ্যালেন্ট), ১০০০ dpi, টাইটেল উপরে-কেন্দ্রে, লিজেন্ড (loc="outside lower center") প্লটের নিচে, পূর্ণ প্যারামিটার-নামের অক্ষ-লেবেল, মেজর+মাইনর গ্রিড, ভ্যালু-লেবেল; চার্ট-ধরন বৈচিত্র্য: F1 বার (মার্জিন), F2 বক্স (প্রজাতিভেদে দাম), F3 লাইন (চেইন-প্রগ্রেশন), F4 ডোনাট (ভোক্তা-দাম বিভাজন), F5 স্ট্যাকড বার (পেমেন্ট), F6 রাডার (অবকাঠামো ৩ বাজার×৭ সুবিধা), F7 রোজ (সমস্যা-ফ্রিকোয়েন্সি), F8 বার (বাজারভেদে দাম), A1 বক্স-লগ (ধারণক্ষমতা), A2 হরাইজন্টাল বার (PS প্রজাতিভেদে) + FIGURE_INDEX.csv; চেইন-পুল MIN_CONS নিয়মে (৮ প্রজাতি: S01–S07, S09)
 - VLM-ভিত্তিক চার্ট-QC: ৩ রাউন্ড — ফিক্স করা হয়েছে F2/A1 (মিডিয়ান-লেবেল বক্স-কিনারায় ছুঁয়েছিল → বক্সের ভিতরে সাদা-ব্যাকগ্রাউন্ড লেবেল), F3 (পয়েন্ট-লেবেল ক্লিয়ারেন্স+va) — চূড়ান্ত: ১০/১০ পাস
-- scripts/R/run_analysis.R (নতুন, ~৭২০ লাইন): openxlsx দিয়ে ওয়ার্কবুক পড়া (startRow=4), K/D-ক্লিনিং মিরর, T1/T2/T3/T5/T10/T11/T12b/T14/T15/T16/T17 পুনর্গণনা, r_outputs/tables/*.csv, ~৫৮টি নম্বরযুক্ত [OK/!!] MATCH/MISMATCH কনসোল-রিপোর্ট (Python-রেফারেন্স এমবেডেড), ggplot2-তে ৫টি মূল ফিগার (Windows-এ আসল Times New Roman, ১০০০ dpi); paren-balance+সিনট্যাক্স-রিভিউ করা (এনভায়রনমেন্টে R নেই বলে রান-টেস্ট হয়নি — ইউজার তাদের PC-তে চালিয়ে কনসোল-আউটপুট ফেরত দেবে)
-- ডক হালনাগাদ: README (রিপো-ম্যাপ 05_data_cleaned+charts_v2+R, পাইপলাইন, ইংরেজি-আউটপুট নোট), docs/WRITING_GUIDE.md (ফিগার-স্যুট v2 টেবিল, ক্লিনিং-সেকশন, R-সেকশন, পূর্ণ-প্যারামিটার-নাম নিয়ম, সম্পূর্ণ পাইপলাইন), docs/MASTER_PROMPT.md (রিপো-ম্যাপ + REPRODUCING + PUBLICATION FIGURE SET), scripts/README.md (স্ক্রিপ্ট-টেবিল+ফ্লো), .gitignore (r_outputs/)
-- রিপো-মাস্টার-ওয়ার্কলগ /home/z/my-project/worklog.md-ও Task 7 যোগ করা হয়েছে
+- scripts/R/run_analysis.R (নতুন, Task 8-এর run_all.R-এর পূরক — হালকা যাচাই-পথ): openxlsx দিয়ে ওয়ার্কবুক পড়া (startRow=4), K/D-ক্লিনিং মিরর, T1/T2/T3/T5/T10/T11/T12b/T14/T15/T16/T17 পুনর্গণনা (MIN_CONS-সহ), r_outputs/tables/*.csv, ~৫৮টি নম্বরযুক্ত [OK/!!] MATCH/MISMATCH কনসোল-রিপোর্ট (Python-রেফারেন্স এমবেডেড — Task 7-8-এর নতুন সংখ্যায় হালনাগাদ), ggplot2-তে ৫টি v2-ফিগার (Windows-এ আসল Times New Roman, ১০০০ dpi)
+- Task 7-8 (Arena.ai রিমোট) মার্জ: T6/xlsx/C2/C5 → রিমোট ভার্সন; WRITING_GUIDE → নতুন সংখ্যা + v2-সেকশন একত্র; worklog → টাস্ক-নম্বর রি-অর্গানাইজ
+- ডক হালনাগাদ: README, WRITING_GUIDE, MASTER_PROMPT, scripts/README, .gitignore (r_outputs/)
 
 Stage Summary:
-- নতুন ডেলিভারেবল: 05_data_cleaned/ (৬ ফাইল), analysis_outputs/charts_v2/ (১০ ফিগার ১০০০ dpi + ইনডেক্স), scripts/clean_data.py, scripts/make_charts_v2.py, scripts/R/run_analysis.R
+- নতুন ডেলিভারেবল: 05_data_cleaned/ (৬ ফাইল), analysis_outputs/charts_v2/ (১০ ফিগার ১০০০ dpi + ইনডেক্স), scripts/clean_data.py, scripts/make_charts_v2.py, scripts/R/run_analysis.R (Task 8-এর স্যুটের পাশে আলাদা লঘু-যাচাই পথ)
 - পেপারের ফিগার = charts_v2 (F1–F8 মূল, A1–A2 অ্যাপেন্ডিক্স); ক্লিনিং-মেথড Chapter 3-এ CLEANING_REPORT.md থেকে
 - পরবর্তী: ইউজারের R-কনসোল আউটপুট এলে MISMATCH থাকলে ডায়াগনোসিস; আসল ডাটায় পুরো পাইপলাইন রিরান

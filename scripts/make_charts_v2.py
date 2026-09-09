@@ -60,7 +60,7 @@ from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from run_analysis import (load_data, find_default_data, num, MAUND,
-                          LANDING_MARKETS,
+                          LANDING_MARKETS, MIN_CONS,
                           C_PRODUCER, C_ARATDAR, C_BEPARI, C_RETAIL,
                           C_CONSUMER)
 
@@ -129,7 +129,9 @@ def save(fig, fname, w=9.0, h=6.4):
 # Data blocks shared by several figures
 # ---------------------------------------------------------------------------
 def chain_species_stats(d):
-    """Per-species chain means (run_analysis Table-3 conventions)."""
+    """Per-species chain means (run_analysis Table-3 conventions:
+    producer/aratdar at landing markets; chain-complete additionally
+    requires >= MIN_CONS consumer-paid quotes)."""
     po = d["PO"]
     cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
 
@@ -142,15 +144,16 @@ def chain_species_stats(d):
 
     rows = {}
     for code in sorted(d["SP"]):
+        cons_v = [r["price_kg"] for r in cpf_yes
+                  if r.get("Species_code") == code and r["price_kg"] is not None]
         prod = mean_of(code, "Aratdar", "buy_kg", LANDING_MARKETS)
         arat = mean_of(code, "Aratdar", "sell_kg", LANDING_MARKETS)
         bep = mean_of(code, "Bepari_Faria", "sell_kg")
-        cons_v = [r["price_kg"] for r in cpf_yes
-                  if r.get("Species_code") == code and r["price_kg"] is not None]
         cons = round(float(np.mean(cons_v)), 2) if cons_v else None
         rows[code] = {"producer": prod, "aratdar": arat, "bepari": bep,
-                      "consumer": cons,
-                      "complete": None not in (prod, arat, bep, cons)}
+                      "consumer": cons, "consumer_n": len(cons_v),
+                      "complete": (None not in (prod, arat, bep, cons)
+                                   and len(cons_v) >= MIN_CONS)}
     return rows
 
 
@@ -580,7 +583,9 @@ def figa2_producer_share(d):
     chain = chain_species_stats(d)
     rows = []
     for code, v in chain.items():
-        if v["producer"] is not None and v["consumer"]:
+        # share reported only where MIN_CONS consumer quotes exist
+        if v["producer"] is not None and v["consumer"] \
+                and v["consumer_n"] >= MIN_CONS:
             rows.append((f"{d['SP'][code]['Local_name']} ({code})",
                          100.0 * v["producer"] / v["consumer"]))
     rows.sort(key=lambda t: t[1])

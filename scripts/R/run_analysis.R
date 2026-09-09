@@ -51,6 +51,7 @@ if (MAKE_FIGURES && !requireNamespace("ggplot2", quietly = TRUE)) {
 
 MAUND  <- 37.32            # 1 maund = 37.32 kg (template Unit_Converter)
 LANDING <- c("M1", "M6")   # first-sale observable markets (Methodology V4)
+MIN_CONS <- 3               # chain-complete needs >=3 consumer-paid quotes
 
 ## Locate the repository root (works when run from repo root, scripts/,
 ## scripts/R/, or set ROOT manually, e.g. ROOT <- "C:/TermPaperNew")
@@ -207,15 +208,17 @@ stage_mean <- function(code, actor, field, landing_only = FALSE) {
   mean_of(v)
 }
 cons_mean <- function(code) mean_of(CPF_yes$price_kg[CPF_yes$Species_code == code])
+cons_n <- function(code) sum(!is.na(CPF_yes$price_kg[CPF_yes$Species_code == code]))
 chain <- function(code) {
   prod <- stage_mean(code, "Aratdar", "buy_kg",  TRUE)
   arat <- stage_mean(code, "Aratdar", "sell_kg", TRUE)
   bep  <- stage_mean(code, "Bepari_Faria", "sell_kg")
   ret  <- stage_mean(code, "Khuchra", "sell_kg")
   cons <- cons_mean(code)
-  comp <- !any(is.na(c(prod, arat, bep, cons)))
+  nc   <- cons_n(code)
+  comp <- !any(is.na(c(prod, arat, bep, cons))) && nc >= MIN_CONS
   list(code = code, producer = prod, aratdar = arat, bepari = bep,
-       retail = ret, consumer = cons, complete = comp)
+       retail = ret, consumer = cons, consumer_n = nc, complete = comp)
 }
 species_codes <- sort(SP$Code)
 chains <- lapply(species_codes, chain)
@@ -493,16 +496,16 @@ chk("T5 Bepari mean cash share (%)",          T5$Cash_pct_mean[2], 63.87)
 chk("T5 Retailer mean cash share (%)",        T5$Cash_pct_mean[3], 55.23)
 chk("T5 consumer bKash share (%)",
     T5c$pct[T5c$Method == "bKash"], 36.7)
-chk("Chain-complete species count",           length(complete_codes), 9)
-chk("T3 ALL producer price (BDT/kg)",         P$producer, 560.34)
-chk("T3 ALL aratdar sell (BDT/kg)",           P$aratdar, 586.13)
-chk("T3 ALL bepari sell (BDT/kg)",            P$bepari, 678.85)
-chk("T3 ALL retailer quote (BDT/kg)",         P$retail, 809.0)
-chk("T3 ALL consumer paid (BDT/kg)",          P$consumer, 790.26)
-chk("T10 aratdar margin (BDT/kg)",            P$aratdar - P$producer, 25.79)
-chk("T10 bepari margin (BDT/kg)",             P$bepari - P$aratdar, 92.72)
-chk("T10 retailer margin (BDT/kg)",           P$consumer - P$bepari, 111.41)
-chk("T10 total marketing spread (BDT/kg)",    P$consumer - P$producer, 229.92)
+chk("Chain-complete species count (MIN_CONS)", length(complete_codes), 8)
+chk("T3 ALL producer price (BDT/kg)",         P$producer, 601.41)
+chk("T3 ALL aratdar sell (BDT/kg)",           P$aratdar, 629.25)
+chk("T3 ALL bepari sell (BDT/kg)",            P$bepari, 728.83)
+chk("T3 ALL retailer quote (BDT/kg)",         P$retail, 869.5)
+chk("T3 ALL consumer paid (BDT/kg)",          P$consumer, 847.8)
+chk("T10 aratdar margin (BDT/kg)",            P$aratdar - P$producer, 27.84)
+chk("T10 bepari margin (BDT/kg)",             P$bepari - P$aratdar, 99.58)
+chk("T10 retailer margin (BDT/kg)",           P$consumer - P$bepari, 118.97)
+chk("T10 total marketing spread (BDT/kg)",    P$consumer - P$producer, 246.39)
 chk("T10 producer share (%)",                 100 * P$producer / P$consumer, 70.9)
 chk("T3 S01 Ilish consumer price (BDT/kg)",   chains$S01$consumer, 1420)
 chk("T3 S02 Rupchanda consumer price",        chains$S02$consumer, 1615)
@@ -511,9 +514,9 @@ chk("T3 S04 Koral consumer price",            chains$S04$consumer, 885)
 chk("T3 S05 Surma consumer price",            chains$S05$consumer, 585)
 chk("T3 S06 Churi consumer price",            chains$S06$consumer, 446.54)
 chk("T3 S07 Poa consumer price",              chains$S07$consumer, 530)
-chk("T3 S08 Kankoita consumer price",         chains$S08$consumer, 330)
+chk("T3 S08 Kankoita consumer price (n=1, descriptive)", chains$S08$consumer, 330)
 chk("T3 S09 Loitta consumer price",           chains$S09$consumer, 267.5)
-chk("T3 S10 Harina consumer price",           chains$S10$consumer, 215)
+chk("T3 S10 Harina consumer price (n=1, descriptive)", chains$S10$consumer, 215)
 chk("T3 S01 Ilish retailer quote (BDT/kg)",   chains$S01$retail, 1486.96)
 chk("T11 S01 Ilish retail at Fishery Ghat",   T11["S01", "M1"], 1416.0)
 if (nrow(T12b)) {
