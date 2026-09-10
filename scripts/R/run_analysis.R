@@ -148,6 +148,35 @@ PO  <- read_form("Price_Observations",      "Respondent_ID")
 CPF <- read_form("Consumer_Purchases_Focal", "Respondent_ID")
 MFO <- read_form("Form_M_Market_Observation", "Obs_Date")
 
+## --------------------------------------------------------------------
+## 1b. EMPTY-TEMPLATE GUARD (mirrors tables_descriptive.R load_data())
+## The blank data-entry form ("Marine_Fish_Marketing_Data_Entry (1).xlsx",
+## also in 03_data_entry_template/) carries only the pre-created scaffolding:
+## Obs_IDs (and Form A/B Respondent_IDs + Market codes) exist, but every
+## Interview_Date / price / quantity cell is blank. Statistics on it produce
+## cryptic errors, so stop here with a clear message instead.
+po_hdr  <- "Respondent_ID" %in% names(PO)
+po_rows <- if (po_hdr) sum(!is.na(PO$Respondent_ID) &
+                          trimws(as.character(PO$Respondent_ID)) != "") else 0L
+a_rows  <- sum(!is.na(A$Interview_Date))
+b_rows  <- sum(!is.na(B$Interview_Date))
+cat(sprintf("[guard] PO rows with Respondent_ID=%d | Form A dated=%d | Form B dated=%d\n",
+            po_rows, a_rows, b_rows))
+if (po_rows == 0 && a_rows == 0 && b_rows == 0) {
+  stop(paste0(
+    "\n[ERROR] This workbook appears to be the EMPTY data-entry template.\n",
+    "  Price_Observations: Obs_IDs PO-0001..PO-050x are pre-created, but\n",
+    "  Respondent_ID / Market / price cells are all blank.\n",
+    "  Form A / Form B: no rows carry an Interview_Date.\n",
+    "  -> Use the FILLED workbook instead, e.g.\n",
+    "       04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx\n",
+    "     or your final data-entry file with the yellow cells completed.\n",
+    "  Current file: ", DATA_PATH, "\n"))
+}
+if (po_rows < 10)
+  warning(sprintf("[guard] Very few filled PO rows (%d) - file may be partially filled: %s",
+                  po_rows, DATA_PATH))
+
 PO$buy_kg  <- ppk(PO$Buy_price_raw,  PO$Unit, PO$Buy_BDT_per_kg)
 PO$sell_kg <- ppk(PO$Sell_price_raw, PO$Unit, PO$Sell_BDT_per_kg)
 PO$qty_kg  <- qkg(PO$Quantity_raw, PO$Quantity_unit, PO$Quantity_kg)

@@ -19,40 +19,57 @@ num <- function(x) {
 ## of the double, so the half-even decision is made on exact digits.
 rp <- function(x, nd = 0) {
   if (length(x) != 1) return(vapply(x, rp, numeric(1), nd = nd))
-  if (is.na(x) || is.null(x)) return(x)
+  if (is.null(x) || length(x) == 0) return(NA_real_)
+  if (is.na(x)) return(x)
+  if (!is.finite(x)) return(x)  # Inf, -Inf -> return as-is; NaN already NA above
   s0 <- sprintf("%.1100f", x)
+  ## sprintf can return "Inf"/"-Inf"/"NaN" for non-finite (guarded above) or
+  ## locale-dependent strings — bail out safely
+  if (grepl("[^0-9.\\-]", s0)) return(x)
   neg <- substr(s0, 1, 1) == "-"
   s <- sub("-", "", s0, fixed = TRUE)
   sp <- strsplit(s, ".", fixed = TRUE)[[1]]
+  if (length(sp) < 2) return(x)  # no decimal part -> unexpected, return original
   ints <- sp[1]
   frac <- sp[2]
+  if (is.na(frac) || frac == "") return(as.numeric(ints) * if (neg) -1 else 1)
   if (nd == 0) {
     first <- substr(frac, 1, 1)
+    if (is.na(first) || first == "") return(as.numeric(ints) * if (neg) -1 else 1)
     tail  <- substr(frac, 2, nchar(frac))
-    last_int <- as.integer(substr(ints, nchar(ints), nchar(ints)))
+    last_int <- suppressWarnings(as.integer(substr(ints, nchar(ints), nchar(ints))))
+    if (is.na(last_int)) last_int <- 0L
     up <- if (first < "5") 0L else if (first > "5") 1L else
       if (tail != "" && any(strsplit(tail, "")[[1]] != "0")) 1L else
         if (last_int %% 2 == 1) 1L else 0L
-    if (up) ints <- as.character(as.numeric(ints) + 1)
-    val <- as.numeric(ints)
+    if (up) ints <- as.character(suppressWarnings(as.numeric(ints) + 1))
+    val <- suppressWarnings(as.numeric(ints))
   } else {
     keep <- substr(frac, 1, nd)
     d1   <- substr(frac, nd + 1, nd + 1)
+    if (is.na(d1) || d1 == "") {
+      val <- suppressWarnings(as.numeric(paste0(ints, ".", keep)))
+      return(if (neg) -val else val)
+    }
     tail <- substr(frac, nd + 2, nchar(frac))
+    kd <- suppressWarnings(as.integer(substr(keep, nd, nd)))
+    if (is.na(kd)) kd <- 0L
     up <- if (d1 < "5") 0L else if (d1 > "5") 1L else
       if (tail != "" && any(strsplit(tail, "")[[1]] != "0")) 1L else
-        if (as.integer(substr(keep, nd, nd)) %% 2 == 1) 1L else 0L
+        if (kd %% 2 == 1) 1L else 0L
     if (up) {
-      nk <- as.numeric(keep) + 1
+      nk <- suppressWarnings(as.numeric(keep) + 1)
+      if (is.na(nk)) nk <- 0
       if (nk >= 10^nd) {
-        ints <- as.character(as.numeric(ints) + 1)
+        ints <- as.character(suppressWarnings(as.numeric(ints) + 1))
         keep <- sprintf(paste0("%0", nd, "d"), nk - 10^nd)
       } else {
         keep <- sprintf(paste0("%0", nd, "d"), nk)
       }
     }
-    val <- as.numeric(paste0(ints, ".", keep))
+    val <- suppressWarnings(as.numeric(paste0(ints, ".", keep)))
   }
+  if (is.na(val)) return(x)
   if (neg) -val else val
 }
 

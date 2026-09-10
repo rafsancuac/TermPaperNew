@@ -13,7 +13,7 @@
 # All output goes to OUTPUT_DIR (F:/TermPaperNew/Analysis on Windows).
 # ============================================================================
 
-rm(list = ls())                                   # clean session
+rm(list = setdiff(ls(), c("INPUT_FILE", "OUTPUT_DIR")))   # clean session, keep manual overrides
 options(warn = 1)                                  # warnings become visible
 if (!requireNamespace("readxl", quietly = TRUE) ||
     !requireNamespace("openxlsx", quietly = TRUE)) {
