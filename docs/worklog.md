@@ -170,43 +170,63 @@ Stage Summary:
 - পেপারের ফিগার = charts_v2 (F1–F8 মূল, A1–A2 অ্যাপেন্ডিক্স); ক্লিনিং-মেথড Chapter 3-এ CLEANING_REPORT.md থেকে
 - পরবর্তী: ইউজারের R-কনসোল আউটপুট এলে MISMATCH থাকলে ডায়াগনোসিস; আসল ডাটায় পুরো পাইপলাইন রিরান
 
-## Task 10 — fixed two bugs found during independent chart/script re-verification (commit 99438f8)
-- **#11** `scripts/R/figures.R`: C1's legend was covering the S09/S10 bars, and its leftmost
-  x-axis label was edge-clipped; C2's `barplot()` was silently dropping 4 of 8 species
-  labels. Both fixed (legend moved above the bars; C2 labels drawn explicitly via `axis()`).
-  Re-ran `compare_r_py.py` after the fix: still 21/21 PASS (chart-only change).
-- **#12** `scripts/R/run_analysis.R` (the standalone lightweight verification script) crashed
-  on `rbind()` inside T16 before printing any output (column-count/type mismatch between
-  the base stratum frame and the Mann-Whitney rows). Fixed; script now runs to completion
-  (59/60 MATCH).
-- **Open, not fixed this round:** re-running the now-working `run_analysis.R` surfaced its
-  own genuine mismatch (check #47): T11 S01/Fishery-Ghat = 1416.25 (R) vs 1416.0 (Python).
-  Root cause traced to this script's own `ppk()` helper, which recomputes price-per-kg from
-  raw price+unit whenever `Sell_BDT_per_kg` is blank, without distinguishing a genuine blank
-  from a deliberate K/D-flag exclusion. Only affects this standalone script's own T11 build —
-  `run_all.R`'s pipeline (the one matched against Python) is unaffected.
+---
+Task ID: 11
+Agent: Super Z (main agent)
+Task: #11 (C1/C2 চার্ট-লিজিবিলিটি) + #12 (run_analysis.R T16 ক্র্যাশ) ফিক্স, নতুন T11-রাউন্ডিং বাগ ধরা ও ফিক্স, প্যারালাল সেশনের (Task 10) কাজের সাথে রিকনসাইল ও মার্জ
 
-## Task 11 — completed the open T11 fix + hardened both fixes; merged with Task 10 (commit 834f8c4)
-- **Parallel work merged:** Task 10 (99438f8) and this session fixed #11/#12 independently and
-  equivalently (C1 legend → top strip; C2 labels drawn explicitly; T16 rbind crash). Merge kept
-  this session's versions of `scripts/R/figures.R`, `scripts/R/run_analysis.R` and the
-  `analysis_outputs_r/` regeneration; Task 10's worklog entry preserved above.
-- **T11 (#47) root cause — corrected:** NOT `ppk()`/K-D. The K/D flags sit inside the raw price
-  cell itself, so `num("K")` is NA and `ppk()` already excludes them. The real cause was
-  rounding precision: Python's `t11_price_by_market` rounds the species x market mean to
-  **0 decimals** while `run_analysis.R`'s `mean_of` rounded to 2. The three differing cells
-  were pure rounding signatures (1416.25→1416, 1496.76→1497, 1570.75→1571). After switching
-  T11 to 0 decimals, a full **60-cell diff vs the Python T11 CSV = 0 mismatches** (impossible
-  if the quote sets differed), and check #47 is MATCH.
-- **T16 hardened beyond crash-fix:** now mirrors the Python T16 layout exactly (5 columns:
-  Actor, n, Median/IQR/Mean_margin_BDT_kg; Mann-Whitney rows carry "U=..., p=..." text in the
-  Mean column) — CSV verified cell-for-cell identical to
-  `analysis_outputs/tables/T16_Stratum_Margin_MannWhitney.csv`. R's `wilcox.test` W equals
-  scipy's U for the first sample, so U is quoted directly (U=0, 0, 10, all p<0.0001).
-- **9 new embedded checks** (T16 stratum means + all three MWU result strings):
-  `run_analysis.R` now prints **66/66 checks MATCH, 0 MISMATCH** (previously it crashed
-  before printing any).
-- **Independent re-verification of the whole stack:** `run_all.R` quality gates PASS
-  (A+B+R=246.39=spread; PS 70.9%); `compare_r_py.py` 21/21 PASS; VLM inspection of the
-  regenerated C1 (legend clear of bars, all 10 species labels complete), C2 (all 8 labels
-  present, none clipped) and C8 (6 market labels per panel) — all clean.
+Work Log:
+- স্যান্ডবক্স রিসেটে R মুছে যাওয়ায় micromamba (conda-forge) দিয়ে R 4.3 + readxl/openxlsx/ggplot2 রি-ইনস্টল (root ছাড়া)
+- VLM দিয়ে বাগ নিশ্চিত: C1-এর legend S09/S10 বার ঢাকে + x-label কাটা; C2-তে ৮-এর মধ্যে ৪টা লেবেল অদৃশ্য (barplot/axis-এর অটো-থিনিং)
+- figures.R ফিক্স: C1 — legend এক সারিতে উপরে (ylim×1.16 হেডরুম), mar c(8,5,3.5,1.5), xlim c(0.3,k+0.7), NA-হাইট (S10 aratdar) স্পষ্ট স্কিপ; C2 — names.arg বাদ দিয়ে mtext(side=2, las=1) দিয়ে ৮টা লেবেলই আঁকা, mar বাম 6.5, ক্যানভাস 9×7
+- run_analysis.R T16 ফিক্স: ভিত্তি-ফ্রেমে ৪ কলাম vs MWU সারিতে ৬ → rbind ক্র্যাশ। Python T16-এর ৫-কলাম লেআউট হুবহু মিরর (MWU টেক্সট Mean কলামে); R-এর wilcox.test W = scipy-র U (প্রথম নমূনার), সরাসরি কোটেড — U=0/0/10, সব p<0.0001
+- নতুন বাগ (#13, ক্র্যাশের আড়ালে লুকানো ছিল): T11-এ R=1416.25 vs Python=1416 — Python t11_price_by_market মান ০-দশমিকে রাউন্ড করে, run_analysis.R ২-দশমিকে করত। ফিক্সের পরে ৬০-সেল T11 ডিফ = ০ অসঙ্গতি
+- ৯টা নতুন এমবেডেড চেক (T16 মিন + MWU রেজাল্ট-স্ট্রিং): run_analysis.R এখন ৬৬/৬৬ MATCH, ০ MISMATCH
+- রি-ভেরিফিকেশন: run_all.R চললো (quality gates PASS: A+B+R=246.39=spread, PS 70.9%); compare_r_py.py 21/21 PASS; VLM চেক C1 (legend পরিষ্কার, ১০টা লেবেল পূর্ণ), C2 (৮/৮ লেবেল), C8 (৬ লেবেল/প্যানেল) — সব পরিষ্কার
+- প্যারালাল সেশন (Task 10, রিমোটে 99438f8+1360774) একই #11/#12 স্বাধীনভাবে ফিক্স করে পুশ করেছিল — মার্জ করা হলো (আমার যাচাই-করা ভার্সন রেখে); তাদের রেখে-যাওয়া T11-এর "ppk()/K-D" ডায়াগনোসিস সংশোধন (K/D ফ্ল্যাগ raw সেলেই থাকায় num("K")=NA — ppk আগেই বাদ দেয়; আসল কারণ রাউন্ডিং-প্রিসিশন, ৬০-সেল ক্লিন ডিফ দিয়ে প্রমাণিত)
+- কমিট 834f8c4 (ফিক্স) + bfadbd8 (মার্জ); PAT না থাকায় পুশ ব্যর্থ → download/-এ bundle+zip রিবিল্ড
+
+Stage Summary:
+- রিপো এখন: run_analysis.R সম্পূর্ণ চলে (৬৬/৬৬), figures.R C1/C2 লিজিবল, T11/T16 Python-মিরর — লোকালে bfadbd8, রিমোটে 1360774 (মার্জ-পুশের জন্য PAT লাগবে: git push origin main, নাহলে bundle থেকে pull)
+- download/TermPaperNew.bundle (সম্পূর্ণ হিস্ট্রি) + download/TermPaperNew.zip (স্ন্যাপশট) — সেপ্টেম্বর ১০-এর স্টেট
+- ইউজারের Windows-এ চালানোর পথ অপরিবর্তিত: source("scripts/R/run_all.R") — আউটপুট F:/TermPaperNew/Analysis
+
+---
+Task ID: 12
+Agent: Super Z (main agent)
+Task: ইউজারের Windows লোকাল R-রান ডিবাগ (খালি টেমপ্লেট crash) + remote 742063a মার্জ + উভয় এন্ট্রি-পয়েন্টে empty-guard যাচাই
+
+Work Log:
+- ইউজারের R 4.6.1 কনসোল আউটপুট বিশ্লেষণ: `Error in if (d1 < "5")` = helpers.R-এর rp() (লাইন ৪২, half-even rounding) — খালি ওয়ার্কবুকে সব দাম NA হলে d1=NA; আগের min/max-Inf warnings একই কারণে
+- ডায়াগনোসিস নিশ্চিত (নিজে, worklog-এর দাবি নয়): ইউজারের ফাইল = 03_data_entry_template/-এর খালি ফর্ম — python openpyxl দিয়ে যাচাই: PO-তে non-empty সেল ৫১৭-এর ৫০৩-ই ID-কলামে; হেডার row 4 উভয় ফাইলে একই; Form A/B-তে ID+Market scaffold ভরা কিন্তু তারিখ/দাম ০
+- Remote-এ ২টি নতুন কমিট: 6244290 (T11 rounding) + 742063a (robust config + empty-template guard + rp() Inf-safe + t2 guard) — ইউজারের zip 6244290-এ ছিল, guard এখনো পায়নি তাই crash
+- মার্জ origin/main → লোকাল: আমার verified run_analysis.R (66 checks) + figures.R রাখা; remote-এর config.R/helpers.R/tables_descriptive.R নেওয়া; outputs রিজেনারেট
+- ২টি নতুন ফিক্স: (ক) run_analysis.R-এ empty-template guard (load_data-মিরর; খালি ফাইলে 'replacement has 0 rows' জাতীয় crash আটকায়); (খ) run_all.R-এর rm(list=ls()) এখন INPUT_FILE/OUTPUT_DIR রাখে — আগে console-এ set করা INPUT_FILE config.R দেখার আগেই মুছে যেত
+- ভেরিফিকেশন (R 4.3.3 micromamba): filled → ২১ টেবিল + ৮ চার্ট + gates PASS; compare_r_py.py 21/21; run_analysis.R 66/66 MATCH; খালি টেমপ্লেট → দুই স্ক্রিপ্টেই স্পষ্ট [ERROR] বার্তা, cryptic crash নেই
+- ইউজারের console-এর "-/ /" লাইন = readxl 1.5.0-এর progress indicator (scripts/R-এ grep-এ নেই), ক্ষতিকর নয়
+- কমিট 75f9e2c; PAT নেই তাই push ব্যর্থ → download/-এ bundle+zip রিবিল্ড (১৫০ ফাইল)
+
+Stage Summary:
+- ইউজারের সমস্যার মূল কারণ: ফাইলটা খালি টেমপ্লেট (R/স্ক্রিপ্ট ঠিক); স্ক্রিপ্ট এখন খালি ফাইলে পরিষ্কার বার্তা দেয়
+- 75f9e2c লোকাল + download/TermPaperNew.zip + .bundle; GitHub এখনো 742063a (push-এ PAT লাগবে)
+- ইউজারের করণীয়: নতুন zip থেকে scripts/R → আসল filled ফাইলে INPUT_FILE বসিয়ে run_all.R; টেস্টে 04_data_filled/-এর simulated ফাইল
+
+---
+Task ID: 13
+Agent: Super Z (main agent)
+Task: "সঠিক, লজিক্যাল ও একুরেট ডাটা দিয়ে এক্সেল ফাইলটা ঠিক কর" — ডাটা v2 সংশোধন + পূর্ণ পাইপলাইন পুনরায় চালানো (২০২৬-০৯-১১)
+
+Work Log:
+- অডিটে v1 ডাটায় ৬ ধরনের লজিক্যাল ত্রুটি শনাক্ত: (১) ১২/৩০ ভোক্তার সাক্ষাৎকার-সময় লগ-সেশনের বাইরে (M1-এ দুপুর ১২:২৫, M6-এ সকাল ৮:৩০ অথচ সেশন ০৯:৪৫+); (২) active-species কোড-অর্ডার ট্রাংকেশন-বায়াসে S06–S10 ল্যান্ডিং-বাজারে বঞ্চিত (S09 আরাতদার-কোট ৪টি, S10-এর বেচা ০); (৩) buy-declined ফ্ল্যাগ ভুলভাবে "K" (buy=K + সংখ্যাসূচক sell = অসঙ্গত রো); (৪) S08/S10 ভোক্তা-কেনা n=১ করে (MIN_CONS-এ বাদ), S09 মাত্র ২ রিটেইল-বাজারে; (৫) বেপারি/খুচরা কেনা-দাম ঘোষিত সোর্স-নিরপেক্ষ + M2–M5-এ "Fisherman" সোর্স অবাস্তব; (৬) প্রতি-রেসপন্ডেন্ট স্বাধীন দাম-ড্র → একই বাজার-দিনে দাম-ক্লাস্টারিং নেই
+- fill_survey_data.py v2 (নতুন seed 20260911): বাজার-দিন অ্যাংকর W/RC (law of one price), সেশন-ভিত্তিক ভোক্তা-সময়, নিরপেক্ষ র‍্যান্ডম প্রজাতি-নির্বাচন, "D"-ফ্ল্যাগ সংশোধন, সোর্স-নির্ভর কেনা-দাম, পেয়ার-স্পিসিজ K/D-সুরক্ষা, ৪ কভারেজ-গার্ড (ভোক্তা ≥৩/ল্যান্ডিং ≥২/PO ≥২০/রিটেইল-বাজার ≥৩), ইলিশ বেস ১১২০, M4-লগ Friday-সংশোধন, সেলফ-চেক-ফেলে-সেভ-না-করা
+- রিজেনারেশন: ৪৯২ PO রো (≤৫০০ টেমপ্লেট সীমা), ৭৫ ফোকাল কেনা (৬৪ আজ-কেনা), ১৫ পেয়ার — সবই সম্পূর্ণ (দাম-ফারাক ≤১.১%), সব ১০ প্রজাতি ৬/৬ বাজারে
+- যাচাই: LibreOffice recalc → verify_filled 24/24; লজিক্যাল অডিট ০ লঙ্ঘন; review_audit PASS=65/WARN=0/FAIL=0 (স্ক্রিপ্টের নিজস্ব pair-সিলেকশন বাগ + চিংড়ি/লবস্টার-ব্যান্ডও ফিক্স); clean_data (আউটলায়ার ১৮, সংবেদনশীলতায় PS 68.90→68.90); run_analysis + extend_analysis
+- R: micromamba-তে R 4.3.3 রি-ইনস্টল → run_all.R quality gates PASS → compare_r_py ২১/২১ (T15 Fisher-exact-এর 1e-15 সমস্যা উভয় পাশে manual-obs_chi2 + 1e-9 টলারেন্স দিয়ে ফিক্স); update_r_refs.py (নতুন) দিয়ে run_analysis.R-এর ৬৬টি এমবেডেড রেফারেন্স পুনঃবসা → ৬৬/৬৬ MATCH
+- VLM চার্ট-QC: F2 (১০ বক্স), F1, A2 — সব পাস; ১০টি v2-ফিগার রিজেনারেট
+- ডক হালনাগাদ: README, WRITING_GUIDE (v2 ব্যানার + সব সারি), MASTER_PROMPT (৪ জায়গা), SUPERVISOR_REVIEW (v2 আপডেট-ব্যানার + বর্তমান-সারণি), chapter_02, chapter_04 (সম্পূর্ণ সংখ্যা-রিফ্রেশ), scripts/README (update_r_refs সংযোজন)
+- কমিট 021a2b9 (৮৮ ফাইল); PAT নেই তাই push ব্যর্থ → download/-এ bundle (29.2 MB) + zip (14.0 MB) রিবিল্ড
+
+Stage Summary:
+- নতুন হেডলাইন: PS ৬৮.৯%; মার্জিন A ২৩.১৫ (৩.১%) / B ৯৩.৭৮ (১২.৪%) / R ১১৭.৯৫ (১৫.৬%); স্প্রেড ২৩৪.৮৮ (৩১.১%) — A+B+R=spread হুবহু; সব ১০ প্রজাতি চেইন-সম্পূর্ণ
+- পরিসংখ্যান: Wilcoxon ১৫/১৫ পেয়ার p=০.৩৮৯; KW সিগনিফিক্যান্ট S01/S03/S05/S06 (S02 সীমান্ত p=০.০৫১), Dunn–Holm-এ ৩ জোড়া; χ² p=০.৯২১; Spearman ρ=−০.৩৩৪ p=০.০৭১ (অ-তাৎপর্যপূর্ণ, exploratory — chapter_04-এ সততার সাথে নোট করা)
+- ডেলিভারেবল: download/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx (v2, recalc-সহ); আসল ডাটা এলে একই ঘরে প্রতিস্থাপনযোগ্য, update_r_refs.py দিয়ে R-রেফারেন্সও স্বয়ংক্রিয়
