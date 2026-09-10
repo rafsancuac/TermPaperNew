@@ -169,3 +169,19 @@ Stage Summary:
 - নতুন ডেলিভারেবল: 05_data_cleaned/ (৬ ফাইল), analysis_outputs/charts_v2/ (১০ ফিগার ১০০০ dpi + ইনডেক্স), scripts/clean_data.py, scripts/make_charts_v2.py, scripts/R/run_analysis.R (Task 8-এর স্যুটের পাশে আলাদা লঘু-যাচাই পথ)
 - পেপারের ফিগার = charts_v2 (F1–F8 মূল, A1–A2 অ্যাপেন্ডিক্স); ক্লিনিং-মেথড Chapter 3-এ CLEANING_REPORT.md থেকে
 - পরবর্তী: ইউজারের R-কনসোল আউটপুট এলে MISMATCH থাকলে ডায়াগনোসিস; আসল ডাটায় পুরো পাইপলাইন রিরান
+
+## Task 10 — fixed two bugs found during independent chart/script re-verification (commit 99438f8)
+- **#11** `scripts/R/figures.R`: C1's legend was covering the S09/S10 bars, and its leftmost
+  x-axis label was edge-clipped; C2's `barplot()` was silently dropping 4 of 8 species
+  labels. Both fixed (legend moved above the bars; C2 labels drawn explicitly via `axis()`).
+  Re-ran `compare_r_py.py` after the fix: still 21/21 PASS (chart-only change).
+- **#12** `scripts/R/run_analysis.R` (the standalone lightweight verification script) crashed
+  on `rbind()` inside T16 before printing any output (column-count/type mismatch between
+  the base stratum frame and the Mann-Whitney rows). Fixed; script now runs to completion
+  (59/60 MATCH).
+- **Open, not fixed this round:** re-running the now-working `run_analysis.R` surfaced its
+  own genuine mismatch (check #47): T11 S01/Fishery-Ghat = 1416.25 (R) vs 1416.0 (Python).
+  Root cause traced to this script's own `ppk()` helper, which recomputes price-per-kg from
+  raw price+unit whenever `Sell_BDT_per_kg` is blank, without distinguishing a genuine blank
+  from a deliberate K/D-flag exclusion. Only affects this standalone script's own T11 build —
+  `run_all.R`'s pipeline (the one matched against Python) is unaffected.
