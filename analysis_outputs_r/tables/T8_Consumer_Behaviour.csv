@@ -1,17 +1,16 @@
 "Item","Value","n","pct"
-"Visit frequency","Weekly",16,53.3
-"Visit frequency","Daily",14,46.7
-"Payment method","bKash",11,36.7
-"Payment method","Cash",11,36.7
-"Payment method","Nagad_app",6,20
-"Payment method","Credit",2,6.7
-"Main reason for choosing seller","Purity",10,33.3
-"Main reason for choosing seller","Price",7,23.3
-"Main reason for choosing seller","Proximity",7,23.3
-"Main reason for choosing seller","Familiar_shop",5,16.7
-"Main reason for choosing seller","Variety",1,3.3
-"Mean visit interval (days)","3.57",30,
-"Focal purchase source (per purchase)","Retailer",49,71
-"Focal purchase source (per purchase)","Hawker",3,4.3
-"Mean focal-species price paid (BDT/kg)","699.04",52,
-"Mean purchase size (kg)","1.57",52,
+"Visit frequency","Weekly",24,80
+"Visit frequency","Daily",6,20
+"Payment method","Cash",17,56.7
+"Payment method","Credit",7,23.3
+"Payment method","bKash",6,20
+"Main reason for choosing seller","Proximity",12,40
+"Main reason for choosing seller","Purity",7,23.3
+"Main reason for choosing seller","Familiar_shop",7,23.3
+"Main reason for choosing seller","Price",2,6.7
+"Main reason for choosing seller","Variety",2,6.7
+"Mean visit interval (days)","4.73",30,
+"Focal purchase source (per purchase)","Retailer",54,72
+"Focal purchase source (per purchase)","Hawker",10,13.3
+"Mean focal-species price paid (BDT/kg)","654.77",64,
+"Mean purchase size (kg)","1.23",64,

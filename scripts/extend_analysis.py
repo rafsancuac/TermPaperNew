@@ -340,7 +340,12 @@ def fisher_exact_3x3(table):
     t = np.asarray(table, dtype=np.int64)
     if t.shape != (3, 3):
         return None
-    obs_chi2 = float(stats.chi2_contingency(t)[0])
+    # obs chi2 computed with the SAME arithmetic as the enumeration below
+    # (scipy's chi2_contingency differs at ~1e-15 and used to exclude the
+    # observed table itself from its own tail); tail comparison carries a
+    # 1e-9 tolerance, mirrored byte-for-byte in tables_inferential.R.
+    expm_obs = np.outer(t.sum(1), t.sum(0)) / float(t.sum())
+    obs_chi2 = float(np.sum((t.astype(np.float64) - expm_obs) ** 2 / expm_obs))
     r = t.sum(1).astype(np.int64)
     c = t.sum(0).astype(np.int64)
     N = int(r.sum())
@@ -378,7 +383,7 @@ def fisher_exact_3x3(table):
     logP = (gammaln(r + 1).sum() + gammaln(c + 1).sum() - gammaln(N + 1)
             - gammaln(obs_arr + 1).sum(axis=0))
     P = np.exp(logP - logP.max())
-    p_extreme = float(P[chi2v >= obs_chi2].sum() / P.sum())
+    p_extreme = float(P[chi2v >= (obs_chi2 - 1e-9)].sum() / P.sum())
     return p_extreme
 
 

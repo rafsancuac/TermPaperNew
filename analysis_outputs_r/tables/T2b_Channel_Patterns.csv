@@ -1,31 +1,30 @@
 "Form","Field","Value","n","pct"
-"Form B (Bepari/Faria)","Actor subtype","Bepari",20,66.7
-"Form B (Bepari/Faria)","Actor subtype","Faria",10,33.3
-"Form B (Bepari/Faria)","Business pattern","Year_round",25,83.3
-"Form B (Bepari/Faria)","Business pattern","Seasonal",5,16.7
-"Form B (Bepari/Faria)","Supplier category","Fisherman",13,43.3
-"Form B (Bepari/Faria)","Supplier category","Aratdar",12,40
-"Form B (Bepari/Faria)","Supplier category","Faria",5,16.7
-"Form B (Bepari/Faria)","Source location","Karnaphuli river ghat",9,30
-"Form B (Bepari/Faria)","Source location","Fishery Ghat landing",5,16.7
-"Form B (Bepari/Faria)","Source location","Bhola charter landing",4,13.3
-"Form B (Bepari/Faria)","Source location","Kuakata",3,10
-"Form B (Bepari/Faria)","Source location","Teknaf",3,10
+"Form B (Bepari/Faria)","Actor subtype","Bepari",18,60
+"Form B (Bepari/Faria)","Actor subtype","Faria",12,40
+"Form B (Bepari/Faria)","Business pattern","Year_round",19,63.3
+"Form B (Bepari/Faria)","Business pattern","Seasonal",11,36.7
+"Form B (Bepari/Faria)","Supplier category","Fisherman",19,63.3
+"Form B (Bepari/Faria)","Supplier category","Aratdar",7,23.3
+"Form B (Bepari/Faria)","Supplier category","Faria",3,10
+"Form B (Bepari/Faria)","Supplier category","Other",1,3.3
+"Form B (Bepari/Faria)","Source location","Karnaphuli river ghat",8,26.7
+"Form B (Bepari/Faria)","Source location","Fishery Ghat landing",6,20
+"Form B (Bepari/Faria)","Source location","Cox's Bazar landing",5,16.7
+"Form B (Bepari/Faria)","Source location","Kuakata",4,13.3
 "Form B (Bepari/Faria)","Source location","Moheshkhali",3,10
-"Form B (Bepari/Faria)","Source location","Kutubdia",2,6.7
-"Form B (Bepari/Faria)","Source location","Cox's Bazar landing",1,3.3
-"Form B (Bepari/Faria)","Credit sales share","Almost_all",1,3.3
-"Form B (Bepari/Faria)","Credit sales share","Some",21,70
-"Form B (Bepari/Faria)","Credit sales share","None",8,26.7
-"Form R (Retailer)","Buys from","Aratdar",17,56.7
-"Form R (Retailer)","Buys from","Faria",5,16.7
-"Form R (Retailer)","Buys from","Fisherman",5,16.7
-"Form R (Retailer)","Buys from","Other",3,10
-"Form R (Retailer)","Sells to","Household",21,70
-"Form R (Retailer)","Sells to","Hawker",3,10
-"Form R (Retailer)","Sells to","Hotel",3,10
-"Form R (Retailer)","Sells to","Other",2,6.7
+"Form B (Bepari/Faria)","Source location","Bhola charter landing",3,10
+"Form B (Bepari/Faria)","Source location","Teknaf",1,3.3
+"Form B (Bepari/Faria)","Credit sales share","Almost_all",0,0
+"Form B (Bepari/Faria)","Credit sales share","Some",18,60
+"Form B (Bepari/Faria)","Credit sales share","None",12,40
+"Form R (Retailer)","Buys from","Aratdar",26,86.7
+"Form R (Retailer)","Buys from","Faria",2,6.7
+"Form R (Retailer)","Buys from","Other",1,3.3
+"Form R (Retailer)","Buys from","Fisherman",1,3.3
+"Form R (Retailer)","Sells to","Household",20,66.7
+"Form R (Retailer)","Sells to","Hotel",5,16.7
+"Form R (Retailer)","Sells to","Hawker",4,13.3
 "Form R (Retailer)","Sells to","Institutional",1,3.3
-"Form R (Retailer)","Sells on credit","Almost_all",5,16.7
-"Form R (Retailer)","Sells on credit","Some",18,60
+"Form R (Retailer)","Sells on credit","Almost_all",2,6.7
+"Form R (Retailer)","Sells on credit","Some",17,56.7
 "Form R (Retailer)","Sells on credit","None",0,0

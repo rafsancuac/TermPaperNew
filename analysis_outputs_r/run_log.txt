@@ -1,6 +1,37 @@
 MS-499 R analysis session
- 2026-09-10 11:15:48 
-Input : /home/z/my-project/TermPaperNew/03_data_entry_template/Marine_Fish_Marketing_Data_Entry (1).xlsx 
+ 2026-09-10 17:25:41 
+Input : /home/z/my-project/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx 
 Output: /home/z/my-project/TermPaperNew/analysis_outputs_r 
 
-[load] PO rows=501 (with Market=0), A=0, B=0, R=0, C=0, CPF=0
+[load] PO rows=501 (with Market=492), A=30, B=30, R=30, C=30, CPF=75
+  table  T1_Respondent_Profile.csv                  (5 rows)
+  table  T2_Business_Scale.csv                      (3 rows)
+  table  T2b_Channel_Patterns.csv                   (29 rows)
+  table  T3_Price_Chain.csv                         (11 rows)
+  table  T4_Marketing_Costs.csv                     (21 rows)
+  table  T5_Payment_Methods.csv                     (6 rows)
+  table  T6_Problems.csv                            (12 rows)
+  table  T7_Market_Infrastructure.csv               (6 rows)
+  table  T8_Consumer_Behaviour.csv                  (15 rows)
+  table  T9_Other_Fish.csv                          (6 rows)
+  table  T10_Margin_Summary.csv                     (5 rows)
+  table  T11_Retail_Price_by_Market.csv             (10 rows)
+  table  T12_Pair_Detail.csv                        (15 rows)
+  table  T12b_Wilcoxon_Result.csv                   (7 rows)
+  table  T13_Species_Market_Spread.csv              (60 rows)
+  table  T14_Species_Market_KruskalWallis.csv       (10 rows)
+  table  T14b_Dunn_Holm_Posthoc.csv                 (28 rows)
+  table  T15_Payment_Actor_ChiSquare.csv            (5 rows)
+  table  T16_Stratum_Margin_MannWhitney.csv         (6 rows)
+  table  T17_Retailer_MC_Profit_Spearman.csv        (31 rows)
+  table  T18_ShapiroWilk_Screening.csv              (5 rows)
+[17:25:45] Figures C1-C8 written
+Workbook written: /home/z/my-project/TermPaperNew/analysis_outputs_r/R_Analysis_Summary.xlsx 
+
+---------------- QUALITY GATES ----------------
+Margins telescope: A+B+R = 234.88 vs spread = 234.88  [PASS]
+PS + spread% = 100: PS 68.9%  [PASS]
+T3 ALL matches T10: 68.9% vs 68.9%  [PASS]
+-----------------------------------------------
+
+DONE - R analysis outputs in: /home/z/my-project/TermPaperNew/analysis_outputs_r 

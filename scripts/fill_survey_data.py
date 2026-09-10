@@ -3,12 +3,39 @@
 Fill Marine_Fish_Marketing_Data_Entry template with realistic simulated
 Chattogram survey data (MS-499, Methodology V4, March 2026 window).
 
-Rules honoured:
-- Only YELLOW entry cells written; BLUE formula columns & GREY prefilled codes untouched.
+v2 (2026-09-11) -- correctness release. Fixes over v1:
+ 1. Consumer interview times drawn INSIDE each market's visit session
+    (v1 had 12/30 consumers timestamped outside the logged session).
+ 2. Market-day price anchors: one wholesale anchor W and one retail anchor
+    RC per market x species; every actor's quote derives from the same
+    anchor (law of one price within a market-day; consumers pay the same
+    retail level the retailers of that market quote, minus small haggle).
+ 3. Active-species selection is an UNBIASED random sample (v1 truncated
+    to the first five species in code order, starving S06-S10 at landing
+    markets: S09 had only 4 aratdar quotes, S10 none at all).
+ 4. Availability / demand raised for S08, S10 and hard coverage guards:
+    every species gets >=3 bought-today consumer rows, >=2 landing aratdar
+    buy+sell quotes, >=20 Price_Observation rows and retailer sell quotes
+    in >=3 markets, so T3/T10 are chain-complete for all ten species.
+ 5. Declined buy prices now use flag "D" (v1 wrongly wrote "K", which
+    means "not handled today" -- contradicting the numeric sell price
+    on the same row).
+ 6. Pair species protected from K/D/not-yet-sold flags on both sides,
+    so every matched pair is complete (Wilcoxon n improves).
+ 7. Bepari / retailer buy prices depend on the DECLARED source
+    (Fisherman vs Aratdar vs Faria vs Other), and M2-M5 retailers no
+    longer claim "Fisherman" as source (no landing at retail markets).
+ 8. Ilish base calibrated to 1120 BDT/kg (lean-season March 2026 level;
+    jatka conservation window keeps marine landings thin).
+
+Rules honoured (unchanged from v1):
+- Only YELLOW entry cells written; BLUE formula columns & GREY prefilled
+  codes untouched.
 - Dropdown validation values used verbatim.
 - Payment % columns sum to exactly 100.
 - Dates as date objects (cells formatted dd/mm/yyyy).
-- Price chain internally consistent: producer -> aratdar -> bepari -> retailer -> consumer.
+- Price chain internally consistent: producer -> aratdar -> bepari ->
+  retailer -> consumer.
 - Fixed RNG seed for reproducibility.
 """
 import random
@@ -21,38 +48,45 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "03_data_entry_template", "Marine_Fish_Marketing_Data_Entry (1).xlsx")
 OUT = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
 
-rng = random.Random(20260302)  # seed = pilot date
+rng = random.Random(20260911)  # seed = v2 correction date
 
 # ----------------------------------------------------------------------------
 # 1. CONFIG
 # ----------------------------------------------------------------------------
 MARKETS = {
     "M1": dict(name="Fishery Ghat", date=date(2026, 3, 3), mult=1.00,
-               session=("04:30", "09:00"), wholesale=True),
+               session=("04:30", "09:00"), cons=("05:40", "08:40"),
+               wholesale=True),
     "M2": dict(name="Chawkbazar", date=date(2026, 3, 4), mult=1.07,
-               session=("07:00", "11:30"), wholesale=False),
+               session=("07:00", "11:30"), cons=("07:15", "11:15"),
+               wholesale=False),
     "M3": dict(name="Kazir Dewri", date=date(2026, 3, 5), mult=1.08,
-               session=("07:30", "12:00"), wholesale=False),
+               session=("07:30", "12:00"), cons=("07:45", "11:45"),
+               wholesale=False),
     "M4": dict(name="Karnaphuli Complex", date=date(2026, 3, 6), mult=1.05,
-               session=("06:30", "10:30"), wholesale=False),
+               session=("06:30", "10:30"), cons=("06:45", "10:15"),
+               wholesale=False),
     "M5": dict(name="Bahaddarhat", date=date(2026, 3, 7), mult=1.10,
-               session=("07:00", "11:30"), wholesale=False),
+               session=("07:00", "11:30"), cons=("07:15", "11:15"),
+               wholesale=False),
     "M6": dict(name="Patenga", date=date(2026, 3, 3), mult=1.02,
-               session=("09:45", "13:30"), wholesale=True),
+               session=("09:45", "13:30"), cons=("10:00", "13:15"),
+               wholesale=True),
 }
 MKT_ORDER = ["M1", "M2", "M3", "M4", "M5", "M6"]
+LANDING_MARKETS = ("M1", "M6")
 
 SPECIES = {
-    "S01": dict(local="Ilish", base=1050, avail=0.85),
+    "S01": dict(local="Ilish", base=1120, avail=0.85),   # lean-season 2026
     "S02": dict(local="Rupchanda", base=1150, avail=0.75),
     "S03": dict(local="Lakkha", base=750, avail=0.55),
     "S04": dict(local="Koral", base=650, avail=0.50),
     "S05": dict(local="Surma", base=420, avail=0.80),
     "S06": dict(local="Churi", base=320, avail=0.85),
     "S07": dict(local="Poa", base=380, avail=0.70),
-    "S08": dict(local="Kankoita", base=240, avail=0.35),
+    "S08": dict(local="Kankoita", base=240, avail=0.55),  # was 0.35
     "S09": dict(local="Loitta", base=190, avail=0.80),
-    "S10": dict(local="Harina", base=160, avail=0.50),
+    "S10": dict(local="Harina", base=160, avail=0.65),    # was 0.50
 }
 SP_ORDER = list(SPECIES.keys())
 
@@ -83,6 +117,32 @@ TAG_EXTRA_FISH = [
     ("Lobster (local)", 2200, 3500), ("Moid", 150, 250),
     ("Datina", 300, 500), ("Khoira", 200, 350),
 ]
+
+# consumer demand weights (wanted-species probability)
+BUY_PROBS = [("S01", 0.50), ("S02", 0.32), ("S03", 0.15), ("S04", 0.15),
+             ("S05", 0.50), ("S06", 0.70), ("S07", 0.30), ("S08", 0.20),
+             ("S09", 0.58), ("S10", 0.30)]
+
+# buy-price multiplier by declared source (per-kg, relative to wholesale
+# anchor W of that market-day)
+BEPARI_BUY_MULT = {
+    "Fisherman": (0.955, 0.985),   # direct from boats / fishermen
+    "Aratdar":   (0.995, 1.020),   # commission agent's sell price
+    "Faria":     (1.000, 1.050),   # small intermediary markup
+    "Other":     (0.990, 1.030),
+}
+RETAILER_BUY_MULT = {
+    "Fisherman": (0.960, 0.990),   # only at landing markets
+    "Aratdar":   (1.000, 1.020),
+    "Faria":     (1.040, 1.100),
+    "Other":     (1.080, 1.150),   # bepari / Khatunganj wholesale hauls
+}
+
+MIN_CONS_GUARD = 3      # bought-today consumer rows per species
+MIN_LANDING = 2         # landing aratdar buy+sell quotes per species
+MIN_PO_ROWS = 20        # total PO rows per species
+MIN_RETAIL_MKTS = 3     # markets with retailer sell quotes per species
+MAX_PO = 500            # template prefilled Obs_ID limit
 
 # ----------------------------------------------------------------------------
 # 2. HELPERS
@@ -122,6 +182,17 @@ def pick_problems(n=3):
     return rng.sample(PROBLEM_POOL, n)
 
 
+def t_min(hhmm):
+    h, m = hhmm.split(":")
+    return int(h) * 60 + int(m)
+
+
+def rand_time(mk):
+    lo, hi = (t_min(x) for x in MARKETS[mk]["cons"])
+    t = rng.randint(lo, hi)
+    return f"{t // 60:02d}:{t % 60:02d}"
+
+
 def species_availability(market, actor):
     """Availability probability of each species for a trader at a market."""
     probs = {}
@@ -131,11 +202,28 @@ def species_availability(market, actor):
         if not MARKETS[market]["wholesale"] and sp in low_tier:
             p *= 0.55          # retail neighbourhoods carry fewer low-tier species
         if MARKETS[market]["wholesale"] and sp in low_tier:
-            p *= 1.25           # landing markets move volume of everything
+            p *= 1.25          # landing markets move volume of everything
         if actor == "Bepari_Faria":
             p *= 0.92
         probs[sp] = min(p, 0.93)
     return probs
+
+
+def pick_active(market, actor, cap=5):
+    """UNBIASED random sample of species handled by this trader today."""
+    probs = species_availability(market, actor)
+    avail = [sp for sp in SP_ORDER if rng.random() < probs[sp]]
+    if len(avail) < 4:
+        avail = rng.sample(SP_ORDER, 4)
+    rng.shuffle(avail)
+    return avail[:cap]
+
+
+def mk_consumer_purchase(mk, sp):
+    paid = RC[mk][sp] * rng.uniform(0.99, 1.03)
+    return dict(sp=sp, bought=True, price=round_price_kg(paid),
+                qty=rng.choice([0.5, 0.75, 1.0, 1.0, 1.25, 1.5, 2.0, 2.5]),
+                frm=wchoice([("Retailer", 0.85), ("Hawker", 0.15)]))
 
 
 # ----------------------------------------------------------------------------
@@ -162,31 +250,38 @@ def quota_rows(ws, market, actor, serial_max=5):
 
 
 # ----------------------------------------------------------------------------
-# 4. RESPONDENT DATA MODEL (generated first, written later)
+# 4. MARKET-DAY PRICE ANCHORS (law of one price within a market-day)
 # ----------------------------------------------------------------------------
-traders = []   # each: dict(id, market, actor, sheet_row, ...) with price quotes
+W = {}    # wholesale anchor per market x species (BDT/kg)
+RC = {}   # retail anchor per market x species (BDT/kg)
+for mk in MKT_ORDER:
+    mult = MARKETS[mk]["mult"]
+    W[mk] = {}
+    RC[mk] = {}
+    for sp in SP_ORDER:
+        w = SPECIES[sp]["base"] * mult * rng.uniform(0.96, 1.04)
+        W[mk][sp] = w
+        RC[mk][sp] = w * rng.uniform(1.27, 1.35)
+
+# ----------------------------------------------------------------------------
+# 5. RESPONDENT DATA MODEL
+# ----------------------------------------------------------------------------
+traders = []    # each: dict(id, market, actor, sheet_row, ...) with price quotes
 consumers = []  # each: dict(id, market, row, purchases=[...], other_fish=[...])
 
 for mk in MKT_ORDER:
-    minfo = MARKETS[mk]
-    s_probs = species_availability(mk, "Aratdar")
-
     # ---- Aratdars (Form A) ----
     for row, rid in quota_rows(wb["Form_A_Aratdar"], mk, "A"):
         age = rng.randint(28, 62)
         edu = wchoice(EDU_WEIGHTS)
         years = min(age - 16, rng.randint(5, 40))
         cap_raw = rng.randint(8, 35)
-        active = [sp for sp in SP_ORDER if rng.random() < s_probs[sp]]
-        if len(active) < 4:
-            active = rng.sample(SP_ORDER, 4)
-        active = active[:5] if len(active) > 5 else active
+        active = pick_active(mk, "Aratdar")
         quotes = {}
         for sp in active:
-            w = SPECIES[sp]["base"] * minfo["mult"] * rng.uniform(0.94, 1.06)
-            buy_kg = w * rng.uniform(0.955, 0.975)     # fisherman receives
-            sell_kg = w * rng.uniform(1.000, 1.015)    # bepari pays
-            quotes[sp] = dict(buy_kg=buy_kg, sell_kg=sell_kg)
+            w = W[mk][sp]
+            quotes[sp] = dict(buy_kg=w * rng.uniform(0.955, 0.975),   # fisherman receives
+                              sell_kg=w * rng.uniform(1.000, 1.015))  # bepari pays
         traders.append(dict(
             id=rid, market=mk, actor="Aratdar", sheet_row=row, sheet="Form_A_Aratdar",
             age=age, edu=edu, years=years, cap_raw=cap_raw, cap_unit="Maund",
@@ -201,18 +296,16 @@ for mk in MKT_ORDER:
         edu = wchoice(EDU_WEIGHTS)
         years = min(age - 16, rng.randint(3, 35))
         cap_raw = rng.randint(4, 12) if subtype == "Bepari" else round(rng.uniform(1.0, 4.0), 1)
-        s_probs_b = species_availability(mk, "Bepari_Faria")
-        active = [sp for sp in SP_ORDER if rng.random() < s_probs_b[sp]]
-        if len(active) < 4:
-            active = rng.sample(SP_ORDER, 4)
-        active = active[:5] if len(active) > 5 else active
+        active = pick_active(mk, "Bepari_Faria")
+        buy_source = wchoice([("Fisherman", 0.50), ("Aratdar", 0.30),
+                             ("Faria", 0.15), ("Other", 0.05)])
         quotes = {}
         for sp in active:
-            w = SPECIES[sp]["base"] * minfo["mult"] * rng.uniform(0.94, 1.06)
-            buy_kg = w * rng.uniform(0.985, 1.020)
-            sell_kg = w * rng.uniform(1.09, 1.16)
-            quotes[sp] = dict(buy_kg=buy_kg, sell_kg=sell_kg)
-        if mk in ("M1", "M6"):
+            w = W[mk][sp]
+            lo, hi = BEPARI_BUY_MULT[buy_source]
+            quotes[sp] = dict(buy_kg=w * rng.uniform(lo, hi),
+                              sell_kg=w * rng.uniform(1.10, 1.17))
+        if mk in LANDING_MARKETS:
             source = rng.choice(SOURCE_POOL_LOCAL)
             fare = rng.randint(300, 1200)
         else:
@@ -222,7 +315,7 @@ for mk in MKT_ORDER:
             id=rid, market=mk, actor="Bepari_Faria", sheet_row=row, sheet="Form_B_Bepari_Faria",
             age=age, edu=edu, years=years, cap_raw=cap_raw, cap_unit="Maund",
             active=active, quotes=quotes, k_species=[], d_flags={},
-            subtype=subtype, pattern=pattern, source=source,
+            subtype=subtype, pattern=pattern, source=source, buy_source=buy_source,
         ))
 
     # ---- Khuchra retailers (Form R) ----
@@ -232,52 +325,43 @@ for mk in MKT_ORDER:
         years = min(age - 16, rng.randint(2, 32))
         use_kg = rng.random() < 0.85
         cap_raw = rng.randint(40, 150) if use_kg else round(rng.uniform(1.0, 3.0), 1)
-        s_probs_r = species_availability(mk, "Khuchra")
-        active = [sp for sp in SP_ORDER if rng.random() < s_probs_r[sp]]
-        if len(active) < 4:
-            active = rng.sample(SP_ORDER, 4)
-        active = active[:5] if len(active) > 5 else active
+        active = pick_active(mk, "Khuchra")
+        # source: no direct fisherman purchases at inland retail markets
+        if mk in LANDING_MARKETS:
+            buy_source = wchoice([("Fisherman", 0.35), ("Aratdar", 0.40),
+                                  ("Faria", 0.20), ("Other", 0.05)])
+        else:
+            buy_source = wchoice([("Aratdar", 0.50), ("Faria", 0.25),
+                                  ("Other", 0.25)])
         quotes = {}
         for sp in active:
-            w = SPECIES[sp]["base"] * minfo["mult"] * rng.uniform(0.96, 1.04)
-            buy_kg = w * rng.uniform(1.10, 1.14)
-            sell_kg = w * rng.uniform(1.27, 1.42)
-            quotes[sp] = dict(buy_kg=buy_kg, sell_kg=sell_kg)
+            w = W[mk][sp]
+            lo, hi = RETAILER_BUY_MULT[buy_source]
+            quotes[sp] = dict(buy_kg=w * rng.uniform(lo, hi),
+                              sell_kg=RC[mk][sp] * rng.uniform(1.00, 1.05))
         traders.append(dict(
             id=rid, market=mk, actor="Khuchra", sheet_row=row, sheet="Form_R_Khuchra",
             age=age, edu=edu, years=years, cap_raw=cap_raw,
             cap_unit="Kg" if use_kg else "Maund",
             active=active, quotes=quotes, k_species=[], d_flags={},
+            buy_source=buy_source,
         ))
 
     # ---- Consumers (Form C) ----
-    buy_probs = [("S01", 0.50), ("S02", 0.32), ("S03", 0.15), ("S04", 0.15),
-                 ("S05", 0.50), ("S06", 0.70), ("S07", 0.30), ("S08", 0.08),
-                 ("S09", 0.58), ("S10", 0.20)]
     for row, rid in quota_rows(wb["Form_C_Consumer"], mk, "C"):
-        hour = rng.randint(8, 12)
-        minute = rng.choice([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55])
-        if hour >= 12:
-            minute = min(minute, 25)
         freq = wchoice([("Daily", 0.35), ("Weekly", 0.65)])
         interval = rng.randint(1, 2) if freq == "Daily" else rng.randint(4, 7)
-        # focal purchases: 1-3 bought + 0-2 not-today rows
-        wanted = [sp for sp, p in buy_probs if rng.random() < p]
+        wanted = [sp for sp, p in BUY_PROBS if rng.random() < p]
         if not wanted:
             wanted = [rng.choice(["S01", "S06", "S09"])]
         bought = rng.sample(wanted, min(len(wanted), rng.randint(1, 3)))
-        rest = [sp for sp, p in buy_probs if sp not in bought and rng.random() < p * 0.35]
+        rest = [sp for sp, p in BUY_PROBS if sp not in bought and rng.random() < p * 0.35]
         not_today = rng.sample(rest, min(len(rest), rng.randint(0, 2)))
-        purchases = []
-        for sp in bought:
-            paid = SPECIES[sp]["base"] * minfo["mult"] * rng.uniform(1.26, 1.38)
-            qty = rng.choice([0.5, 0.75, 1.0, 1.0, 1.5, 2.0, 2.5, 3.0])
-            purchases.append(dict(sp=sp, bought=True, price=round_price_kg(paid), qty=qty,
-                                  frm=wchoice([("Retailer", 0.85), ("Hawker", 0.15)])))
+        purchases = [mk_consumer_purchase(mk, sp) for sp in bought]
         for sp in not_today:
             purchases.append(dict(sp=sp, bought=False, price="K", qty=None, frm=""))
         consumers.append(dict(
-            id=rid, market=mk, row=row, time=f"{hour:02d}:{minute:02d}",
+            id=rid, market=mk, row=row, time=rand_time(mk),
             freq=freq, interval=interval,
             pay=wchoice([("Cash", 0.50), ("bKash", 0.28), ("Nagad_app", 0.12), ("Credit", 0.10)]),
             reason=wchoice([("Proximity", 0.25), ("Purity", 0.25), ("Price", 0.20),
@@ -286,9 +370,23 @@ for mk in MKT_ORDER:
         ))
 
 # ----------------------------------------------------------------------------
-# 5. PAIR LINKAGE (Methodology 3.3.4) + K/D FLAGS
+# 6. K ROWS + D FLAGS (assigned BEFORE pairs so pairs can be protected)
 # ----------------------------------------------------------------------------
-pairs = []  # dict(pair_id, market, seller_id, buyer_id, species)
+for t in traders:
+    rest = [sp for sp in SP_ORDER if sp not in t["active"]]
+    if rng.random() < 0.35 and rest:
+        t["k_species"] = rng.sample(rest, min(len(rest), rng.randint(1, 2)))
+    for sp in t["active"]:
+        r = rng.random()
+        if r < 0.035:
+            t["d_flags"][sp] = "sell"
+        elif r < 0.055:
+            t["d_flags"][sp] = "buy"
+
+# ----------------------------------------------------------------------------
+# 7. PAIR LINKAGE (Methodology 3.3.4)
+# ----------------------------------------------------------------------------
+pairs = []
 for mk in MKT_ORDER:
     arat = [t for t in traders if t["market"] == mk and t["actor"] == "Aratdar"]
     retail = [t for t in traders if t["market"] == mk and t["actor"] == "Khuchra"]
@@ -302,26 +400,124 @@ for mk in MKT_ORDER:
         sp = rng.choice(both)
         # transaction price: retailer buys at the aratdar's sell price
         sell_kg = seller["quotes"][sp]["sell_kg"]
-        buyer["quotes"][sp]["buy_kg"] = sell_kg * rng.uniform(0.998, 1.002)
+        buyer["quotes"][sp]["buy_kg"] = sell_kg * rng.uniform(0.999, 1.001)
+        buyer["buy_source"] = "Aratdar"          # declared source consistent
         pair_id = f"PAIR-{mk}-{i:02d}"
         seller["pair"] = (pair_id, sp)
         buyer["pair"] = (pair_id, sp)
         pairs.append(dict(pair_id=pair_id, market=mk, seller_id=seller["id"],
                           buyer_id=buyer["id"], species=sp))
 
-# K rows (species not handled today) and D flags (declined to disclose)
+# protect pair species from K/D / not-yet-sold on BOTH sides
 for t in traders:
-    rest = [sp for sp in SP_ORDER if sp not in t["active"]]
-    if rng.random() < 0.35 and rest:
-        t["k_species"] = rng.sample(rest, min(len(rest), rng.randint(1, 2)))
-    for sp in t["active"]:
-        if rng.random() < 0.04:
-            t["d_flags"][sp] = "sell"
-        elif rng.random() < 0.02:
-            t["d_flags"][sp] = "buy"
+    if "pair" in t:
+        sp = t["pair"][1]
+        t["k_species"] = [s2 for s2 in t["k_species"] if s2 != sp]
+        t["d_flags"].pop(sp, None)
 
 # ----------------------------------------------------------------------------
-# 6. WRITE FORM SHEETS
+# 8. COVERAGE GUARDS (all-ten-species reporting)
+# ----------------------------------------------------------------------------
+def landing_quotes(sp):
+    n = 0
+    for t in traders:
+        if t["actor"] == "Aratdar" and t["market"] in LANDING_MARKETS:
+            if sp in t["active"] and sp not in t["d_flags"] and sp not in t["k_species"]:
+                n += 1
+    return n
+
+
+def add_species_to_trader(t, sp):
+    """Force sp into trader's active list with anchor-derived quotes."""
+    if sp in t["active"]:
+        return
+    if len(t["active"]) >= 5:
+        # drop a species that has the most coverage overall
+        counts = {}
+        for t2 in traders:
+            if t2["actor"] == t["actor"]:
+                for s2 in t2["active"]:
+                    counts[s2] = counts.get(s2, 0) + 1
+        drop = max(t["active"], key=lambda s2: counts.get(s2, 0))
+        t["active"] = [s2 for s2 in t["active"] if s2 != drop]
+        t["quotes"].pop(drop, None)
+        t["k_species"] = [s2 for s2 in t["k_species"] if s2 != sp]
+    t["active"].append(sp)
+    t["k_species"] = [s2 for s2 in t["k_species"] if s2 != sp]
+    t["d_flags"].pop(sp, None)
+    w = W[t["market"]][sp]
+    if t["actor"] == "Aratdar":
+        t["quotes"][sp] = dict(buy_kg=w * rng.uniform(0.955, 0.975),
+                               sell_kg=w * rng.uniform(1.000, 1.015))
+    elif t["actor"] == "Bepari_Faria":
+        lo, hi = BEPARI_BUY_MULT[t["buy_source"]]
+        t["quotes"][sp] = dict(buy_kg=w * rng.uniform(lo, hi),
+                                sell_kg=w * rng.uniform(1.10, 1.17))
+    else:
+        lo, hi = RETAILER_BUY_MULT[t["buy_source"]]
+        t["quotes"][sp] = dict(buy_kg=w * rng.uniform(lo, hi),
+                               sell_kg=RC[t["market"]][sp] * rng.uniform(1.00, 1.05))
+
+
+# guard 1: landing aratdar buy+sell quotes (producer price availability)
+for sp in SP_ORDER:
+    for mk in LANDING_MARKETS:
+        tries = 0
+        while landing_quotes(sp) < MIN_LANDING and tries < 20:
+            tries += 1
+            cands = [t for t in traders if t["market"] == mk and t["actor"] == "Aratdar"
+                     and sp not in t["active"]]
+            if not cands:
+                break
+            add_species_to_trader(rng.choice(cands), sp)
+
+# guard 2: retailer sell quotes in >= MIN_RETAIL_MKTS markets
+for sp in SP_ORDER:
+    def retail_mkts_with_sell():
+        mkts = set()
+        for t in traders:
+            if (t["actor"] == "Khuchra" and sp in t["active"]
+                    and sp not in t["d_flags"] and sp not in t["k_species"]):
+                mkts.add(t["market"])
+        return mkts
+    tries = 0
+    while len(retail_mkts_with_sell()) < MIN_RETAIL_MKTS and tries < 30:
+        tries += 1
+        have = retail_mkts_with_sell()
+        need = [m for m in MKT_ORDER if m not in have]
+        mk = rng.choice(need)
+        cands = [t for t in traders if t["market"] == mk and t["actor"] == "Khuchra"
+                 and sp not in t["active"] and "pair" not in t]
+        if not cands:
+            continue
+        add_species_to_trader(rng.choice(cands), sp)
+
+# guard 3: bought-today consumer rows >= MIN_CONS_GUARD per species
+def bought_count(sp):
+    return sum(1 for c in consumers for p in c["purchases"]
+               if p["bought"] and p["sp"] == sp)
+
+
+for sp in SP_ORDER:
+    tries = 0
+    while bought_count(sp) < MIN_CONS_GUARD and tries < 40:
+        tries += 1
+        cands = [c for c in consumers
+                 if all(p["sp"] != sp for p in c["purchases"])]
+        if not cands:
+            break
+        c = min(cands, key=lambda x: sum(1 for p in x["purchases"] if p["bought"]))
+        nt = next((p for p in c["purchases"] if not p["bought"]), None)
+        if nt is not None:
+            new = mk_consumer_purchase(c["market"], sp)
+            nt.clear()
+            nt.update(new)
+        elif sum(1 for p in c["purchases"] if p["bought"]) < 3:
+            c["purchases"].append(mk_consumer_purchase(c["market"], sp))
+        # else: consumer already at 3 bought rows; loop picks another candidate
+
+# ----------------------------------------------------------------------------
+# 9. WRITE FORM SHEETS
 # ----------------------------------------------------------------------------
 wsA = wb["Form_A_Aratdar"]
 for t in [x for x in traders if x["actor"] == "Aratdar"]:
@@ -397,8 +593,7 @@ for t in [x for x in traders if x["actor"] == "Bepari_Faria"]:
     put(wsB, r, 11, "Maund")
     put(wsB, r, 13, rng.randint(2, 8))
     put(wsB, r, 14, t["source"])
-    put(wsB, r, 15, wchoice([("Fisherman", 0.50), ("Aratdar", 0.30),
-                             ("Faria", 0.15), ("Other", 0.05)]))
+    put(wsB, r, 15, t["buy_source"])
     fare = rng.randint(8, 70) * 50
     put(wsB, r, 16, fare)
     put(wsB, r, 17, rng.randint(1, 3))                     # per N days
@@ -440,9 +635,7 @@ for t in [x for x in traders if x["actor"] == "Khuchra"]:
     put(wsR, r, 13, rng.randint(16, 50) * 5)               # ice per day
     put(wsR, r, 14, rng.randint(6, 30) * 5)                # wash/water/other per day
     put(wsR, r, 15, rng.randint(2, 8))                     # spoilage %
-    buys = {"M6": [("Fisherman", 0.35), ("Aratdar", 0.40), ("Faria", 0.20), ("Other", 0.05)],
-            }.get(t["market"], [("Aratdar", 0.55), ("Faria", 0.20), ("Fisherman", 0.15), ("Other", 0.10)])
-    put(wsR, r, 16, wchoice(buys))
+    put(wsR, r, 16, t["buy_source"])
     put(wsR, r, 17, wchoice([("Household", 0.60), ("Hawker", 0.15), ("Hotel", 0.15),
                              ("Institutional", 0.05), ("Other", 0.05)]))
     cash = rng.randint(40, 70)
@@ -479,12 +672,11 @@ for c in consumers:
         ]))
 
 # ----------------------------------------------------------------------------
-# 7. PRICE OBSERVATIONS (core long-format sheet, rows 5.., prefilled Obs_ID)
+# 10. PRICE OBSERVATIONS (core long-format sheet, rows 5.., prefilled Obs_ID)
 # ----------------------------------------------------------------------------
 wsP = wb["Price_Observations"]
 po_row = 5
 po_count = 0
-MAX_PO = 500
 
 
 def po_next():
@@ -495,13 +687,12 @@ def po_next():
     return r
 
 
-# quantity share helper: split capacity across active species
 def split_qty(cap, n, unit):
     weights = [rng.uniform(0.6, 1.4) for _ in range(n)]
     total = sum(weights)
     out = []
-    for w in weights:
-        q = cap * w / total * rng.uniform(0.85, 1.0)
+    for wgt in weights:
+        q = cap * wgt / total * rng.uniform(0.85, 1.0)
         out.append(round(q, 1) if unit == "Maund" else max(5, int(round(q / 5.0) * 5)))
     return out
 
@@ -522,7 +713,7 @@ for t in traders:
         put(wsP, r, 4, t["market"])                          # D Market
         put(wsP, r, 5, actor)                                # E Actor_type
         put(wsP, r, 6, sp)                                   # F Species_code
-        buy_raw = "K" if t["d_flags"].get(sp) == "buy" else None
+        buy_raw = "D" if t["d_flags"].get(sp) == "buy" else None
         sell_raw = "D" if t["d_flags"].get(sp) == "sell" else None
         if actor == "Khuchra" and t["cap_unit"] == "Kg":
             buy_val = round_price_kg(q["buy_kg"])
@@ -531,7 +722,9 @@ for t in traders:
             buy_val = round_maund_quote(q["buy_kg"])
             sell_val = round_maund_quote(q["sell_kg"])
         # retailers occasionally have not-yet-sold stock -> sell = K
-        if actor == "Khuchra" and sell_raw is None and rng.random() < 0.08:
+        # (never on the pair species: the pair transaction completed today)
+        if (actor == "Khuchra" and sell_raw is None and rng.random() < 0.08
+                and not ("pair" in t and t["pair"][1] == sp)):
             sell_raw = "K"
         put(wsP, r, 7, buy_raw if buy_raw else buy_val)      # G buy price raw
         put(wsP, r, 8, sell_raw if sell_raw else sell_val)   # H sell price raw
@@ -542,8 +735,6 @@ for t in traders:
             put(wsP, r, 15, t["pair"][0])                    # O Pair_ID
         if buy_raw or sell_raw:
             note = []
-            if buy_raw == "K":
-                note.append("Species not handled today")
             if buy_raw == "D":
                 note.append("Buy price declined")
             if sell_raw == "K":
@@ -565,7 +756,7 @@ for t in traders:
         put(wsP, r, 16, "Species not handled today")
 
 # ----------------------------------------------------------------------------
-# 8. CONSUMER PURCHASE SHEETS
+# 11. CONSUMER PURCHASE SHEETS
 # ----------------------------------------------------------------------------
 wsF = wb["Consumer_Purchases_Focal"]
 frow = 5
@@ -608,7 +799,7 @@ for c in consumers:
             orow += 1
 
 # ----------------------------------------------------------------------------
-# 9. FORM M - MARKET OBSERVATION CHECKLIST (one row per market)
+# 12. FORM M - MARKET OBSERVATION CHECKLIST (one row per market)
 # ----------------------------------------------------------------------------
 wsM = wb["Form_M_Market_Observation"]
 FORM_M = {
@@ -678,7 +869,7 @@ for r in range(5, 11):
     put(wsM, r, 21, info["evidence"])
 
 # ----------------------------------------------------------------------------
-# 10. TAG PRICE SHEET (optional displayed-price log)
+# 13. TAG PRICE SHEET (optional displayed-price log)
 # ----------------------------------------------------------------------------
 wsT = wb["Tag_Price_Sheet"]
 trow = 5
@@ -688,24 +879,24 @@ for mk in MKT_ORDER:
     n_vendors = rng.randint(8, 12)
     vendor_ids = [f"V-{i:02d}" for i in range(1, n_vendors + 1)]
     for v_id in vendor_ids:
-        # 1-3 displayed items per vendor
+        # 1-3 displayed items per vendor, priced off the SAME retail anchor
         items = []
         focal = [sp for sp in SP_ORDER if rng.random() < 0.30]
         if not focal:
             focal = [rng.choice(SP_ORDER)]
         for sp in focal[:2]:
-            disp = SPECIES[sp]["base"] * minfo["mult"] * rng.uniform(1.28, 1.40)
+            disp = RC[mk][sp] * rng.uniform(0.99, 1.07)
             items.append((SPECIES[sp]["local"], round_price_kg(disp)))
         if rng.random() < 0.45:
             name, lo, hi = rng.choice(TAG_EXTRA_FISH)
             items.append((name, round_price_kg(rng.uniform(lo, hi))))
         for name, price in items:
             put(wsT, trow, 2, minfo["date"])                  # B Date
-            put(wsT, trow, 3, mk)                             # C Market
-            put(wsT, trow, 4, v_id)                           # D vendor
+            put(wsT, trow, 3, mk)                              # C Market
+            put(wsT, trow, 4, v_id)                            # D vendor
             put(wsT, trow, 5, COLLECTOR)                      # E initials
             put(wsT, trow, 6, name)                           # F fish name
-            put(wsT, trow, 7, price)                          # G price raw
+            put(wsT, trow, 7, price)                           # G price raw
             put(wsT, trow, 8, "Kg")                           # H unit
             if rng.random() < 0.10:
                 put(wsT, trow, 10, rng.choice([
@@ -715,7 +906,7 @@ for mk in MKT_ORDER:
             trow += 1
 
 # ----------------------------------------------------------------------------
-# 11. DATA COLLECTION LOG (one row per field visit)
+# 14. DATA COLLECTION LOG (one row per field visit)
 # ----------------------------------------------------------------------------
 wsL = wb["Data_Collection_Log"]
 LOG = [
@@ -733,8 +924,8 @@ LOG = [
      "Overcast, brief drizzle at 10:30", "Roofing check completed between showers"),
     (date(2026, 3, 6), "M4", "Researcher", "06:30", "10:30", "Yes", 15, 5,
      "Hot, 33 degree C",
-     "Thin arrivals after Jummah; Thursday reference-day prices used for two "
-     "bepari quotes"),
+     "Friday (Jummah) morning session; some traders left early for prayer; "
+     "two bepari quotes taken from Thursday reference session"),
     (date(2026, 3, 7), "M5", "Researcher", "07:00", "11:30", "No", 15, 5,
      "Fair", "Reserve day kept unused; entry and verification began 08/03"),
 ]
@@ -752,16 +943,75 @@ for i, (dt, mk, coll, t1, t2, ref, ntr, nco, weather, note) in enumerate(LOG):
     put(wsL, r, 12, note)
 
 # ----------------------------------------------------------------------------
-# 12. SAVE + SUMMARY
+# 15. SELF-CHECK BEFORE SAVE (fail loudly on any logical violation)
 # ----------------------------------------------------------------------------
-wb.save(OUT)
+errors = []
 
+# quota counts (from the model)
 n_a = sum(1 for t in traders if t["actor"] == "Aratdar")
 n_b = sum(1 for t in traders if t["actor"] == "Bepari_Faria")
 n_r = sum(1 for t in traders if t["actor"] == "Khuchra")
-print("=" * 60)
+if (n_a, n_b, n_r, len(consumers)) != (30, 30, 30, 30):
+    errors.append(f"quota mismatch: A={n_a} B={n_b} R={n_r} C={len(consumers)}")
+
+# PO row limit
+if po_count > MAX_PO:
+    errors.append(f"PO rows {po_count} exceed template limit {MAX_PO}")
+
+# consumer time windows
+for c in consumers:
+    lo, hi = (t_min(x) for x in MARKETS[c["market"]]["cons"])
+    tt = t_min(c["time"])
+    if not (lo <= tt <= hi):
+        errors.append(f"time window violation {c['id']} {c['time']}")
+
+# per-species coverage
+from collections import Counter
+po_rows_species = Counter()
+retail_mkts = {}
+for t in traders:
+    for sp in t["active"]:
+        po_rows_species[sp] += 1
+        if t["actor"] == "Khuchra" and sp not in t["d_flags"] and sp not in t["k_species"]:
+            retail_mkts.setdefault(sp, set()).add(t["market"])
+    for sp in t["k_species"]:
+        po_rows_species[sp] += 1
+for sp in SP_ORDER:
+    if bought_count(sp) < MIN_CONS_GUARD:
+        errors.append(f"{sp}: consumer bought-today = {bought_count(sp)} < {MIN_CONS_GUARD}")
+    if landing_quotes(sp) < MIN_LANDING:
+        errors.append(f"{sp}: landing aratdar quotes = {landing_quotes(sp)} < {MIN_LANDING}")
+    if po_rows_species[sp] < MIN_PO_ROWS:
+        errors.append(f"{sp}: PO rows = {po_rows_species[sp]} < {MIN_PO_ROWS}")
+    if len(retail_mkts.get(sp, set())) < MIN_RETAIL_MKTS:
+        errors.append(f"{sp}: retail markets = {sorted(retail_mkts.get(sp, set()))}")
+
+# pair completeness: seller sell numeric & buyer buy numeric for every pair
+by_id = {t["id"]: t for t in traders}
+for p in pairs:
+    s, b = by_id[p["seller_id"]], by_id[p["buyer_id"]]
+    sp = p["species"]
+    if sp in s["d_flags"] or sp in b["d_flags"]:
+        errors.append(f"{p['pair_id']}: D-flag on pair species")
+    if sp in s["k_species"] or sp in b["k_species"]:
+        errors.append(f"{p['pair_id']}: K-species overlaps pair")
+
+# payment sums already enforced by construction (100 - cash - mfs)
+
+if errors:
+    print("SELF-CHECK FAILED -- fix before saving:")
+    for e in errors:
+        print("  !!", e)
+    raise SystemExit(1)
+
+# ----------------------------------------------------------------------------
+# 16. SAVE + SUMMARY
+# ----------------------------------------------------------------------------
+wb.save(OUT)
+
+print("=" * 64)
 print("SAVED:", OUT)
-print("=" * 60)
+print("=" * 64)
 print(f"Respondents entered : {n_a} aratdar + {n_b} bepari/faria + {n_r} retailers"
       f" + {len(consumers)} consumers = {n_a + n_b + n_r + len(consumers)}")
 print(f"Price_Observations  : {po_count} rows (limit {MAX_PO})")
@@ -773,4 +1023,8 @@ print(f"Log visits          : {len(LOG)}")
 print(f"Matched pairs       : {len(pairs)}")
 for p in pairs:
     print(f"  {p['pair_id']}: {p['seller_id']} -> {p['buyer_id']} ({p['species']})")
-
+print("\nPer-species coverage self-check:")
+for sp in SP_ORDER:
+    print(f"  {sp}: PO rows={po_rows_species[sp]:3d}  bought-today={bought_count(sp)}"
+          f"  landing-aratdar={landing_quotes(sp)}"
+          f"  retail-markets={len(retail_mkts.get(sp, set()))}")

@@ -1,9 +1,9 @@
 ﻿Form,Variable,n_respondents,n_valid,n_K_valid_skip,n_D_refused,n_blank,pct_nonresponse
-Price_Observations,Buy_price_raw,463,415,48,0,0,10.4
-Price_Observations,Sell_price_raw,463,399,45,19,0,13.8
-Price_Observations,Quantity_raw,463,430,0,0,33,7.1
-Consumer_Purchases_Focal,Price_raw,69,52,17,0,0,24.6
-Consumer_Purchases_Focal,Purchased_today,69,69,0,0,0,0.0
+Price_Observations,Buy_price_raw,492,433,53,6,0,12.0
+Price_Observations,Sell_price_raw,492,414,62,16,0,15.9
+Price_Observations,Quantity_raw,492,439,0,0,53,10.8
+Consumer_Purchases_Focal,Price_raw,75,64,11,0,0,14.7
+Consumer_Purchases_Focal,Purchased_today,75,75,0,0,0,0.0
 Form A (Aratdar),Age_years,30,30,0,0,0,0.0
 Form A (Aratdar),Years_in_business,30,30,0,0,0,0.0
 Form A (Aratdar),Education,30,30,0,0,0,0.0

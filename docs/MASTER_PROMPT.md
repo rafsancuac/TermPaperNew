@@ -116,32 +116,36 @@ enter it in yellow cells only, run verify_filled.py (must pass 24/24),
 then run_analysis.py to regenerate every table and chart.
 
 CURRENT STATUS & HEADLINE (SIMULATED) RESULTS
-- 120 respondents; 463 price observations; 16 matched buy/sell pairs
-  (14 usable); 6 market-observation rows; 7 collection-log visits.
-- Producer's (fisher's) share of consumer price: 70.9% (producer price =
+- 120 respondents; 492 price observations; 15 matched buy/sell pairs
+  (all 15 usable); 6 market-observation rows; 7 collection-log visits.
+  Data = corrected v2 dataset (seed 20260911; market-day price anchors,
+  in-session interview times, unbiased species selection, full ten-species
+  coverage).
+- Producer's (fisher's) share of consumer price: 68.9% (producer price =
   Form A buy quotes at landing-linked markets M1/M6 only; Methodology 3.11c).
-- Channel margins (8 chain-complete species = S01–S07, S09; % of consumer
-  taka): Aratdar ≈ 27.8 BDT/kg (3.3%), Bepari/Faria ≈ 99.6 (11.7%),
-  Retailer (consumer-anchored) ≈ 119.0 (14.0%); total spread 246.4 (29.1%);
+- Channel margins (ALL TEN chain-complete species S01–S10; % of consumer
+  taka): Aratdar ≈ 23.2 BDT/kg (3.1%), Bepari/Faria ≈ 93.8 (12.4%),
+  Retailer (consumer-anchored) ≈ 118.0 (15.6%); total spread 234.9 (31.1%);
   margins + share = exactly 100%.
 - Chain-complete = all four stages present AND ≥3 consumer-paid quotes
-  (MIN_CONS). S08 Kankoita and S10 Harina rest on a single consumer quote
-  each → their share cells are blank (descriptive only); T3 carries a
-  Consumer_paid_n column so every share's sample size is visible.
-- Ilish chain example: fisher ≈1,032 → auction ≈1,083 → bepari ≈1,236 →
-  consumer ≈1,420 BDT/kg.
-- Retailer vendor quotes average ≈2.5% ABOVE consumer-paid prices (bargaining
+  (MIN_CONS). In the corrected v2 dataset ALL TEN species qualify
+  (Consumer_paid_n = 3–13 per species); T3 carries a Consumer_paid_n
+  column so every share's sample size is visible.
+- Ilish chain example: fisher ≈1,090 → auction ≈1,140 → bepari ≈1,331 →
+  consumer ≈1,596 BDT/kg (lean-season March 2026 level).
+- Retailer vendor quotes average ≈0.5% ABOVE consumer-paid prices (bargaining
   gap) — margins use the consumer-paid anchor; quote series are descriptive.
-- MFS payment share rises down-chain (Aratdar ~14% → retail ~29%);
-  consumers pay ~57% by MFS (bKash 37%, Nagad 20%).
-- Top problems: unsold-fish spoilage 31%, supply syndicate 31%,
-  frozen-import competition 29%, ice cost 27%.
-- Statistics (Methodology 3.8): Wilcoxon on matched pairs p=0.116
+- MFS payment share rises down-chain (Aratdar ~15% → retail ~27%);
+  consumers pay ~20% by MFS (bKash; no Nagad user intercepted).
+- Top problems: transport cost increase 31%, lean-season low landings 30%,
+  monsoon waterlogging 29%.
+- Statistics (Methodology 3.8): Wilcoxon on matched pairs p=0.389
   (consistent); Kruskal–Wallis across markets exploratory (cells n≥3):
-  significant for S01–S03, S05, S06 (S01 Fishery Ghat vs Bahaddarhat
-  survives Dunn–Holm); payment mode × actor χ² p=0.87; stratum margins
-  differ (MWU p<0.0001); retailer MC/kg vs net margin Spearman rho=0.43,
-  p=0.018.
+  significant for S01, S03, S05, S06 (S02 marginal p=0.051); three
+  contrasts survive Dunn–Holm (S01 Bahaddarhat–Patenga, S03 Chawkbazar–
+  Patenga, S06 Fishery Ghat–Chawkbazar); payment mode × actor χ² p=0.92;
+  stratum margins differ (MWU p<0.0001); retailer MC/kg vs net margin
+  Spearman rho=−0.33, p=0.071 (not significant; exploratory).
 (Full numbers live in analysis_outputs/ and docs/WRITING_GUIDE.md.)
 
 REPRODUCING / RE-RUNNING
@@ -277,14 +281,15 @@ Kazir Dewri, Karnaphuli Complex, Bahaddarhat, Patenga), 120 respondents
 species, 2–7 March 2026. Chain: fisher → Aratdar (auction) → Bepari →
 retailer → consumer; 1 maund = 37.32 kg; producer's share = fisher price
 ÷ consumer price (producer price = landing markets M1/M6 only; retail
-price = consumer-paid). Current dataset (SIMULATED, for drafting only)
-gives: producer's share 70.9%; margins (% of consumer taka) Aratdar 27.8
-(3.3%), Bepari/Faria 99.6 (11.7%), Retailer 119.0 (14.0%) — additive to
-100; total spread 246.4 (29.1%); Ilish chain ≈1,032→1,083→1,236→1,420
-BDT/kg; MFS use rises down-chain (retail ~29%); consumer MFS ~57%; top
-problems spoilage 31%, syndicate 31%, import competition 29%. Pooled
-chain stats cover 8 species (S01–S07, S09); S08/S10 producer shares are
-NOT reported (single consumer quote each; Consumer_paid_n in Table 3),
+price = consumer-paid). Current dataset (SIMULATED, corrected v2, for
+drafting only) gives: producer's share 68.9%; margins (% of consumer
+taka) Aratdar 23.2 (3.1%), Bepari/Faria 93.8 (12.4%), Retailer 118.0
+(15.6%) — additive to 100; total spread 234.9 (31.1%); Ilish chain
+≈1,090→1,140→1,331→1,596 BDT/kg; MFS use rises down-chain (retail ~27%);
+consumer MFS ~20% (bKash only); top
+problems transport cost 31%, lean-season low landings 30%, waterlogging
+29%. Pooled chain stats cover ALL TEN species (S01–S10) — every species
+is chain-complete in the v2 dataset (Consumer_paid_n in Table 3).
 S09 is descriptive-only for market coverage. TASK: <এখানে কাজ লিখুন —
 e.g., "draft Chapter 4.3 (price chain & margins) from the numbers above">.
 I will paste the exact tables next. [Then paste the relevant CSV contents.]

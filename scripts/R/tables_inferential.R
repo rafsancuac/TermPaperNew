@@ -241,7 +241,9 @@ fisher_exact_3x3 <- function(tab) {
   logP <- sum(lgamma(r + 1)) + sum(lgamma(c + 1)) - lgamma(N + 1) -
     rowSums(lgamma(cells + 1))
   P <- exp(logP - max(logP))
-  sum(P[chi2v >= obs_chi2]) / sum(P)
+  ## 1e-9 tolerance mirrors extend_analysis.py (guards against summation-
+  ## order noise at ~1e-15 excluding the observed table from its own tail)
+  sum(P[chi2v >= (obs_chi2 - 1e-9)]) / sum(P)
 }
 
 t15 <- function() {

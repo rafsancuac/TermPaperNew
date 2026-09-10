@@ -373,25 +373,37 @@ def main(path):
             pairs[str(pid).strip()].append(p)
     pair_bad, diffs = [], []
     npairs = 0
+    # channel order: buyer must sit at the same or a downstream stage of the
+    # seller (Aratdar -> Bepari_Faria -> Khuchra). The seller's own row also
+    # carries a buy price, so buyer rows must be a DIFFERENT respondent.
+    ACTOR_ORDER = {"Aratdar": 0, "Bepari_Faria": 1, "Khuchra": 2}
     for pid, rows in pairs.items():
         if len(rows) < 2:
             continue
         npairs += 1
-        seller = [r for r in rows if price_kg(r.get("Sell_price_raw"), r.get("Unit"),
-                                               r.get("Sell_BDT_per_kg"))]
-        buyer = [r for r in rows if price_kg(r.get("Buy_price_raw"), r.get("Unit"),
-                                             r.get("Buy_BDT_per_kg"))]
-        if not seller or not buyer:
+        best = None  # (gap, s_price, b_price)
+        for a in range(len(rows)):
+            for b2 in range(len(rows)):
+                if a == b2:
+                    continue
+                s_r, b_r = rows[a], rows[b2]
+                s = price_kg(s_r.get("Sell_price_raw"), s_r.get("Unit"),
+                             s_r.get("Sell_BDT_per_kg"))
+                bb = price_kg(b_r.get("Buy_price_raw"), b_r.get("Unit"),
+                              b_r.get("Buy_BDT_per_kg"))
+                if s is None or bb is None:
+                    continue
+                if ACTOR_ORDER.get(s_r.get("Actor_type"), 9) > \
+                        ACTOR_ORDER.get(b_r.get("Actor_type"), 9):
+                    continue
+                gap = abs(s - bb) / max(s, bb)
+                if best is None or gap < best[0]:
+                    best = (gap, s, bb)
+        if best is None:
             continue
-        s = price_kg(seller[0].get("Sell_price_raw"), seller[0].get("Unit"),
-                     seller[0].get("Sell_BDT_per_kg"))
-        b = price_kg(buyer[0].get("Buy_price_raw"), buyer[0].get("Unit"),
-                     buyer[0].get("Buy_BDT_per_kg"))
-        if s is None or b is None:
-            continue
-        diffs.append(abs(s - b) / max(s, b))
-        if abs(s - b) / max(s, b) > 0.05:
-            pair_bad.append((pid, round(s), round(b)))
+        diffs.append(best[0])
+        if best[0] > 0.05:
+            pair_bad.append((pid, round(best[1]), round(best[2])))
     rep("PASS" if len(diffs) >= 10 else "WARN",
         f"Matched pairs available for Wilcoxon (n={npairs})",
         f"usable price-pairs={len(diffs)}")
@@ -454,8 +466,18 @@ def main(path):
     ofp = [price_kg(r.get("Price_raw"), r.get("Unit"), r.get("Price_BDT_per_kg"))
            for r in COF]
     if ofp:
-        bad_of = [x for x in ofp if x and (x < 60 or x > 600)]
-        rep("PASS" if not bad_of else "WARN", "Other-fish prices in 60-600 band",
+        # species-aware bands: shrimp / lobster / crab legitimately trade
+        # above the generic 60-600 BDT/kg band of common table fish
+        HIGH_BAND = {"Lobster": 3600, "Bagda": 1400, "Kakra": 750}
+        def _of_cap(r):
+            name = str(r.get("Fish_name_local") or "")
+            for k, cap in HIGH_BAND.items():
+                if k.lower() in name.lower():
+                    return cap
+            return 600
+        bad_of = [x for x, r in zip(ofp, COF)
+                  if x and (x < 60 or x > _of_cap(r))]
+        rep("PASS" if not bad_of else "WARN", "Other-fish prices in 60-600 band (+shrimp/lobster)",
             f"suspect={bad_of[:5]}" if bad_of else f"mean={np.mean(ofp):.0f} BDT/kg")
 
     # ---------------- 11. Form M ----------------
