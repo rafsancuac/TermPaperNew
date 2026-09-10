@@ -169,3 +169,44 @@ Stage Summary:
 - নতুন ডেলিভারেবল: 05_data_cleaned/ (৬ ফাইল), analysis_outputs/charts_v2/ (১০ ফিগার ১০০০ dpi + ইনডেক্স), scripts/clean_data.py, scripts/make_charts_v2.py, scripts/R/run_analysis.R (Task 8-এর স্যুটের পাশে আলাদা লঘু-যাচাই পথ)
 - পেপারের ফিগার = charts_v2 (F1–F8 মূল, A1–A2 অ্যাপেন্ডিক্স); ক্লিনিং-মেথড Chapter 3-এ CLEANING_REPORT.md থেকে
 - পরবর্তী: ইউজারের R-কনসোল আউটপুট এলে MISMATCH থাকলে ডায়াগনোসিস; আসল ডাটায় পুরো পাইপলাইন রিরান
+
+## Task 10 — fixed two bugs found during independent chart/script re-verification (commit 99438f8)
+- **#11** `scripts/R/figures.R`: C1's legend was covering the S09/S10 bars, and its leftmost
+  x-axis label was edge-clipped; C2's `barplot()` was silently dropping 4 of 8 species
+  labels. Both fixed (legend moved above the bars; C2 labels drawn explicitly via `axis()`).
+  Re-ran `compare_r_py.py` after the fix: still 21/21 PASS (chart-only change).
+- **#12** `scripts/R/run_analysis.R` (the standalone lightweight verification script) crashed
+  on `rbind()` inside T16 before printing any output (column-count/type mismatch between
+  the base stratum frame and the Mann-Whitney rows). Fixed; script now runs to completion
+  (59/60 MATCH).
+- **Open, not fixed this round:** re-running the now-working `run_analysis.R` surfaced its
+  own genuine mismatch (check #47): T11 S01/Fishery-Ghat = 1416.25 (R) vs 1416.0 (Python).
+  Root cause traced to this script's own `ppk()` helper, which recomputes price-per-kg from
+  raw price+unit whenever `Sell_BDT_per_kg` is blank, without distinguishing a genuine blank
+  from a deliberate K/D-flag exclusion. Only affects this standalone script's own T11 build —
+  `run_all.R`'s pipeline (the one matched against Python) is unaffected.
+
+## Task 11 — completed the open T11 fix + hardened both fixes; merged with Task 10 (commit 834f8c4)
+- **Parallel work merged:** Task 10 (99438f8) and this session fixed #11/#12 independently and
+  equivalently (C1 legend → top strip; C2 labels drawn explicitly; T16 rbind crash). Merge kept
+  this session's versions of `scripts/R/figures.R`, `scripts/R/run_analysis.R` and the
+  `analysis_outputs_r/` regeneration; Task 10's worklog entry preserved above.
+- **T11 (#47) root cause — corrected:** NOT `ppk()`/K-D. The K/D flags sit inside the raw price
+  cell itself, so `num("K")` is NA and `ppk()` already excludes them. The real cause was
+  rounding precision: Python's `t11_price_by_market` rounds the species x market mean to
+  **0 decimals** while `run_analysis.R`'s `mean_of` rounded to 2. The three differing cells
+  were pure rounding signatures (1416.25→1416, 1496.76→1497, 1570.75→1571). After switching
+  T11 to 0 decimals, a full **60-cell diff vs the Python T11 CSV = 0 mismatches** (impossible
+  if the quote sets differed), and check #47 is MATCH.
+- **T16 hardened beyond crash-fix:** now mirrors the Python T16 layout exactly (5 columns:
+  Actor, n, Median/IQR/Mean_margin_BDT_kg; Mann-Whitney rows carry "U=..., p=..." text in the
+  Mean column) — CSV verified cell-for-cell identical to
+  `analysis_outputs/tables/T16_Stratum_Margin_MannWhitney.csv`. R's `wilcox.test` W equals
+  scipy's U for the first sample, so U is quoted directly (U=0, 0, 10, all p<0.0001).
+- **9 new embedded checks** (T16 stratum means + all three MWU result strings):
+  `run_analysis.R` now prints **66/66 checks MATCH, 0 MISMATCH** (previously it crashed
+  before printing any).
+- **Independent re-verification of the whole stack:** `run_all.R` quality gates PASS
+  (A+B+R=246.39=spread; PS 70.9%); `compare_r_py.py` 21/21 PASS; VLM inspection of the
+  regenerated C1 (legend clear of bars, all 10 species labels complete), C2 (all 8 labels
+  present, none clipped) and C8 (6 market labels per panel) — all clean.
