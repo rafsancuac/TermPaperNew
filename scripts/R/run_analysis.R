@@ -266,7 +266,8 @@ T11 <- t(sapply(species_codes, function(code) {
   sapply(markets, function(m) {
     v <- PO$sell_kg[PO$Species_code == code & PO$Actor_type == "Khuchra" &
                     PO$Market == m & !is.na(PO$sell_kg)]
-    if (length(v)) mean_of(v) else NA_real_
+    ## Python T11 rounds the species x market mean to 0 decimals
+    if (length(v)) round(mean(v, na.rm = TRUE), 0) else NA_real_
   })
 }))
 rownames(T11) <- species_codes
@@ -381,22 +382,30 @@ resp_margins <- function() {
 RM <- resp_margins()
 
 ## T16 - stratum margins + Mann-Whitney U
+## (same five-column layout as the Python T16: the Mann-Whitney rows carry
+##  "U=..., p=..." text in the Mean column and blanks in Median/IQR)
 strata <- list(Aratdar = RM$margin[RM$Actor == "Aratdar"],
                Bepari_Faria = RM$margin[RM$Actor == "Bepari_Faria"],
                Khuchra = RM$margin[RM$Actor == "Khuchra"])
 T16 <- data.frame(Actor = names(strata), n = sapply(strata, length),
-                  Median = sapply(strata, function(v) round(median(v), 2)),
-                  Mean = sapply(strata, function(v) round(mean(v), 2)))
+                  Median_margin_BDT_kg = sapply(strata, function(v) round(median(v), 2)),
+                  IQR_BDT_kg = sapply(strata, function(v) round(IQR(v), 2)),
+                  Mean_margin_BDT_kg = sapply(strata, function(v) round(mean(v), 2)))
 pairs16 <- rbind(c("Aratdar", "Bepari_Faria"),
                  c("Aratdar", "Khuchra"),
                  c("Bepari_Faria", "Khuchra"))
 T16 <- rbind(T16, do.call(rbind, lapply(seq_len(nrow(pairs16)), function(k) {
   a <- strata[[pairs16[k, 1]]]; b <- strata[[pairs16[k, 2]]]
+  ## R's W equals scipy's U for the first sample, so the statistic is quoted
+  ## directly (verified against extend_analysis.py T16)
   ut <- suppressWarnings(wilcox.test(a, b, exact = FALSE, correct = FALSE))
-  data.frame(Actor = paste0("MWU: ", pairs16[k, 1], " vs ", pairs16[k, 2]),
+  u <- unname(ut$statistic); p <- ut$p.value
+  ptxt <- if (p < 1e-4) sprintf("U=%0.0f, p<0.0001", u)
+          else sprintf("U=%0.0f, p=%.4f", u, p)
+  data.frame(Actor = paste0("Mann-Whitney U: ", pairs16[k, 1], " vs ", pairs16[k, 2]),
              n = paste0(length(a), "/", length(b)),
-             Median = NA_real_, Mean = NA_real_,
-             U = unname(ut$statistic), p = ut$p.value)
+             Median_margin_BDT_kg = NA_real_, IQR_BDT_kg = NA_real_,
+             Mean_margin_BDT_kg = ptxt)
 })))
 
 ## T17 - retailer marketing cost vs net margin (Spearman)
@@ -529,11 +538,26 @@ chk("T15 chi-square statistic",               T15b$chi2, 1.22)
 chk("T15 chi-square df",                      T15b$df, 4)
 chk("T15 chi-square p-value",                 T15b$p, 0.8749, tol = 0.002)
 chk("T16 Aratdar median margin (BDT/kg)",
-    T16$Median[T16$Actor == "Aratdar"], 30.14)
+    T16$Median_margin_BDT_kg[T16$Actor == "Aratdar"], 30.14)
 chk("T16 Bepari/Faria median margin",
-    T16$Median[T16$Actor == "Bepari_Faria"], 83.74)
+    T16$Median_margin_BDT_kg[T16$Actor == "Bepari_Faria"], 83.74)
 chk("T16 Retailer median margin",
-    T16$Median[T16$Actor == "Khuchra"], 182.0)
+    T16$Median_margin_BDT_kg[T16$Actor == "Khuchra"], 182.0)
+chk("T16 Aratdar mean margin (BDT/kg)",
+    T16$Mean_margin_BDT_kg[T16$Actor == "Aratdar"], 30.62)
+chk("T16 Bepari/Faria mean margin",
+    T16$Mean_margin_BDT_kg[T16$Actor == "Bepari_Faria"], 84.07)
+chk("T16 Retailer mean margin",
+    T16$Mean_margin_BDT_kg[T16$Actor == "Khuchra"], 176.02)
+chk("T16 MWU result Aratdar vs Bepari/Faria",
+    T16$Mean_margin_BDT_kg[T16$Actor ==
+      "Mann-Whitney U: Aratdar vs Bepari_Faria"], "U=0, p<0.0001")
+chk("T16 MWU result Aratdar vs Retailer",
+    T16$Mean_margin_BDT_kg[T16$Actor ==
+      "Mann-Whitney U: Aratdar vs Khuchra"], "U=0, p<0.0001")
+chk("T16 MWU result Bepari/Faria vs Retailer",
+    T16$Mean_margin_BDT_kg[T16$Actor ==
+      "Mann-Whitney U: Bepari_Faria vs Khuchra"], "U=10, p<0.0001")
 if (nrow(T17b)) {
   chk("T17 Spearman rho (MC vs net margin)",  T17b$rho, 0.43, tol = 0.006)
   chk("T17 Spearman p-value",                 T17b$p, 0.0177, tol = 0.002)

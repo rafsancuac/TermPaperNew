@@ -19,20 +19,26 @@ fig_c1 <- function(T3) {
   cols <- c(COL_PRODUCER, COL_ARATDAR, COL_BEPARI, COL_RETAIL, COL_CONSUMER)
   labs <- c("Producer (net auction)","Aratdar sell","Bepari sell",
             "Retailer sell","Consumer paid")
-  open_png(file.path(DIR_CHARTS, "C1_price_chain_by_species.png"), w = 12.5, h = 7)
+  open_png(file.path(DIR_CHARTS, "C1_price_chain_by_species.png"), w = 12.5, h = 7.5)
+  par(mar = c(8, 5, 3.5, 1.5))          # deep bottom margin for rotated labels
   on.exit(close_png())
   ymax <- max(sapply(levs, function(l) max(df[[l]], na.rm = TRUE)))
-  plot.new(); plot.window(xlim = c(0.4, k + 0.6), ylim = c(0, ymax * 1.08))
+  ## 16% headroom keeps the top legend strictly above the tallest bar
+  plot.new(); plot.window(xlim = c(0.3, k + 0.7), ylim = c(0, ymax * 1.16))
   wd <- 0.16
   for (j in seq_along(levs)) {
-    rect(x + (j - 3) * wd - wd/2, 0, x + (j - 3) * wd + wd/2, df[[levs[j]]],
+    h <- df[[levs[j]]]
+    ok <- !is.na(h)                       # S10 has no aratdar sell quote
+    rect(x[ok] + (j - 3) * wd - wd/2, 0, x[ok] + (j - 3) * wd + wd/2, h[ok],
          col = cols[j], border = "white", lwd = 0.4)
   }
   axis(1, at = x, labels = paste(df$Species_code, df$Local_name), las = 2, cex.axis = 0.7)
   axis(2); box()
   title(ylab = "BDT per kg",
         main = "Marine fish price chain by species - Chattogram markets, March 2026")
-  legend("bottomright", legend = labs, fill = cols, border = NA, cex = 0.85, bty = "n")
+  ## single-row legend centred at the top, over the empty headroom zone
+  legend("top", legend = labs, fill = cols, border = NA, cex = 0.8, bty = "n",
+         ncol = 5, inset = c(0, -0.02))
 }
 
 ## ---------------------------------------------------------------------------
@@ -42,12 +48,17 @@ fig_c2 <- function(T3) {
   df <- T3[!is.na(T3$Producer_share_pct) & T3$Species_code != "ALL", , drop = FALSE]
   df <- df[order(df$Producer_share_pct), , drop = FALSE]
   overall <- T3$Producer_share_pct[T3$Species_code == "ALL"]
-  open_png(file.path(DIR_CHARTS, "C2_producers_share.png"), w = 9, h = 6)
+  open_png(file.path(DIR_CHARTS, "C2_producers_share.png"), w = 9, h = 7)
+  par(mar = c(4.5, 6.5, 3.2, 1.2))       # wide left margin for full names
   on.exit(close_png())
+  ## axis() silently drops crowded category labels (4 of 8 vanished), so the
+  ## names are drawn manually with mtext(), which never thins
+  nms <- paste(df$Species_code, df$Local_name)
   xr <- barplot(df$Producer_share_pct, horiz = TRUE, col = COL_PRODUCER,
                 border = NA, xlim = c(0, 110),
-                names.arg = paste(df$Species_code, df$Local_name),
-                xlab = "Producer share of consumer price (%)", cex.names = 0.85)
+                names.arg = rep("", nrow(df)),
+                xlab = "Producer share of consumer price (%)")
+  mtext(nms, side = 2, at = xr, las = 1, line = 0.6, cex = 0.8)
   abline(v = overall, col = COL_CONSUMER, lty = 2, lwd = 1.8)
   mtext(sprintf("Pooled mean %.1f%%", overall), side = 1, at = overall + 2.5,
         col = COL_CONSUMER, cex = 0.85, adj = 0)

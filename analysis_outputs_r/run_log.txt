@@ -1,7 +1,7 @@
 MS-499 R analysis session
- 2026-09-09 08:20:24 
-Input : /home/user/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx 
-Output: /home/user/TermPaperNew/analysis_outputs_r 
+ 2026-09-10 05:16:02 
+Input : /home/z/my-project/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx 
+Output: /home/z/my-project/TermPaperNew/analysis_outputs_r 
 
   table  T1_Respondent_Profile.csv                  (5 rows)
   table  T2_Business_Scale.csv                      (3 rows)
@@ -24,8 +24,8 @@ Output: /home/user/TermPaperNew/analysis_outputs_r
   table  T16_Stratum_Margin_MannWhitney.csv         (6 rows)
   table  T17_Retailer_MC_Profit_Spearman.csv        (31 rows)
   table  T18_ShapiroWilk_Screening.csv              (5 rows)
-[08:20:27] Figures C1-C8 written
-Workbook written: /home/user/TermPaperNew/analysis_outputs_r/R_Analysis_Summary.xlsx 
+[05:16:05] Figures C1-C8 written
+Workbook written: /home/z/my-project/TermPaperNew/analysis_outputs_r/R_Analysis_Summary.xlsx 
 
 ---------------- QUALITY GATES ----------------
 Margins telescope: A+B+R = 246.39 vs spread = 246.39  [PASS]
@@ -33,4 +33,4 @@ PS + spread% = 100: PS 70.9%  [PASS]
 T3 ALL matches T10: 70.9% vs 70.9%  [PASS]
 -----------------------------------------------
 
-DONE - R analysis outputs in: /home/user/TermPaperNew/analysis_outputs_r 
+DONE - R analysis outputs in: /home/z/my-project/TermPaperNew/analysis_outputs_r 
