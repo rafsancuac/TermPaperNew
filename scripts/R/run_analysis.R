@@ -261,12 +261,16 @@ T10 <- data.frame(
                  round(100 * P$producer / P$consumer, 1)))
 
 ## T11 - retail quotes by species x market
+## NOTE: Table 11 is the one table that reports whole-BDT retail quotes
+## (0 decimals) in both the Python reference and run_all.R's own T11 -
+## mean_of() rounds to 2 dp, which is what produced the earlier 1416.25
+## vs 1416.0 mismatch at check #47. Round to 0 dp here to match.
 markets <- c("M1", "M2", "M3", "M4", "M5", "M6")
 T11 <- t(sapply(species_codes, function(code) {
   sapply(markets, function(m) {
     v <- PO$sell_kg[PO$Species_code == code & PO$Actor_type == "Khuchra" &
                     PO$Market == m & !is.na(PO$sell_kg)]
-    if (length(v)) mean_of(v) else NA_real_
+    if (length(v)) round(mean(v, na.rm = TRUE), 0) else NA_real_
   })
 }))
 rownames(T11) <- species_codes
