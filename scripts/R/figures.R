@@ -19,10 +19,14 @@ fig_c1 <- function(T3) {
   cols <- c(COL_PRODUCER, COL_ARATDAR, COL_BEPARI, COL_RETAIL, COL_CONSUMER)
   labs <- c("Producer (net auction)","Aratdar sell","Bepari sell",
             "Retailer sell","Consumer paid")
-  open_png(file.path(DIR_CHARTS, "C1_price_chain_by_species.png"), w = 12.5, h = 7)
+  open_png(file.path(DIR_CHARTS, "C1_price_chain_by_species.png"), w = 12.5, h = 7.5)
   on.exit(close_png())
+  ## extra left/bottom/top room: (a) stops the leading letter of the leftmost
+  ## rotated species label ("S02...") from being clipped by the plot edge,
+  ## (b) leaves headroom above the tallest bars for a top legend strip
+  graphics::par(mar = c(7.0, 4.6, 3.6, 1.4))
   ymax <- max(sapply(levs, function(l) max(df[[l]], na.rm = TRUE)))
-  plot.new(); plot.window(xlim = c(0.4, k + 0.6), ylim = c(0, ymax * 1.08))
+  plot.new(); plot.window(xlim = c(0.0, k + 0.7), ylim = c(0, ymax * 1.24))
   wd <- 0.16
   for (j in seq_along(levs)) {
     rect(x + (j - 3) * wd - wd/2, 0, x + (j - 3) * wd + wd/2, df[[levs[j]]],
@@ -32,7 +36,12 @@ fig_c1 <- function(T3) {
   axis(2); box()
   title(ylab = "BDT per kg",
         main = "Marine fish price chain by species - Chattogram markets, March 2026")
-  legend("bottomright", legend = labs, fill = cols, border = NA, cex = 0.85, bty = "n")
+  ## legend as a horizontal strip ABOVE the bars (not "bottomright" inside the
+  ## plot, which used to sit on top of the short S09/S10 bars) - reserved
+  ## headroom above is ymax*1.08..ymax*1.24
+  legend(x = mean(range(x)), y = ymax * 1.24, xjust = 0.5, yjust = 1,
+         legend = labs, fill = cols, border = NA, cex = 0.8, bty = "n",
+         horiz = TRUE, xpd = TRUE)
 }
 
 ## ---------------------------------------------------------------------------
@@ -42,12 +51,21 @@ fig_c2 <- function(T3) {
   df <- T3[!is.na(T3$Producer_share_pct) & T3$Species_code != "ALL", , drop = FALSE]
   df <- df[order(df$Producer_share_pct), , drop = FALSE]
   overall <- T3$Producer_share_pct[T3$Species_code == "ALL"]
-  open_png(file.path(DIR_CHARTS, "C2_producers_share.png"), w = 9, h = 6)
+  open_png(file.path(DIR_CHARTS, "C2_producers_share.png"), w = 9, h = 7.5)
   on.exit(close_png())
+  ## widen the left margin so the longest species labels ("S04 Koral/Kurl",
+  ## "S02 Rupchanda") aren't clipped at the canvas edge
+  graphics::par(mar = c(4.2, 7.8, 3.2, 1.2))
+  ## names.arg = NA + explicit axis(2, ...) below, instead of letting
+  ## barplot's own names.arg place the labels: with 8 close-set horizontal
+  ## bars, barplot()/axis() was silently skipping every other category
+  ## label to avoid overlap (S02, S03, S04, S06 were disappearing).
+  ## Drawing the axis ourselves with tick = FALSE forces all 8 to render.
   xr <- barplot(df$Producer_share_pct, horiz = TRUE, col = COL_PRODUCER,
-                border = NA, xlim = c(0, 110),
-                names.arg = paste(df$Species_code, df$Local_name),
-                xlab = "Producer share of consumer price (%)", cex.names = 0.85)
+                border = NA, xlim = c(0, 110), names.arg = NA,
+                xlab = "Producer share of consumer price (%)")
+  axis(2, at = xr, labels = paste(df$Species_code, df$Local_name),
+       las = 1, cex.axis = 0.8, tick = FALSE, line = -0.4)
   abline(v = overall, col = COL_CONSUMER, lty = 2, lwd = 1.8)
   mtext(sprintf("Pooled mean %.1f%%", overall), side = 1, at = overall + 2.5,
         col = COL_CONSUMER, cex = 0.85, adj = 0)

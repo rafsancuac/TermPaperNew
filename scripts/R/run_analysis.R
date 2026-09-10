@@ -384,9 +384,10 @@ RM <- resp_margins()
 strata <- list(Aratdar = RM$margin[RM$Actor == "Aratdar"],
                Bepari_Faria = RM$margin[RM$Actor == "Bepari_Faria"],
                Khuchra = RM$margin[RM$Actor == "Khuchra"])
-T16 <- data.frame(Actor = names(strata), n = sapply(strata, length),
+T16 <- data.frame(Actor = names(strata), n = as.character(sapply(strata, length)),
                   Median = sapply(strata, function(v) round(median(v), 2)),
-                  Mean = sapply(strata, function(v) round(mean(v), 2)))
+                  Mean = sapply(strata, function(v) round(mean(v), 2)),
+                  U = NA_real_, p = NA_real_)
 pairs16 <- rbind(c("Aratdar", "Bepari_Faria"),
                  c("Aratdar", "Khuchra"),
                  c("Bepari_Faria", "Khuchra"))
