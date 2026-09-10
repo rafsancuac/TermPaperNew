@@ -70,6 +70,34 @@ load_data <- function() {
   COF<- COF[!is.na(COF$Fish_name_local) & COF$Fish_name_local != "", , drop = FALSE]
   M  <- has_date(drop_id(read_tab("Form_M_Market_Observation", fM)), "Obs_Date")
 
+  ## ---- empty-template guard -------------------------------------------------
+  ## The file Marine_Fish_Marketing_Data_Entry (1).xlsx in 03_data_entry_template/
+  ## has only Obs_ID / Respondent_ID pre-filled (500 rows) and everything else
+  ## blank. That is not usable data — give a clear error instead of cryptic
+  ## min/max -> rp() crashes.
+  po_filled <- sum(!is.na(PO$Market) & PO$Market != "")
+  a_filled  <- nrow(A)
+  b_filled  <- nrow(B)
+  cat(sprintf("[load] PO rows=%d (with Market=%d), A=%d, B=%d, R=%d, C=%d, CPF=%d\n",
+              nrow(PO), po_filled, a_filled, b_filled, nrow(R), nrow(C), nrow(CPF)))
+  if (po_filled == 0 && a_filled == 0 && b_filled == 0) {
+    stop(paste0(
+      "\n[ERROR] This workbook appears to be the EMPTY TEMPLATE (03_data_entry_template/).\n",
+      "  Price_Observations has ", nrow(PO), " Obs_ID rows but 0 Market/price values,\n",
+      "  and Form A/B/C have 0 dated interviews.\n",
+      "  -> Please use the FILLED workbook from 04_data_filled/ or your final data-entry file.\n",
+      "  Current file: ", INPUT_FILE, "\n",
+      "  In the repo the filled file is:\n",
+      "    04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx\n",
+      "  If you are on Windows and your file is F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx,\n",
+      "  open it in Excel and check Price_Observations sheet — you will see only PO-0001..PO-0502\n",
+      "  with all price columns blank (yellow cells). That means survey data has not been entered yet.\n"
+    ))
+  }
+  if (po_filled < 10) {
+    warning(sprintf("[load] Very few filled PO rows (%d) — file may be partially filled: %s", po_filled, INPUT_FILE))
+  }
+
   PO$buy_kg  <- mapply(price_kg, PO$Buy_price_raw, PO$Unit, PO$Buy_BDT_per_kg)
   PO$sell_kg <- mapply(price_kg, PO$Sell_price_raw, PO$Unit, PO$Sell_BDT_per_kg)
   PO$qty_kg  <- mapply(qty_kg,  PO$Quantity_raw, PO$Quantity_unit, PO$Quantity_kg)
@@ -77,8 +105,9 @@ load_data <- function() {
   CPF$qty_kg   <- mapply(qty_kg,   CPF$Quantity_raw, CPF$Quantity_unit, CPF$Quantity_kg)
   COF$price_kg <- mapply(price_kg, COF$Price_raw, COF$Unit, COF$Price_BDT_per_kg)
 
-  window <- range(na.omit(as.Date(c(A$Interview_Date, B$Interview_Date,
-                                     R$Interview_Date, C$Interview_Date))))
+  all_dates <- na.omit(as.Date(c(A$Interview_Date, B$Interview_Date,
+                                 R$Interview_Date, C$Interview_Date)))
+  window <- if (length(all_dates)) range(all_dates) else as.Date(c(NA, NA))
   list(SP = SP, MK = MK, A = A, B = B, R = R, C = C, PO = PO, CPF = CPF,
        COF = COF, M = M, window = format(window, "%d/%m/%Y"))
 }
@@ -127,11 +156,20 @@ t1 <- function() {
 t2 <- function() {
   cap_stats <- function(rs) {
     v <- num(rs$Daily_capacity_kg)
-    data.frame(n = sum(!is.na(v)),
-               Daily_capacity_kg_mean = mn(v), Daily_capacity_kg_sd = sdv(v),
-               Daily_capacity_kg_median = rp(median(v, na.rm = TRUE), 1),
-               Daily_capacity_kg_min = rp(min(v, na.rm = TRUE), 1),
-               Daily_capacity_kg_max = rp(max(v, na.rm = TRUE), 1))
+    v <- v[!is.na(v)]
+    if (length(v) == 0) {
+      data.frame(n = 0L,
+                 Daily_capacity_kg_mean = NA_real_, Daily_capacity_kg_sd = NA_real_,
+                 Daily_capacity_kg_median = NA_real_,
+                 Daily_capacity_kg_min = NA_real_,
+                 Daily_capacity_kg_max = NA_real_)
+    } else {
+      data.frame(n = length(v),
+                 Daily_capacity_kg_mean = mn(v), Daily_capacity_kg_sd = sdv(v),
+                 Daily_capacity_kg_median = rp(median(v, na.rm = TRUE), 1),
+                 Daily_capacity_kg_min = rp(min(v, na.rm = TRUE), 1),
+                 Daily_capacity_kg_max = rp(max(v, na.rm = TRUE), 1))
+    }
   }
   a <- cap_stats(DATA$A); b <- cap_stats(DATA$B); rr <- cap_stats(DATA$R)
   row1 <- cbind(data.frame(Actor = "Aratdar", n = a$n), a[, -1, drop = FALSE],

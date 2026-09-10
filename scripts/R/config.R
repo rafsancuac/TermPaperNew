@@ -27,31 +27,61 @@
 ##    currently in 04_data_filled/) so the suite can be tested end-to-end.
 ##    The repo root is located by walking upward from the working directory.
 ## ---------------------------------------------------------------------------
+## If the user already set INPUT_FILE manually (in console or by editing this file
+## below), respect it and do not overwrite.
+if (exists("INPUT_FILE", inherits = TRUE)) {
+  try({
+    pf <- get("INPUT_FILE", inherits = TRUE)
+    if (is.character(pf) && length(pf) == 1 && file.exists(pf)) {
+      INPUT_FILE <- normalizePath(pf, winslash = "/", mustWork = FALSE)
+    }
+  }, silent = TRUE)
+}
+
 find_repo_root <- function() {
-  d <- normalizePath(getwd(), winslash = "/")
+  d <- normalizePath(getwd(), winslash = "/", mustWork = FALSE)
   repeat {
     if (dir.exists(file.path(d, "04_data_filled"))) return(d)
+    if (file.exists(file.path(d, "scripts", "R", "run_all.R"))) return(d)
     nd <- dirname(d)
     if (identical(nd, d)) return(NULL)
     d <- nd
   }
 }
 repo_root <- find_repo_root()
-if (!is.null(repo_root)) {
-  found <- list.files(file.path(repo_root, "04_data_filled"),
-                      pattern = "\\.xlsx$", full.names = TRUE)
-  found <- found[!grepl("^~\\$", basename(found))]
-  if (length(found) > 0) {
-    INPUT_FILE <- found[1]
+
+## Only auto-detect if INPUT_FILE is not already a valid file
+need_auto <- TRUE
+if (exists("INPUT_FILE", inherits = FALSE)) {
+  if (is.character(INPUT_FILE) && length(INPUT_FILE) == 1 && file.exists(INPUT_FILE)) {
+    need_auto <- FALSE
+  }
+}
+if (need_auto) {
+  if (!is.null(repo_root) && dir.exists(file.path(repo_root, "04_data_filled"))) {
+    found <- list.files(file.path(repo_root, "04_data_filled"),
+                        pattern = "\\.xlsx$", full.names = TRUE)
+    found <- found[!grepl("^~\\$", basename(found))]
+    if (length(found) > 0) {
+      INPUT_FILE <- found[1]
+    } else {
+      INPUT_FILE <- NULL
+      warning("[config] No filled workbook (*.xlsx) found in 04_data_filled/ - set INPUT_FILE manually, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Your_Final_File.xlsx\"")
+    }
+  } else if (!is.null(repo_root)) {
+    INPUT_FILE <- NULL
+    warning(sprintf("[config] Repo root found at %s but no 04_data_filled/ folder. Set INPUT_FILE manually, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx\"", repo_root))
   } else {
     INPUT_FILE <- NULL
-    warning("[config] No filled workbook (*.xlsx) found in 04_data_filled/ - set INPUT_FILE.")
+    warning("[config] Could not locate the repo root (looked for 04_data_filled/ or scripts/R/run_all.R). Set INPUT_FILE explicitly, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx\"")
   }
-} else {
-  INPUT_FILE <- NULL
-  warning("[config] Could not locate the repo root - set INPUT_FILE explicitly.")
 }
-stopifnot(!is.null(INPUT_FILE), file.exists(INPUT_FILE))
+
+## Final validation — with a helpful message for the empty-template case
+if (is.null(INPUT_FILE) || !is.character(INPUT_FILE) || !file.exists(INPUT_FILE)) {
+  stop(sprintf("[config] INPUT_FILE not found. Current value: %s\nSet it before running, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx\"\n  source(\"scripts/R/run_all.R\")", deparse(if (exists("INPUT_FILE")) INPUT_FILE else NULL)))
+}
+INPUT_FILE <- normalizePath(INPUT_FILE, winslash = "/", mustWork = TRUE)
 
 ## ---------------------------------------------------------------------------
 ## 2. OUTPUT FOLDER  ----------------------------------------------------------
