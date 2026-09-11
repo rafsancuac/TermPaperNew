@@ -1,6 +1,6 @@
 ﻿Series,n,W,p_value,Decision
 Producer price - landing markets M1/M6 (Form A buy),50,0.9035,0.0006,p<=0.05 - non-normal; nonparametric tests used
 Aratdar auction sell - M1/M6,49,0.9046,0.0008,p<=0.05 - non-normal; nonparametric tests used
-Bepari/Faria sell - all markets,146,0.8959,0.0,p<=0.05 - non-normal; nonparametric tests used
-Khuchra retailer sell quotes - all markets,132,0.8951,0.0,p<=0.05 - non-normal; nonparametric tests used
-Consumer-paid prices (Form C slips),54,0.8123,0.0,p<=0.05 - non-normal; nonparametric tests used
+Bepari/Faria sell - all markets,146,0.8961,0.0,p<=0.05 - non-normal; nonparametric tests used
+Khuchra retailer sell quotes - all markets,132,0.8917,0.0,p<=0.05 - non-normal; nonparametric tests used
+Consumer-paid prices (Form C slips),54,0.8104,0.0,p<=0.05 - non-normal; nonparametric tests used

@@ -1,8 +1,8 @@
 "Cash_pct_mean","MFS_pct_mean","Credit_pct_mean","MFS_Regular_n","MFS_Occasional_n","MFS_Never_n","Payment_method","Payment_method_pct","Actor","n"
-69.63,14.17,16.2,14,12,4,,,"Aratdar",30
-64,17.43,18.57,9,16,5,,,"Bepari/Faria",30
-55.1,27.37,17.53,14,13,3,,,"Retailer",30
-,,,,,,"Cash",50,"Consumer (Form C)",30
-,,,,,,"Nagad_app",23.3,"Consumer (Form C)",30
-,,,,,,"bKash",20,"Consumer (Form C)",30
-,,,,,,"Credit",6.7,"Consumer (Form C)",30
+69.63,14.17,16.2,14,12,4,"",NA,"Aratdar",30
+64,17.43,18.57,9,16,5,"",NA,"Bepari/Faria",30
+55.1,27.37,17.53,14,13,3,"",NA,"Retailer",30
+NA,NA,NA,NA,NA,NA,"Cash",50,"Consumer (Form C)",30
+NA,NA,NA,NA,NA,NA,"Nagad_app",23.3,"Consumer (Form C)",30
+NA,NA,NA,NA,NA,NA,"bKash",20,"Consumer (Form C)",30
+NA,NA,NA,NA,NA,NA,"Credit",6.7,"Consumer (Form C)",30

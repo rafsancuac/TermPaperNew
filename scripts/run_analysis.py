@@ -46,6 +46,15 @@ LANDING_MARKETS = ("M1", "M6")
 # consumer price rests on 1-2 slips (e.g. S08 Kankoita, S10 Harina in the
 # simulated set) are reported with prices only; their share cells stay blank.
 MIN_CONS = 3
+# Methodology 3.8: a species observed in fewer than three markets is reported
+# descriptively only. The same three-market floor is therefore applied to
+# chain-completeness, so a row can never be flagged descriptive-only while
+# still feeding the pooled ("ALL") estimate.
+MIN_MARKETS = 3
+# Cost normalisation conventions (Methodology 3.7.1) - mixed-frequency expense
+# items are converted to BDT per trading day before division by throughput.
+TRADING_DAYS_MONTH = 26     # trading days per month
+TRADING_DAYS_YEAR = 312     # trading days per year (26 x 12)
 
 TBL_DIR = os.path.join(ROOT, "analysis_outputs", "tables")
 CH_DIR = os.path.join(ROOT, "analysis_outputs", "charts")
@@ -132,13 +141,20 @@ def read_sheet_rows(ws, id_col=2, require=None):
 
 def find_default_data():
     """
-    Locate the filled workbook for Chattogram field data.
-    Priority:
-      1. *REAL*FILLED*.xlsx (actual field data)
-      2. *REAL*.xlsx excluding EMPTY (real data, any name)
-      3. *Filled*.xlsx (legacy/simulated, e.g. archive fallback)
-      4. Any .xlsx in 04_data_filled/ (including EMPTY template — will fail with clear message)
-    Excludes 04_data_filled/archive/ and temp ~$ files.
+    Locate the workbook the analysis should run on.
+
+    Provenance is encoded in the filename and the ordering below makes the
+    *active* dataset explicit rather than implicit:
+
+      0. ``SYNTHETIC_*_Filled.xlsx``   - the active synthetic dataset produced
+         by ``scripts/generate_synthetic_data.py``. Used for pipeline
+         development and for a methods/instrument-validation write-up.
+      1. ``*REAL*FILLED*.xlsx``        - genuine field data, once collected.
+      2. ``*REAL*.xlsx`` (not EMPTY)   - genuine field data, any naming.
+      3. other ``*Filled*.xlsx``       - legacy naming.
+      4. ``*EMPTY*.xlsx``              - blank template; will fail loudly.
+
+    ``04_data_filled/archive/`` and temporary ``~$`` files are excluded.
     """
     d = os.path.join(ROOT, "04_data_filled")
     if not os.path.isdir(d):
@@ -148,37 +164,40 @@ def find_default_data():
     files = [f for f in files if os.path.isfile(os.path.join(d, f))]
     if not files:
         raise FileNotFoundError(
-            "No workbook found in 04_data_filled/. Expected REAL field data file, e.g.:\n"
-            "  04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx\n"
-            "Create it from REAL_EMPTY.xlsx by filling yellow cells with Chattogram field data.\n"
-            "Simulated test data is archived in 04_data_filled/archive/"
+            "No workbook found in 04_data_filled/. Generate the synthetic set with\n"
+            "  python scripts/generate_synthetic_data.py && python scripts/qc_recalc.py <file>\n"
+            "or place collected field data there as *_REAL_FILLED.xlsx."
         )
-    # priority buckets
+
     def prio(name):
         low = name.lower()
-        if "real" in low and "filled" in low:
+        if low.startswith("synthetic") and "filled" in low:
             return 0
-        if "real" in low and "empty" not in low:
+        if "real" in low and "filled" in low:
             return 1
-        if "filled" in low and "simulated" not in low and "archive" not in low:
+        if "real" in low and "empty" not in low:
             return 2
+        if "filled" in low:
+            return 3
         if "empty" in low:
-            return 4
-        return 3
+            return 5
+        return 4
+
     files_sorted = sorted(files, key=lambda n: (prio(n), n.lower()))
-    chosen = os.path.join(d, files_sorted[0])
-    # warn if only empty template
-    if "empty" in files_sorted[0].lower():
-        print(f"[WARN] Only template found: {files_sorted[0]} — this is EMPTY (yellow cells not filled).")
-        print("  Fill it with real field data from Chattogram (6 markets: M1 Fishery Ghat, M2 Chawkbazar, M3 Kazir Dewri, M4 Karnaphuli, M5 Bahaddarhat, M6 Patenga)")
-        print("  and save as *_REAL_FILLED.xlsx. Simulated test data is in 04_data_filled/archive/")
-    elif prio(files_sorted[0]) == 2:
-        print(f"[WARN] Using legacy/simulated file: {files_sorted[0]}")
-        print("  Simulated test data has been archived to 04_data_filled/archive/")
-        print("  For final paper, use REAL field data: fill REAL_EMPTY.xlsx -> REAL_FILLED.xlsx")
-    else:
-        print(f"[INFO] Using field data: {files_sorted[0]} (Chattogram)")
-    return chosen
+    chosen = files_sorted[0]
+    path = os.path.join(d, chosen)
+    tag = {0: "SYNTHETIC (generated - not field data)",
+           1: "REAL field data", 2: "REAL field data",
+           3: "legacy filled", 4: "unclassified", 5: "EMPTY TEMPLATE"}[prio(chosen)]
+    print(f"[INFO] Dataset: {chosen}  [{tag}]")
+    if prio(chosen) == 0:
+        print("  NOTE: figures produced from this workbook are properties of the "
+              "generator seed, not of Chattogram markets.")
+    if prio(chosen) == 5:
+        print(f"[WARN] Only the blank template was found: {chosen}.")
+        print("  Fill the yellow cells (6 markets: M1 Fishery Ghat, M2 Chawkbazar, "
+              "M3 Kazir Dewri, M4 Karnaphuli, M5 Bahaddarhat, M6 Patenga).")
+    return path
 
 
 # ----------------------------------------------------------------------------
@@ -425,8 +444,13 @@ def t3_chain(d):
         bep = _po_mean(po, "Bepari_Faria", "sell_kg", code)
         ret = _po_mean(po, "Khuchra", "sell_kg", code)
         cons = round(float(np.mean(cons_vals)), 2) if cons_vals else None
+        # Chain-complete (Methodology 3.8 + 3.7.3): all four level means, at
+        # least MIN_CONS consumer-paid slips, AND retail quotes in >= 3 markets
+        # (Method 3.8: species seen in fewer than three markets are descriptive
+        # only, so they must not feed the inferential/pooled estimate either).
         complete = (all(x is not None for x in (prod, arat, bep, cons))
-                    and cons_n >= MIN_CONS)
+                    and cons_n >= MIN_CONS
+                    and len(ret_markets) >= MIN_MARKETS)
 
         reasons = []
         if len(ret_markets) < 3:
@@ -498,11 +522,11 @@ def t3_chain(d):
             "(descriptive; margins use the consumer-paid anchor); Consumer = focal-species "
             "purchases actually paid (Form C). Margins = differences of consecutive level means "
             "and telescope to the total spread. K/D-flagged prices excluded. Species without a "
-            "complete chain - or with fewer than MIN_CONS consumer-paid observations - show "
-            "prices but blank margins/share and are excluded from ALL (see Local_name note); "
-            "Consumer_paid_n reports the actual number of consumer slips behind each share. "
-            "Reporting_status lists Method 3.8 descriptive-only reasons (S08/S09/S10 in the "
-            "current set).")
+            "complete chain - fewer than MIN_CONS consumer-paid slips, or retail quotes in "
+            "fewer than MIN_MARKETS markets (Method 3.8 descriptive-only) - show prices but "
+            "blank margins/share and are excluded from ALL, so Reporting_status and pool "
+            "membership can never disagree. Consumer_paid_n reports the actual number of "
+            "consumer slips behind each share.")
     return "T3_Price_Chain", "Table 3. Price chain by species (BDT per kg)", df, note
 
 
@@ -716,10 +740,15 @@ def t10_margins(d):
     for c in codes:
         cons_n = sum(1 for r in cpf_yes
                      if r.get("Species_code") == c and r["price_kg"] is not None)
+        ret_markets = {r.get("Market") for r in po
+                       if r.get("Actor_type") == "Khuchra"
+                       and r.get("Species_code") == c
+                       and r["sell_kg"] is not None}
         if (_po_mean(po, "Aratdar", "buy_kg", c, LANDING_MARKETS) is not None
                 and _po_mean(po, "Aratdar", "sell_kg", c, LANDING_MARKETS) is not None
                 and _po_mean(po, "Bepari_Faria", "sell_kg", c) is not None
                 and cons_n >= MIN_CONS
+                and len(ret_markets) >= MIN_MARKETS
                 and _cons_mean(cpf_yes, c) is not None):
             chain_codes.append(c)
     if not chain_codes:
@@ -794,10 +823,260 @@ def t11_price_by_market(d):
     return "T11_Retail_Price_by_Market", "Table 11. Retail prices by species and market", df, note
 
 
+# ----------------------------------------------------------------------------
+# Cost normalisation helpers (Methodology V4 Sec. 3.7.1)
+#   MC_ki = ( sum_r c_ri ) / Q_ki
+# Expense items arrive in mixed frequencies (daily / monthly / yearly /
+# per-trip / per-lot). Each is converted to a BDT-per-trading-day figure using
+# the convention documented in the table note, then divided by the
+# respondent's own daily throughput in kg.
+# ----------------------------------------------------------------------------
+def _per_day(amount, freq, default_days=1.0):
+    """Convert a cost item to BDT per trading day."""
+    v = num(amount)
+    if v is None or not np.isfinite(v) or v <= 0:
+        return 0.0
+    f = str(freq or "").strip().lower()
+    if f.startswith("day"):
+        return v
+    if f.startswith("month"):
+        return v / TRADING_DAYS_MONTH
+    if f.startswith("year") or f.startswith("annual"):
+        return v / TRADING_DAYS_YEAR
+    if f.startswith("week"):
+        return v / 6.0
+    return v / default_days
+
+
+def _resp_buy_price_kg(po, rid):
+    """Mean buy price per kg quoted by one respondent (own purchase cost)."""
+    vals = [r["buy_kg"] for r in po
+            if r.get("Respondent_ID") == rid and r["buy_kg"] is not None]
+    return float(np.mean(vals)) if vals else None
+
+
+def _mc_per_kg_by_stratum(d):
+    """Per-respondent marketing cost in BDT/kg for all three trader strata.
+
+    Methodology 3.7.1 itemises: rent/toll, electricity where applicable,
+    transport including loading/unloading, wages, commission paid, icing,
+    tools and washing water, and other sundries. Losses (spoilage, transit
+    damage) are entered at replacement cost because Sec. 3.7.2 defines profit
+    as margin minus marketing cost and an unsold/damaged kilogram is a real
+    cost to the operator.
+    """
+    po, out = d["PO"], {"Aratdar": [], "Bepari_Faria": [], "Khuchra": []}
+
+    # ---- Aratdar -----------------------------------------------------------
+    for r in d["A"]:
+        cap = num(r.get("Daily_capacity_kg")) or num(r.get("Daily_capacity_raw"))
+        if not cap or cap <= 0:
+            continue
+        rent = _per_day(r.get("Rent_amount_BDT"), r.get("Rent_frequency"))
+        elec = _per_day(r.get("Electricity_bill_BDT"), r.get("Electricity_frequency"))
+        maint = _per_day(r.get("Equipment_Cooler_Maintenance_BDT"),
+                         r.get("Equipment_Cooler_Maintenance_frequency"))
+        wages = (num(r.get("Workers_count")) or 0) * (num(r.get("Worker_daily_wage_BDT")) or 0)
+        other = _per_day(r.get("Other_cost_BDT"), "Monthly")   # see note
+        out["Aratdar"].append({
+            "Respondent_ID": r.get("Respondent_ID"), "Market": r.get("Market"),
+            "Daily_capacity_kg": round(float(cap), 2),
+            "Rent_toll": round(rent, 2), "Electricity": round(elec, 2),
+            "Wages": round(wages, 2), "Maintenance": round(maint, 2),
+            "Other_sundries": round(other, 2),
+            "Loss_cost": 0.0,
+            "MC_BDT_per_day": round(rent + elec + wages + maint + other, 2),
+            "MC_BDT_per_kg": round((rent + elec + wages + maint + other) / cap, 2),
+        })
+
+    # ---- Bepari / Faria ----------------------------------------------------
+    for r in d["B"]:
+        cap = num(r.get("Daily_capacity_kg")) or num(r.get("Daily_capacity_raw"))
+        if not cap or cap <= 0:
+            continue
+        period = num(r.get("Trip_frequency_days")) or 1.0
+        if period <= 0:
+            period = 1.0
+        trips = num(r.get("Trips_per_period")) or 0.0
+        transport = ((num(r.get("Transport_fare_per_trip_BDT")) or 0.0)
+                     + (num(r.get("Loading_Unloading_cost_per_trip_BDT")) or 0.0)) * trips / period
+        ice = num(r.get("Ice_cost_BDT_per_day")) or 0.0
+        # commission paid to the aratdar: percent of lot value, or flat per lot
+        buy_px = _resp_buy_price_kg(po, r.get("Respondent_ID"))
+        unit = str(r.get("Commission_unit") or "").strip().lower()
+        comm_val = num(r.get("Commission_to_aratdar_value")) or 0.0
+        if unit.startswith("percent"):
+            comm = (comm_val / 100.0) * (buy_px or 0.0) * cap
+        else:
+            comm = comm_val * trips / period
+        loss = ((num(r.get("Transit_damage_pct")) or 0.0) / 100.0) * (buy_px or 0.0) * cap
+        total = transport + ice + comm + loss
+        out["Bepari_Faria"].append({
+            "Respondent_ID": r.get("Respondent_ID"), "Market": r.get("Market"),
+            "Daily_capacity_kg": round(float(cap), 2),
+            "Transport_loading": round(transport, 2), "Icing": round(ice, 2),
+            "Commission_paid": round(comm, 2), "Loss_cost": round(loss, 2),
+            "MC_BDT_per_day": round(total, 2),
+            "MC_BDT_per_kg": round(total / cap, 2),
+        })
+
+    # ---- Khuchra (retailer) ------------------------------------------------
+    for r in d["R"]:
+        cap = num(r.get("Daily_capacity_kg")) or num(r.get("Daily_capacity_raw"))
+        if not cap or cap <= 0:
+            continue
+        rent = num(r.get("Shop_Van_Rent_BDT_per_day")) or 0.0
+        ice = num(r.get("Ice_cost_BDT_per_day")) or 0.0
+        wash = num(r.get("Wash_Water_Other_cost_BDT_per_day")) or 0.0
+        buy_px = _resp_buy_price_kg(po, r.get("Respondent_ID"))
+        loss = ((num(r.get("Spoilage_pct")) or 0.0) / 100.0) * (buy_px or 0.0) * cap
+        total = rent + ice + wash + loss
+        out["Khuchra"].append({
+            "Respondent_ID": r.get("Respondent_ID"), "Market": r.get("Market"),
+            "Daily_capacity_kg": round(float(cap), 2),
+            "Rent_toll": round(rent, 2), "Icing": round(ice, 2),
+            "Washing_water": round(wash, 2), "Loss_cost": round(loss, 2),
+            "MC_BDT_per_day": round(total, 2),
+            "MC_BDT_per_kg": round(total / cap, 2),
+        })
+    return out
+
+
+def t4b_marketing_cost(d):
+    """Marketing cost per kilogram by stratum (Methodology 3.7.1, eq. 3.3)."""
+    mc = _mc_per_kg_by_stratum(d)
+    rows = []
+    for stratum, label in (("Aratdar", "Aratdar"),
+                           ("Bepari_Faria", "Bepari/Faria"),
+                           ("Khuchra", "Khuchra retailer")):
+        recs = mc[stratum]
+        if not recs:
+            continue
+        vals = [x["MC_BDT_per_kg"] for x in recs]
+        rows.append({
+            "Stratum": label, "n": len(recs),
+            "MC_BDT_kg_mean": round(float(np.mean(vals)), 2),
+            "MC_BDT_kg_sd": round(float(np.std(vals, ddof=1)), 2) if len(vals) > 1 else None,
+            "MC_BDT_kg_median": round(float(np.median(vals)), 2),
+            "MC_BDT_kg_min": round(min(vals), 2), "MC_BDT_kg_max": round(max(vals), 2),
+            "Throughput_kg_day_mean": round(float(np.mean(
+                [x["Daily_capacity_kg"] for x in recs])), 2),
+        })
+    df = pd.DataFrame(rows)
+    note = ("Marketing cost per kilogram by stratum, Methodology 3.7.1 eq. 3.3 "
+            "(MC = sum of itemised expenses / quantity handled per day). Mixed-frequency "
+            f"items are converted to BDT per trading day using {TRADING_DAYS_MONTH} trading "
+            f"days per month and {TRADING_DAYS_YEAR} per year; trips are annualised over the "
+            "respondent's own Trip_frequency_days period; Form A 'Other_cost_BDT' is treated "
+            "as a monthly sundries figure. Physical losses (retailer spoilage, bepari transit "
+            "damage) are valued at the respondent's own mean purchase price per kg, because "
+            "Sec. 3.7.2 defines profit as margin minus marketing cost and an unsold kilogram "
+            "is a genuine cost to the operator. Aratdar commission is income to the aratdar, "
+            "not a cost, and is therefore excluded from his MC while included (as commission "
+            "paid) in the bepari's.")
+    return "T4b_Marketing_Cost_per_kg", ("Table 4b. Marketing cost per kilogram "
+                                         "by trader stratum"), df, note
+
+
+def t19_chain_indicators(d):
+    """Channel-level indicators required by Methodology 3.7.3-3.7.4.
+
+    Price spread (3.6), gross marketing margin GMM% (3.7), net marketing
+    margin NMM% (3.8), producer's share PS% (3.9), and both Shepherd-type
+    marketing-efficiency ratios (3.10).
+    """
+    po = d["PO"]
+    cpf_yes = [r for r in d["CPF"] if r.get("Purchased_today") == "Yes"]
+    mc = _mc_per_kg_by_stratum(d)
+    mc_mean = {k: (float(np.mean([x["MC_BDT_per_kg"] for x in v])) if v else None)
+               for k, v in mc.items()}
+    sum_mc = sum(v for v in mc_mean.values() if v is not None)
+
+    # replicate the Table 3 / Table 10 chain-complete rule exactly
+    chain = []
+    for c in sorted(d["SP"].keys()):
+        cons_n = sum(1 for r in cpf_yes
+                     if r.get("Species_code") == c and r["price_kg"] is not None)
+        ret_mk = {r.get("Market") for r in po
+                  if r.get("Actor_type") == "Khuchra" and r.get("Species_code") == c
+                  and r["sell_kg"] is not None}
+        prod = _po_mean(po, "Aratdar", "buy_kg", c, LANDING_MARKETS)
+        cons = _cons_mean(cpf_yes, c)
+        if (prod and cons and cons_n >= MIN_CONS and len(ret_mk) >= MIN_MARKETS):
+            chain.append((c, prod, cons))
+
+    rows = []
+    for c, prod, cons in chain:
+        sp = d["SP"][c]
+        spread = cons - prod
+        rows.append({
+            "Species_code": c, "Local_name": sp["Local_name"],
+            "Producer_BDT_kg": prod, "Consumer_BDT_kg": cons,
+            "Price_spread_BDT_kg": round(spread, 2),
+            "GMM_pct": round(100.0 * spread / cons, 1),
+            "SumMC_BDT_kg": round(sum_mc, 2),
+            "NMM_pct": round(100.0 * (spread - sum_mc) / cons, 1),
+            "PS_pct": round(100.0 * prod / cons, 1),
+            "ME_consumer": round(cons / (sum_mc + spread), 3),
+            "ME_producer": round(prod / (sum_mc + spread), 3),
+        })
+    if rows:
+        prod_p = float(np.mean([r["Producer_BDT_kg"] for r in rows]))
+        cons_p = float(np.mean([r["Consumer_BDT_kg"] for r in rows]))
+        spread_p = cons_p - prod_p
+        # volume-weighted PS: ratio of sums, weighted by kg actually purchased
+        # (Consumer_Purchases_Focal quantity) - composition-consistent, unlike
+        # the unweighted mean of species means reported in Tables 3 and 10.
+        wsum_p = wsum_c = 0.0
+        for c, prod, cons in chain:
+            q = sum(r["qty_kg"] for r in cpf_yes
+                    if r.get("Species_code") == c and r.get("qty_kg"))
+            if q:
+                wsum_p += prod * q
+                wsum_c += cons * q
+        rows.append({
+            "Species_code": "ALL",
+            "Local_name": f"Mean of species means (chain-complete: "
+                          f"{', '.join(r['Species_code'] for r in rows)})",
+            "Producer_BDT_kg": round(prod_p, 2), "Consumer_BDT_kg": round(cons_p, 2),
+            "Price_spread_BDT_kg": round(spread_p, 2),
+            "GMM_pct": round(100.0 * spread_p / cons_p, 1),
+            "SumMC_BDT_kg": round(sum_mc, 2),
+            "NMM_pct": round(100.0 * (spread_p - sum_mc) / cons_p, 1),
+            "PS_pct": round(100.0 * prod_p / cons_p, 1),
+            "ME_consumer": round(cons_p / (sum_mc + spread_p), 3),
+            "ME_producer": round(prod_p / (sum_mc + spread_p), 3),
+        })
+        if wsum_c:
+            rows.append({
+                "Species_code": "ALL (volume-weighted)",
+                "Local_name": "PS weighted by kg purchased (sensitivity check)",
+                "Producer_BDT_kg": None, "Consumer_BDT_kg": None,
+                "Price_spread_BDT_kg": None, "GMM_pct": None,
+                "SumMC_BDT_kg": round(sum_mc, 2), "NMM_pct": None,
+                "PS_pct": round(100.0 * wsum_p / wsum_c, 1),
+                "ME_consumer": None, "ME_producer": None,
+            })
+    df = pd.DataFrame(rows)
+    note = ("Channel-level indicators, Methodology 3.7.3 eq. 3.6-3.9 and 3.7.4 eq. 3.10. "
+            "GMM%% = (Pr-Pp)/Pr; NMM%% = (Pr-Pp-SumMC)/Pr; PS%% = Pp/Pr; "
+            "ME_consumer = Pr/(SumMC + SumM) and ME_producer = Pp/(SumMC + SumM) with "
+            "SumM = the summed segment margins, which telescope to the price spread. "
+            f"SumMC = {sum_mc:.2f} BDT/kg is the sum of the three stratum mean costs from "
+            "Table 4b and is chain-wide, therefore constant across species. The ALL row is "
+            "the unweighted mean of species means (as Tables 3 and 10); the volume-weighted "
+            "row re-weights each species by the kilograms actually purchased in the consumer "
+            "sample and is reported as a composition sensitivity check.")
+    return "T19_Chain_Indicators", ("Table 19. Channel-level marketing indicators "
+                                    "(spread, GMM, NMM, producer's share, "
+                                    "marketing efficiency)"), df, note
+
+
 def build_tables(d):
     return [t1_profile(d), t2_scale(d), t2b_channel(d), t3_chain(d),
-            t4_costs(d), t5_payment(d), t6_problems(d), t7_market(d),
-            t8_consumer(d), t9_other_fish(d), t10_margins(d), t11_price_by_market(d)]
+            t4_costs(d), t4b_marketing_cost(d), t5_payment(d), t6_problems(d),
+            t7_market(d), t8_consumer(d), t9_other_fish(d), t10_margins(d),
+            t11_price_by_market(d), t19_chain_indicators(d)]
 
 
 # ----------------------------------------------------------------------------

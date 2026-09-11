@@ -4,5 +4,5 @@
 "Median difference (BDT/kg)","0"
 "Mean difference (BDT/kg)","-0.32"
 "Wilcoxon W statistic","26"
-"p-value (two-sided)","0.9188"
+"p-value (two-sided)","0.9219"
 "Interpretation","p >= 0.05: seller-sell and buyer-buy quotes of matched lots do not differ systematically - self-reported chain prices are internally consistent"

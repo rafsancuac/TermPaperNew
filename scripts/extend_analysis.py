@@ -483,6 +483,13 @@ def table_stratum_margins(d):
 # ----------------------------------------------------------------------------
 # 5. Marketing cost vs net margin (Spearman) - retailers (Methodology 3.8 Q5)
 # ----------------------------------------------------------------------------
+def _ret_buy_price_kg(po, rid):
+    """Mean buy price per kg quoted by one respondent (own purchase cost)."""
+    vals = [r["buy_kg"] for r in po
+            if r.get("Respondent_ID") == rid and r["buy_kg"] is not None]
+    return float(np.mean(vals)) if vals else None
+
+
 def table_mc_profit_spearman(d):
     po = d["PO"]
     margins = respondent_margins(po)
@@ -495,14 +502,25 @@ def table_mc_profit_spearman(d):
         cap = num(r.get("Daily_capacity_kg")) or num(r.get("Daily_capacity_raw")) or np.nan
         if not np.isfinite(cap) or cap <= 0:
             continue
-        mc = ((num(r.get("Shop_Van_Rent_BDT_per_day")) or 0)
-              + (num(r.get("Ice_cost_BDT_per_day")) or 0)
-              + (num(r.get("Wash_Water_Other_cost_BDT_per_day")) or 0)) / cap
+        # Marketing cost per kg, Methodology 3.7.1. Cash items are already
+        # BDT/day; the spoilage percentage is valued at the respondent's own
+        # mean purchase price per kg, because an unsold kilogram is a real
+        # cost and Sec. 3.7.2 defines profit as margin minus marketing cost.
+        buy_px = _ret_buy_price_kg(po, rid)
+        cash = ((num(r.get("Shop_Van_Rent_BDT_per_day")) or 0)
+                + (num(r.get("Ice_cost_BDT_per_day")) or 0)
+                + (num(r.get("Wash_Water_Other_cost_BDT_per_day")) or 0))
+        spoil = ((num(r.get("Spoilage_pct")) or 0.0) / 100.0) * (buy_px or 0.0) * cap
+        mc = (cash + spoil) / cap
         pi = margins[key] - mc
         rows.append({"Respondent_ID": rid, "Market": r.get("Market"),
                      "Mean_margin_BDT_kg": round(margins[key], 2),
+                     "Buy_price_BDT_kg": round(buy_px, 2) if buy_px else None,
+                     "Spoilage_loss_BDT_kg": round(spoil / cap, 2),
                      "MC_BDT_kg": round(float(mc), 2),
-                     "Net_profit_BDT_kg": round(float(pi), 2)})
+                     "Net_profit_BDT_kg": round(float(pi), 2),
+                     "Net_profit_pct_of_margin": round(100.0 * pi / margins[key], 1)
+                     if margins[key] else None})
     df = pd.DataFrame(rows)
     out = []
     if len(df) >= 8:
@@ -513,11 +531,16 @@ def table_mc_profit_spearman(d):
                                  "MC_BDT_kg": round(float(rho), 3),
                                  "Net_profit_BDT_kg": round(float(p), 4)}])
         out = pd.concat([df, summary], ignore_index=True)
-    note = ("Retailers only (daily cost structure is unambiguous): MC/kg = (stall rent + ice + "
-            "wash/water/other, all BDT/day) / daily capacity kg; net margin = own-quote margin "
-            "- MC/kg. Spearman rho between MC and net margin (Methodology 3.8 Q5). Other strata "
-            "mix monthly/yearly/per-trip frequencies, so per-kg MC is not computed for them "
-            "until the cost module defines the period consistently (flagged in review).")
+    note = ("Retailers only (their cost module is entirely day-referenced). MC/kg follows "
+            "Methodology 3.7.1: cash items (stall/van rent + ice + washing water and other "
+            "sundries, all BDT/day) plus the spoilage loss valued at the respondent's own mean "
+            "purchase price per kg, divided by daily capacity in kg. Net profit = own-quote "
+            "margin (3.7.2: M = Ps - Pb) minus MC/kg (3.7.2: pi = M - MC). The earlier version "
+            "of this table omitted the spoilage term and therefore overstated retailer profit "
+            "by roughly an order of magnitude; the spoilage column is shown separately so the "
+            "correction is auditable. Spearman rho between MC and net margin (Methodology 3.8 "
+            "Q5). Per-kg MC for the aratdar and bepari strata - which mix monthly, yearly, "
+            "per-trip and per-lot frequencies - is reported in Table 4b.")
     return "T17_Retailer_MC_Profit_Spearman", "Table 17. Retailer marketing cost vs net margin (Spearman)", out, note
 
 

@@ -1,10 +1,10 @@
 ﻿Species,Local_name,Test_tier,Markets_qualifying,n_per_market,H,df,p_value,Decision
-S01,Ilish,exploratory (n>=3),M1; M2; M3; M4; M5; M6,M1=5; M2=4; M3=3; M4=5; M5=4; M6=3,14.354,5.0,0.0135,reject H0 (p<0.05): prices differ across markets
-S02,Rupchanda,exploratory (n>=3),M2; M3; M4; M5; M6,M2=3; M3=4; M4=3; M5=3; M6=4,9.208,4.0,0.0561,fail to reject H0 (p>=0.05)
-S03,Lakkha,exploratory (n>=3),M2; M3; M4,M2=4; M3=5; M4=3,2.402,2.0,0.301,fail to reject H0 (p>=0.05)
-S04,Koral/Kurl,exploratory (n>=3),M1; M3; M6,M1=3; M3=4; M6=5,7.887,2.0,0.0194,reject H0 (p<0.05): prices differ across markets
-S05,Surma,exploratory (n>=3),M1; M3; M4; M5; M6,M1=4; M3=3; M4=5; M5=5; M6=4,11.931,4.0,0.0179,reject H0 (p<0.05): prices differ across markets
-S06,Churi,exploratory (n>=3),M1; M2; M4; M5,M1=3; M2=3; M4=4; M5=5,9.598,3.0,0.0223,reject H0 (p<0.05): prices differ across markets
+S01,Ilish,exploratory (n>=3),M1; M2; M3; M4; M5; M6,M1=5; M2=4; M3=3; M4=5; M5=4; M6=3,17.478,5.0,0.0037,reject H0 (p<0.05): prices differ across markets
+S02,Rupchanda,exploratory (n>=3),M2; M3; M4; M5; M6,M2=3; M3=4; M4=3; M5=3; M6=4,11.657,4.0,0.0201,reject H0 (p<0.05): prices differ across markets
+S03,Lakkha,exploratory (n>=3),M2; M3; M4,M2=4; M3=5; M4=3,1.353,2.0,0.5083,fail to reject H0 (p>=0.05)
+S04,Koral/Kurl,exploratory (n>=3),M1; M3; M6,M1=3; M3=4; M6=5,7.781,2.0,0.0204,reject H0 (p<0.05): prices differ across markets
+S05,Surma,exploratory (n>=3),M1; M3; M4; M5; M6,M1=4; M3=3; M4=5; M5=5; M6=4,14.941,4.0,0.0048,reject H0 (p<0.05): prices differ across markets
+S06,Churi,exploratory (n>=3),M1; M2; M4; M5,M1=3; M2=3; M4=4; M5=5,10.805,3.0,0.0128,reject H0 (p<0.05): prices differ across markets
 S07,Poa,not run,,,,,,cells < n threshold in <3 markets -> descriptive only
 S08,Kankoita,not run,,,,,,cells < n threshold in <3 markets -> descriptive only
 S09,Loitta,not run,,,,,,cells < n threshold in <3 markets -> descriptive only

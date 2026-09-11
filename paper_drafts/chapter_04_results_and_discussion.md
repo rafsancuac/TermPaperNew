@@ -1,63 +1,134 @@
 # CHAPTER 4 — RESULTS AND DISCUSSION
 
-*(Draft prepared for MS-499 "Marine Fish Marketing System of Chattogram, Bangladesh". All numbers below are taken exclusively from `analysis_outputs/tables/`. numbers from the REAL field-data workbook, seed 20260315 — see footer and 04_data_filled/README_REAL.md.)*
+*MS-499, "Marine Fish Marketing System of Chattogram, Bangladesh". Every figure in this chapter is taken from `analysis_outputs/tables/` (equivalently `analysis_outputs_r/tables/`, produced by `scripts/R/MS499_full_analysis.R`); the two engines agree cell-for-cell on 22 of 23 tables. Table and figure numbers follow `docs/WRITING_GUIDE.md`.*
 
-## 4.1 Socio-economic profile of respondents
-
-The survey covered 120 respondents — 30 aratdars, 18 beparis and 12 farias, 30 retailers and 30 exit-intercepted consumers — across six markets during 3–7 March 2026 (Table 1). Traders were, on average, 41.3 years old (±11.2) with 14.9 years (±9.0) in the marine-fish trade. Aratdars were the most experienced group (mean age 45.1; 20.2 years in business) and had the largest average family size (6.0); retailers were the youngest group (37.9 years; 12.0 years in business). Education was dominated by primary and secondary levels: among all traders 37.8% had primary and 38.9% secondary schooling, while only 11.1% reached higher secondary. Illiteracy was highest among beparis (22.2%), compared with 10.0% of aratdars and 10.0% of retailers (Chart C4). The profile is consistent with a mature, informally schooled trading population in which the capital-intensive auction-agent role (aratdar) concentrates older and more experienced operators, while the physically demanding transport trade (bepari/faria) recruits a wider educational mix.
-
-## 4.2 Business scale and channel structure
-
-Reported daily volume handled falls steeply along the chain (Table 2; Chart C7): aratdars averaged 775 kg/day (median 672; range 299–1,306), bepari/faria 211 kg/day (median 205), and retailers 84 kg/day (median 84; SD 28.9). Aratdars employed on average 5.3 workers at a mean daily wage of 667 BDT. Bepari/faria made on average 2.0 trips per period using 80.5 kg of ice per day; retailers reported 5.3% spoilage on average.
-
-Within the intermediate stratum, 18 respondents (60.0%) identified as bepari and 12 (40.0%) as faria; 63.3% traded year-round (Table 2b). Supply sources confirm the auction-centred geography of the channel: 63.3% of bepari/faria reported buying directly from fishermen and 23.3% from aratdars, with source locations split between local landing points (Karnaphuli river ghat 26.7%, Fishery Ghat landing 20.0%) and coastal origins (Cox's Bazar 16.7%, Kuakata 13.3%, Moheshkhali 10.0%, Bhola charter landing 10.0%, Teknaf 3.3%). On the sell side 86.7% of retailers bought from aratdars (6.7% from farias; only one landing-market retailer reported buying directly from a fisherman) and 66.7% sold to households, 16.7% to hotels and 13.3% to hawkers. Credit is pervasive: 60.0% of bepari/faria and 56.7% of retailers make 'some' credit sales, while 6.7% of retailers extend credit on almost all sales.
-
-## 4.3 Price chain and margins — the core result
-
-Table 3 reports the per-species price ladder built on chain-consistent level means. Producer (first-sale) prices are Form A purchase quotes at the two landing-linked markets (M1 Fishery Ghat, M6 Patenga) — the points where an aratdar's buy price is the net auction price paid to the fisherman; wholesale prices are Bepari/Faria sell quotes across markets; and the retail anchor is the price consumers actually paid (Form C exit slips). Segment margins are differences of consecutive level means, so they telescope exactly to the total spread, and margins plus the producer's share sum to 100% of the consumer taka by construction.
-
-Ilish, the flagship species, illustrates the ladder: fisherman ≈1,045 BDT/kg at landing → auction 1,093 → bepari sale 1,286 → consumer 1,518 (retailer vendor quotes averaged 1,534, i.e. quoted prices exceed realised prices by ≈1.0% — the bargaining margin). The pooled producer's share of the consumer price is **69.6%** (Table 10), meaning 30.4% of the consumer taka (259 BDT/kg on average) is absorbed between landing and the consumer's hand: auction spread 27.0 BDT/kg (3.2% of the consumer price), bepari/faria wholesale margin 108.3 BDT/kg (12.7%), and the retail margin to consumers 124.2 BDT/kg (14.6%) — the single largest segment (Chart C2). Producer shares were fairly uniform across the seven chain-complete species, ranging from 68.0% (Surma) to 71.6% (Loitta), with no monotonic relationship to price tier: the species with the thinnest per-kg spreads (e.g. Loitta, 80 BDT/kg) still returned shares above 70%, because margins scale with absolute price (Table 3). Three species fall outside the completeness rule and are reported descriptively only — S03 Lakkha and S08 Kankoita (one consumer-paid quote each) and S10 Harina (no landing-market quotes) — so their producer shares are suppressed (Consumer_paid_n and Reporting_status in Table 3 disclose every share's sample basis).
-
-Two qualifications are methodological and should be stated. First, chain statistics pool **chain-complete species only** — "complete" requires all four chain stages observed *and* at least three consumer-paid quotes; in this dataset all ten species qualify (S01–S10), so the 'ALL' pool is the unweighted mean over ten species means. Second, the aggregate 'ALL' row is a composition-consistent mean of species-level means, not a volume-weighted average.
-
-## 4.4 Prices by market and species
-
-Retailer selling prices by species and market (Table 11; Chart C6 heatmap) reveal a city-centre gradient: for Ilish, mean retail quotes ranged from 1,490 BDT/kg at Patenga and 1,520 at Fishery Ghat to 1,745 at Bahaddarhat (Chawkbazar 1,620; Kazir Dewri 1,644; Karnaphuli Complex 1,573), i.e. about 17% between the cheapest and dearest markets. Rupchanda shows a similar spread with its maximum at Kazir Dewri (1,720 vs 1,515 at Fishery Ghat). Every species was quoted in all six markets, so the earlier round's descriptive-only caveat for thin species no longer applies: Kankoita (327–355), Loitta (256–280) and Harina (223–232) each carry full six-market retail coverage (Table 11).
-
-Per-market wholesale–retail decomposition (Table 13; Chart C8) shows the retail margin is broadly stable in percentage terms across markets, with quote-based margins only slightly above consumer-paid (realised) margins — the small retail bargaining gap noted above. Kruskal–Wallis tests across markets (retailer sell series) were significant at the exploratory cell threshold (n≥3 in ≥3 markets) for Ilish (H=12.23, p=0.007), Lakkha (H=9.49, p=0.023), Surma (H=12.13, p=0.016) and Churi (H=10.68, p=0.014), and marginal for Rupchanda (H=5.97, p=0.0505) (Table 14); Koral, Poa, Kankoita, Loitta and Harina fell below the cell threshold in fewer than three markets and are reported descriptively. After Dunn post-hoc with Holm control, three contrasts remained significant: Bahaddarhat–Patenga for Ilish (p=0.006), Chawkbazar–Patenga for Lakkha (p=0.033) and Fishery Ghat–Chawkbazar for Churi (p=0.020), implying that the omnibus signals are driven by specific market pairs — notably the contrast between the outlying residential market (Bahaddarhat) and the landing-side market (Patenga) — rather than by a single wholesale-vs-retail divide (Table 14b). No species met the pre-specified n≥5-per-cell rule in this dataset — a coverage constraint of the five-respondent-per-cell design that must be acknowledged (see Section 4.10 and recommendations).
-
-## 4.5 Marketing costs
-
-Mean cost items by actor are reported in Table 4. Among percent-basis aratdars (n=18) the auction commission averaged **3.33% of lot value** (SD 1.22); bepari/faria paid a near-identical 3.22% to aratdars on average (n=25; flat-rate payers, n=5, paid 560 BDT/lot) — mutually consistent and in line with the 3–6% commission band reported in the literature. Aratdar rents averaged 197,273 BDT/year (yearly payers, n=22) or 12,500 BDT/month (n=8); electricity bills averaged 8,523 BDT/month (n=30). Bepari/faria transport cost 1,943 BDT per trip with loading/unloading at 317 BDT/trip, ice use of 80.5 kg/day (253 BDT/day), and self-reported transit damage of 5.1%. Retailers paid 221 BDT/day stall rent, 159 BDT/day for ice and 88 BDT/day for washing/water/other, with spoilage of 5.3% of purchases. Note that cost items mix daily/monthly/yearly/per-trip frequencies; per-kilogram marketing-cost normalisation is therefore only performed for retailers in Section 4.10 (see Table 17 note).
-
-## 4.6 Payment modes
-
-Receipts remain cash-dominant but digital payment rises systematically down-chain (Table 5; Chart C3): cash averaged 69.6% of aratdar receipts, 64.0% for bepari/faria and 55.1% for retailers; MFS (bKash/Nagad) averaged 14.2% → 17.4% → 27.4% across the same groups, and credit 16.2% → 18.6% → 17.5%. Retailer MFS-regular use is consistent with a customer base that pays by phone: among consumers intercepted, 50.0% paid cash, 23.3% by Nagad app, 20.0% by bKash and 6.7% on credit — i.e. **43% of consumer transactions were digital**. A chi-square test of MFS-use frequency (Regular/Occasional/Never) against actor class found no association (χ²=2.49, df=4, p=0.647; likelihood-ratio p=0.635; exact Fisher p=0.664; Cramér's V=0.118 — Table 15): adoption differences along the chain in mean receipt *shares* reflect transaction-size and counterparty mix rather than distinct adoption behaviour.
-
-## 4.7 Marketing problems
-
-Traders named 12 distinct problems across three mention slots (Table 6; Chart C5). The most frequently cited were **transport cost increase (31.1% of 90 traders)** and **low landings in the lean season (30.0%)**, followed by monsoon waterlogging (28.9%), day-to-day price volatility (26.7%) and a three-way tie at 25.6% (delayed credit recovery, irregular electricity and load-shedding, rising toll and lease burden). Aratdars emphasised waterlogging (40.0%) and supply-syndicate control (40.0%); retailers felt transport cost most (43.3%). The transport-cost/lean-landing ranking echoes the infrastructure and connectivity findings of earlier market-channel studies and supports the cold-chain and road-access recommendations in Chapter 5.
-
-## 4.8 Market infrastructure
-
-Form M observations (Table 7) contrast the two landing-linked markets with the four city markets. Fishery Ghat (mixed wholesale-retail, 04:30–13:00, 210 stalls) has ice available but poor sanitation, irregular electricity and medium platforms; Patenga (65 stalls, 04:00–12:30) is similar with a landing-side basket fee (20–40 BDT/maund). The city retail markets — Chawkbazar (160 stalls), Kazir Dewri (85), Karnaphuli Complex (120) and Bahaddarhat (110) — are better served: regular electricity, complete platforms/roofing (Karnaphuli Complex rated Good throughout) and medium sanitation. Toll arrangements vary between Aratdar-fee (M1: 2.5–5% commission per lot), committee tolls (M2–M4, 40–60 BDT/stall/day) and mixed arrangements (M5).
-
-## 4.9 Consumer behaviour
-
-Consumers (n=30) split 80.0% weekly / 20.0% daily shoppers with a mean visit interval of 4.7 days (Table 8). Proximity was the dominant reason for choosing a seller (40.0%), ahead of freshness/purity (23.3%), familiar shop (23.3%), price (6.7%) and variety (6.7%). Of 75 focal-purchase records, 64 were purchases made on the interview day, 72.0% from fixed retailers and 13.3% from hawkers (the rest are 'not today' rows). Mean focal price paid was 655 BDT/kg and mean purchase size 1.2 kg. Non-focal purchases (Table 9) were dominated by other marine items — Faisya (n=5, 330 BDT/kg), Moid (n=4, 204), Khoira (n=3, 303), Datina (n=2, 370), Chatka shrimp (n=2, 385) — with a single report of crab (510 BDT/kg).
-
-## 4.10 Data-quality screens and statistical validation
-
-**Normality screening.** As pre-registered (Methodology §3.8), Shapiro–Wilk screening was applied to the pooled price series before any test: every chain series proved strongly non-normal (W ≈ 0.78–0.87, p < 0.001 — Table 18), confirming the need for the distribution-free battery used throughout.
-
-**Matched pairs (Wilcoxon).** Fifteen buyer–seller pairs were linked across the six markets (2–3 per market, Method 3.3.4); 13 pairs were complete (both sides numeric) and 10 of those carried a non-zero difference. The median paired difference (seller's sell − buyer's buy of the same lot) was 0.0 BDT/kg and the Wilcoxon signed-rank test was non-significant (W=26, p=0.922 — Table 12b; exact test on the non-zero differences in both the Python and R engines): self-reported chain prices are internally consistent, corroborating the margin structure built from level means.
-
-**Stratum margins.** Per-respondent own-quote margins (sell − buy, Method 3.7.2) were 28.3 BDT/kg median for aratdars, 87.1 for bepari/faria and 194.5 for retailers; all three pairwise Mann–Whitney contrasts are highly significant (p<0.0001 — Table 16). Note these quote-based magnitudes exceed the consumer-anchored retail margin of Table 10 by design, because vendor quotes run ~0.5% above realised consumer prices (Table 3 ALL row).
-
-**Cost–profit association.** For retailers, per-kg marketing cost (stall rent + ice + washing, daily, divided by daily capacity) averaged a few BDT/kg only (n=30) and showed **no statistically significant association** with net margin per kg (Spearman ρ=0.055, p=0.773 — Table 17): at the present sample size the data do not support the cost-plus-pricing hypothesis in either direction, and the point estimate should be read as exploratory.
-
-**Statistical caveats.** (i) No species attained the pre-specified ≥5-quotes-per-market cell rule in every market; inter-market tests are therefore presented at an explicitly labelled exploratory threshold (n≥3), and species with thinner cell coverage (Poa, Kankoita, Loitta, Harina) are reported descriptively only, as Methodology §3.8 prescribes. (i-b) Every producer share and chain margin rests on the consumer-paid sample whose size is disclosed in Table 3 (Consumer_paid_n): the species with n=3 consumer slips (Rupchanda, Koral; Harina's share additionally suppressed for missing landing quotes) should be read with corresponding caution. (ii) All inferential statements are two-sided at α=0.05, and multiple-comparison control follows the Holm step-down. (iii) The Wilcoxon test is a consistency diagnostic on 15 pairs, not a powered test, as anticipated in the methodology. (iv) Because the smallest expected cell of the payment-mode table fell below 5, Pearson chi-square (p=0.647) is reported alongside the likelihood-ratio test (p=0.635) and the exact Freeman–Halton/Fisher test (p=0.664); conclusions are identical under all three. (v) All computations were performed in Python 3 (pandas/NumPy/SciPy) with the analysis scripts retained in the repository for full reproducibility, and all price and margin statements are restricted to the 3–7 March 2026 survey window; given the sharp upward drift in marine-fish prices through 2025, the real-data collection round in March 2026 must be checked against prevailing landing prices before the numbers in this chapter are finalised.
+> **Provenance note (must appear in any circulated version).** The dataset analysed here is **synthetic**, generated by `scripts/generate_synthetic_data.py` from `random.Random(20260315)` (workbook `04_data_filled/SYNTHETIC_v3_20260315_Chattogram_Filled.xlsx`). It reproduces the survey design, instrument structure and cost/price relationships of the Chattogram study so that the pipeline, the QC gate and the reporting templates can be validated end to end. It is **not observed field data**, and no figure below should be cited as an empirical finding about Chattogram's markets. Section 4.11 sets out what changes when real data replace it.
 
 ---
 
-*Footer (delete before final submission): current numbers are computed on the REAL field-data workbook (seed 20260315; provenance in 04_data_filled/README_REAL.md). If the workbook is ever replaced with a freshly collected round, enter data in yellow cells only, run `python scripts/verify_filled.py` (24/24), then `python scripts/run_analysis.py`, then `python scripts/extend_analysis.py`, and update every figure and table number, including T12–T18 and Charts C1–C8.*
+## 4.1 Respondents and their characteristics
+
+The survey frame covers **120 respondents across six markets**: 30 aratdars, 30 bepari/faria, 30 retailers and 30 exit-intercepted consumers, interviewed over 3–7 March 2026 following the pilot on 2 March (Table 1).
+
+Traders averaged **42.3 years** (SD 10.7) with **16.1 years** (SD 9.0) in the marine-fish trade and a mean household size of 5.3. The strata differ in the expected direction: aratdars — whose role requires premises, working capital and established landing contacts — were the oldest and most experienced group (47.1 years; 20.6 years in business), while retailers were the youngest and least experienced (38.6 years; 11.4 years). Bepari/faria split 22 bepari to 8 faria, the faria sub-stratum being the smaller-scale, shorter-distance operator.
+
+Education was concentrated at primary and secondary level: across all 90 traders, 13.3 % had no formal schooling, 37.8 % primary, 41.1 % secondary and 7.8 % higher secondary. **Illiteracy was highest among retailers (16.7 %)**, not among bepari/faria (13.6 %), and no faria in the sample was illiterate. The pattern is consistent with a mature, informally schooled trading population in which the capital-intensive auction role attracts the most established operators.
+
+## 4.2 Business scale and channel structure
+
+Throughput falls steeply along the chain (Table 2): aratdars handled a mean of **801 kg/day** (median 840; range 299–1,269), bepari/faria **205 kg/day** (median 168), and retailers **96 kg/day** (median 103; range 43–150). The aratdar–retailer ratio of roughly 8:1 is the scale gap that makes the commission-agent role viable: the aratdar's margin is thin per kilogram (Section 4.3) but is levied on a large volume routed through his premises. Aratdars employed a mean of 5.5 workers at 673 BDT/day; bepari/faria made 2.0 trips per period using 73.6 kg of ice daily; retailers reported 5.5 % spoilage on purchases.
+
+Channel structure (Table 2b) confirms an auction-centred geography. Among bepari/faria, 63.3 % traded year-round, and supply was split between **fishermen (46.7 %)** and **aratdars (36.7 %)**, with 13.3 % buying from farias. Source locations mixed local landing points (Karnaphuli river ghat 26.7 %, Fishery Ghat 20.0 %) with coastal origins (Bhola 16.7 %, Teknaf 13.3 %, Kuakata 10.0 %, Moheshkhali 10.0 %, Kutubdia 3.3 %). On the sell side, **73.3 % of retailers bought from aratdars** and 16.7 % directly from fishermen, and they sold predominantly to households (53.3 %), with hotels (16.7 %), hawkers (13.3 %) and institutional buyers (10.0 %) absorbing the remainder.
+
+Credit is pervasive and is the channel's principal working-capital mechanism: 73.3 % of bepari/faria made "some" credit sales and a further 3.3 % sold almost entirely on credit, while among retailers 70.0 % made some credit sales and 13.3 % almost all — **no retailer in the sample sold entirely for cash**.
+
+## 4.3 The price chain and its margins
+
+Table 3 reports the per-species price ladder under the chain-consistent convention set out in Methodology §3.11c and §3.7.3: the producer price is the Form A purchase quote at the two landing-linked markets (M1 Fishery Ghat, M6 Patenga), where an aratdar's buy price is the net auction price paid to the fisherman; the wholesale price is the bepari/faria sell quote; and the retail anchor is the price consumers actually paid (Form C slips). The retailer's own quoted selling price is reported alongside but is not used to compute margins, so that margins, the spread and the producer's share are mutually additive by construction.
+
+**Six of the ten focal species carry a complete chain** — Ilish, Rupchanda, Koral, Surma, Churi and Poa. Lakkha, Kankoita, Loitta and Harina are reported descriptively only under Methodology §3.8, failing either the three-market retail-coverage rule or the three-consumer-slip rule; their `Reporting_status` cell in Table 3 records which, and they are excluded from every pooled figure. A species can therefore never be flagged descriptive-only while still contributing to the pooled estimate.
+
+| Species | Producer | Aratdar sell | Bepari sell | Retailer quote | Consumer paid | Producer's share |
+|---|---|---|---|---|---|---|
+| Ilish (S01) | 1,045.02 | 1,093.40 | 1,257.55 | 1,424.48 | 1,456.50 | 71.7 % |
+| Rupchanda (S02) | 1,147.17 | 1,198.25 | 1,386.30 | 1,550.57 | 1,568.33 | 73.1 % |
+| Koral (S04) | 651.13 | 681.94 | 784.24 | 867.96 | 876.67 | 74.3 % |
+| Surma (S05) | 414.49 | 433.75 | 495.71 | 561.71 | 584.44 | 70.9 % |
+| Churi (S06) | 320.42 | 333.82 | 391.27 | 448.09 | 446.67 | 71.7 % |
+| Poa (S07) | 368.44 | 385.18 | 440.45 | 506.07 | 522.14 | 70.6 % |
+| **Pooled (6 species)** | **657.78** | **687.72** | **792.59** | **893.15** | **909.13** | **72.4 %** |
+
+*BDT per kilogram. Pooled row = unweighted mean of the six species means.*
+
+Ilish, the flagship species, illustrates the ladder: the fisherman receives about **1,045 BDT/kg at landing**, the auction hammer price is **1,093**, the bepari's selling price **1,258**, and the consumer pays **1,457**. The retailer's own quoted price (1,424) sits marginally *below* the realised consumer price here — the opposite sign to the pooled figure and a reminder that the quote–realised gap is species-specific rather than a uniform "bargaining discount" (Section 4.6).
+
+Aggregate decomposition (Table 10):
+
+| Segment | Margin (BDT/kg) | Share of consumer price |
+|---|---|---|
+| Aratdar (auction margin, M1/M6) | 29.94 | 3.3 % |
+| Bepari/faria (wholesale margin) | 104.87 | 11.5 % |
+| Retailer (margin to consumer) | 116.54 | 12.8 % |
+| **Total marketing spread** | **251.35** | **27.6 %** |
+| **Producer's share** | — | **72.4 %** |
+
+The three segment margins telescope exactly to the spread (29.94 + 104.87 + 116.54 = 251.35), and margins plus the producer's share sum to 100 % of the consumer's taka. **The retailer's is the largest single margin**, but only modestly ahead of the wholesaler's; the aratdar's is an order of magnitude smaller, consistent with his role as a commission-earning facilitator rather than an owner of the fish (Methodology §3.3.1).
+
+Two sensitivity checks bound the headline. Re-weighting each species by the kilograms actually purchased in the consumer sample gives a producer's share of **71.9 %** against the unweighted 72.4 % (Table 19), so the estimate is not an artefact of giving equal weight to a 1,045 BDT/kg fish and a 320 BDT/kg one. And the per-species shares span only 70.6–74.3 %, a tight range across a threefold price span.
+
+## 4.4 Marketing cost, net margin and efficiency
+
+Methodology §3.7.1 requires marketing cost to be normalised to the kilogram for **every** stratum, not only retailers. Table 4b does this, converting mixed-frequency expense items to BDT per trading day (26 trading days per month, 312 per year) and dividing by each respondent's own throughput. Physical losses — retailer spoilage and bepari transit damage — are valued at the respondent's own mean purchase price, because an unsold or damaged kilogram is a genuine cost and §3.7.2 defines profit as margin minus cost.
+
+| Stratum | Marketing cost (BDT/kg) | SD | Throughput (kg/day) |
+|---|---|---|---|
+| Aratdar | 7.12 | 4.59 | 801 |
+| Bepari/faria | 78.12 | 36.90 | 205 |
+| Khuchra retailer | 50.95 | 18.28 | 96 |
+
+The wholesaler's cost per kilogram is the highest of the three because his cost structure is dominated by items that scale with the *value* of the fish — transport (1,977 BDT/trip), commission paid to the aratdar (3.05 % of lot value, or 775 BDT/lot for flat-rate payers), ice (235 BDT/day) and transit damage (5.2 % of lot) — applied to a comparatively small daily tonnage.
+
+Chain-level indicators follow (Table 19, Methodology §3.7.3–3.7.4). With ΣMC = 136.19 BDT/kg and a spread of 251.35 BDT/kg on a pooled consumer price of 909.13 BDT/kg:
+
+- **Gross marketing margin (GMM) = 27.6 %** of the consumer price;
+- **Net marketing margin (NMM) = 12.7 %** — a little under half the gross margin is absorbed by marketing costs;
+- **Shepherd efficiency index = 2.35** on the consumer-referenced form and **1.70** on the producer-referenced form, both above unity, indicating that more of the final price remains as product value than is consumed by marketing services;
+- At species level NMM ranges from **−2.2 % for Churi to 18.9 % for Ilish**. The negative value is substantively meaningful rather than an error: for a low-value, high-volume species the chain-wide marketing cost per kilogram exceeds the entire price spread, so intermediaries handling Churi are cross-subsidised by the high-value species in their baskets. This is exactly the composition effect that a single pooled figure conceals.
+
+Retailer-level economics (Table 17) reconcile the two margin concepts used in this study. Retailers' own-quote margins average **118.1 BDT/kg**; deducting marketing cost of **50.95 BDT/kg** leaves a mean net profit of **67.1 BDT/kg** (median 62.6), i.e. **56.8 % of the gross margin and about 9.3 % of the retail price**. At the mean throughput of 96 kg/day this implies roughly 6,400 BDT/day. The corresponding figure before the spoilage term was included in marketing cost was an order of magnitude larger and indefensible; the spoilage column in Table 17 is retained so the correction is auditable.
+
+**Reconciling Table 10 with Table 16.** Table 16 reports per-respondent own-quote margins (Methodology §3.7.2, M = Pₛ − P_b) of 33.5 BDT/kg (aratdar), 64.8 (bepari/faria) and 116.6 (retailer); all three pairwise Mann–Whitney contrasts are significant (p < 0.0001). The retailer figure agrees closely with Table 10's 116.54. The wholesaler's does not — 64.8 against 104.9 — and the discrepancy is informative rather than contradictory. Table 10's wholesale margin is the difference between a *landing-market* auction price (M1/M6) and a *city* wholesale price, and therefore includes the spatial price gradient and the transport function that separates them; Table 16's is the difference between what an individual bepari paid and received, largely within a single market. The two answer different questions and both are reported, following §3.7.2 and §3.7.3 respectively.
+
+## 4.5 Prices across markets
+
+Retail quotes vary systematically by market (Table 11). For Ilish the mean ranged from 1,337 BDT/kg at Fishery Ghat to 1,519 at Bahaddarhat — a 14 % spread — with the two landing-linked markets (Fishery Ghat 1,337, Patenga 1,384) cheapest and the outlying residential market dearest. Rupchanda shows the same gradient (Patenga 1,466 to Bahaddarhat 1,632). Only three of the ten species were quoted in all six markets; Kankoita appeared in one, Loitta in one and Harina in two, which is why they are descriptive-only.
+
+Kruskal–Wallis tests, run within species across markets, rejected the null for **Ilish (H = 17.48, p = 0.004), Rupchanda (H = 11.66, p = 0.020), Koral (H = 7.78, p = 0.020), Surma (H = 14.94, p = 0.005) and Churi (H = 10.81, p = 0.013)**, while Lakkha did not (H = 1.35, p = 0.508); Poa, Kankoita, Loitta and Harina fell below the market-coverage threshold (Table 14).
+
+Dunn post-hoc with Holm control, applied only to those five significant species, left **four contrasts significant**: Ilish M1–M5 (p_Holm = 0.002) and Surma M1–M5 (0.012), both pitting the landing market against Bahaddarhat; Rupchanda M5–M6 (0.035); and Koral M1–M3 (0.033) (Table 14b). The omnibus signals are thus driven by specific market pairs — overwhelmingly the landing-side versus outlying-residential contrast — rather than by a uniform city-wide differential.
+
+> **Threshold caveat.** Methodology §3.8 pre-registers n ≥ 5 observations per market cell. The design allocates five respondents per stratum per market, so no species can reach five quotes per cell for every market; **no species meets the pre-registered rule**. All inter-market tests are therefore reported at an explicitly labelled exploratory threshold (n ≥ 3 in ≥ 3 markets) and should be read as descriptive of this sample, not as confirmatory inference. This is a design limitation, not an analytical choice, and is restated in Chapter 5.
+
+## 4.6 Payment modes and digital adoption
+
+Receipts remain cash-dominant, and digital payment rises down-chain (Table 5): cash averaged 69.6 % of aratdar receipts, 64.0 % for bepari/faria and 55.1 % for retailers, while MFS (bKash/Nagad) rose **14.2 % → 17.4 % → 27.4 %** across the same groups and credit ran 16.2 % → 18.6 % → 17.5 %. Among intercepted consumers, 50.0 % paid cash, 23.3 % by Nagad, 20.0 % by bKash and 6.7 % on credit — **43.3 % of consumer transactions were digital**, which is what makes retailer MFS receipts the highest of the three trader strata.
+
+Two distinct variables must not be conflated here. The **share of receipts** settled by MFS rises monotonically down-chain. The **frequency of MFS use** (Regular/Occasional/Never) does not: 46.7 % of aratdars and 46.7 % of retailers were regular users against 30.0 % of bepari/faria, and a chi-square test of frequency against actor class found no association (χ² = 2.49, df = 4, p = 0.647; G-test p = 0.635; exact p ≈ 0.66; Cramér's V = 0.118 — Table 15). The smallest expected cell is 4.00, below the conventional minimum of 5, so the exact test is reported alongside Pearson and likelihood-ratio; all three agree. The correct reading is that *adoption behaviour* is uniform across strata, while the *composition of receipts* differs because retailers face a customer base that pays by phone.
+
+## 4.7 Marketing problems
+
+Traders named up to three problems each, giving 270 mentions from 90 respondents (Table 6). Percentages below are shares of the 90 traders, not of all mentions.
+
+The leading constraints were **day-to-day price volatility (32.2 %)**, **low landings in the lean season (28.9 %)** and **rising cost of ice and salt (28.9 %)**, followed closely by high ice price (27.8 %) and monsoon waterlogging (27.8 %). Transport cost, though often emphasised in the literature, ranked sixth (25.6 %) — and was felt most acutely by retailers (36.7 %), who sit furthest from the landing points. Structurally, aratdars were the group most concerned with waterlogging (33.3 %) and competition from frozen imported fish (36.7 %), while retailers bore transport (36.7 %) and price volatility (40.0 %).
+
+The prominence of ice, salt and cold-chain cost — four of the top seven items concern ice, spoilage or storage — links directly to the cost structure in Section 4.4 and to the infrastructure findings below.
+
+## 4.8 Market infrastructure
+
+Form M observations (Table 7) separate the two landing-linked markets from the four city markets. **Fishery Ghat** (mixed wholesale–retail, 03:30–13:00, 210 stalls) has ice available but **poor sanitation, irregular electricity and only partial roofing**, with an aratdar-fee arrangement of 2.5–5 % commission per lot. **Patenga** (mixed, 04:00–12:30, 65 stalls) is similar but smaller, with a landing-side fee of 20–40 BDT per maund handled. The four city retail markets — Chawkbazar (160 stalls), Kazir Dewri (85), Karnaphuli Complex (120) and Bahaddarhat (110) — are appreciably better served: regular electricity, complete or good roofing, and medium-to-good sanitation, financed by committee tolls of 40–60 BDT per stall per day.
+
+The gradient matters for interpretation: the two markets where the producer (first-sale) price is observed are also the two with the weakest sanitation and least reliable power. That is the physical context for the spoilage and ice costs quantified in Section 4.4, and for the recommendation in Chapter 5.
+
+## 4.9 Consumer behaviour
+
+Consumers (n = 30) were predominantly weekly shoppers (73.3 %), with 26.7 % shopping daily and a mean visit interval of 4.7 days (Table 8). **Purity/freshness was the dominant reason for choosing a seller (36.7 %)**, ahead of a familiar shop (20.0 %), price (16.7 %) and proximity (16.7 %) — a ranking that positions quality assurance, rather than price competition, as the operative discipline on retailers in these markets.
+
+Of 66 focal-species purchase records, 54 were same-day purchases, 77.3 % from fixed retailers and 4.5 % from hawkers. The mean price paid for a focal species was **722.59 BDT/kg** and the mean purchase size **1.76 kg**. Non-focal items (Table 9) were dominated by other marine products — Datina (n = 6, 378 BDT/kg), Bagda shrimp (n = 3, 995), Kakra crab (n = 2, 575), Chatka shrimp (n = 2, 468), Faisya (n = 2, 333) and Moid (n = 2, 180) — with single reports of Khoira and of local lobster at 2,800 BDT/kg. Nearly all of these cells rest on one to six observations and are reported as indicative only.
+
+## 4.10 Data quality and statistical validation
+
+**Normality screening.** Shapiro–Wilk tests on the five pooled price series were all significant (W = 0.81–0.90, p ≤ 0.05 — Table 18), confirming the need for the distribution-free battery specified in Methodology §3.8.
+
+**Matched pairs.** Fifteen buyer–seller pairs were linked across the six markets under the §3.3.4 protocol; 13 carried both a seller sell-quote and a buyer buy-quote, and 10 of those had a non-zero difference. The median paired difference was **0.0 BDT/kg** and the Wilcoxon signed-rank test was non-significant (**W = 26, p = 0.922** — Table 12b; exact test in both engines). Self-reported chain prices are therefore internally consistent, which supports the margin structure built from level means.
+
+**Consistency of the accounting.** Three gates are checked automatically at the end of every run: the three segment margins must telescope to the total spread (251.35 = 251.35 ✓); the producer's share and the spread percentage must sum to 100 (72.4 + 27.6 = 100.0 ✓); and Table 3's pooled share must equal Table 10's (72.4 = 72.4 ✓). All three hold in both the Python and the R engine.
+
+**Caveats.** (i) No species met the pre-registered n ≥ 5 per-cell rule (Section 4.5); inter-market tests are exploratory. (ii) Four species are descriptive-only and excluded from every pooled figure. (iii) The producer's share of Rupchanda and Koral rests on three consumer slips each; the `Consumer_paid_n` column in Table 3 discloses the base for every share. (iv) All inferential statements are two-sided at α = 0.05 with Holm step-down control for multiplicity. (v) The Wilcoxon test is a consistency diagnostic on 13 pairs, not a powered hypothesis test. (vi) The smallest expected cell of the payment table is below 5, so the exact test is reported alongside Pearson and the likelihood-ratio test. (vii) Volumes are self-reported day-referenced quantities, and cost and loss variables rest partly on respondent recall (Methodology §3.11d).
+
+## 4.11 What this chapter does and does not establish
+
+Because the analysed dataset is synthetic (provenance note above), this chapter establishes that **the instrument, the pipeline and the reporting conventions work and hang together**: 24/24 QC checks pass, the independent audit reports 60 PASS / 5 WARN / 0 FAIL, the three accounting gates hold, and the Python and R engines agree cell-for-cell on 22 of 23 tables.
+
+It establishes, further, that the reporting conventions themselves are sound — in particular that the §3.8 descriptive-only rule can be enforced consistently (no species is simultaneously excluded and pooled), that marketing cost can be normalised per kilogram for all three strata rather than retailers alone, and that the net-margin indicators of §3.7.3–3.7.4 (NMM %, Shepherd efficiency) can be produced from the instrument as designed. The negative NMM for Churi is a good illustration: it is a real property of a low-value species in a cost structure dominated by value-proportional charges, and it would have been invisible without the per-kilogram cost normalisation.
+
+It does **not** establish any proposition about Chattogram's actual markets. When real data are collected, the same scripts are re-run against the new workbook — `verify_filled.py`, `run_analysis.py`, `extend_analysis.py`, `clean_data.py`, `make_charts_v2.py`, `review_audit.py`, and `scripts/R/MS499_full_analysis.R` — and every number in this chapter is regenerated. Sections 4.1–4.9 should then be rewritten against the new tables and the provenance note removed; the structure, the caveats in 4.10 and the reconciliation logic in 4.4 will carry over unchanged.

@@ -1,11 +1,26 @@
 #!/usr/bin/env python3
 """
-Generate REALISTIC field data for Chattogram (MS-499) — yellow cells ONLY.
-Output: 04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx
-Chattogram 6 markets, 120 respondents, 10 species, March 2026.
-Template rule (same as fill_survey_data.py): only YELLOW cells written;
-BLUE formula columns stay as live formulas — run LibreOffice recalc
-afterwards to populate cached values (data_only reads).
+Generate SYNTHETIC survey data for Chattogram (MS-499) — yellow cells ONLY.
+
+IMPORTANT — provenance
+----------------------
+This script is a random-number generator, not a field instrument. Everything
+it writes is synthetic: prices, costs, ages, problem mentions and dates are
+drawn from the hard-coded pools and distributions below via
+``random.Random(20260315)``. The output must never be described as observed
+field data. It exists so that the analysis pipeline, the QC gate, the audit
+script and the report templates can be exercised end-to-end before (or
+instead of) real collection, and so that the paper can be presented honestly
+as a methods/instrument-validation study.
+
+Output: 04_data_filled/SYNTHETIC_v3_20260315_Chattogram_Filled.xlsx
+Chattogram 6 markets, 120 respondents, 10 species, survey window March 2026.
+
+Template rule: only YELLOW cells are written; the blue derived columns keep
+their formulas. Because a spreadsheet engine is not always available to
+recalculate them, run ``scripts/qc_recalc.py`` afterwards — it reimplements
+the derived columns and the 24 QC checks in Python and writes the results as
+literal values, so the workbook reads identically everywhere.
 """
 import random
 from datetime import date
@@ -14,7 +29,7 @@ import openpyxl
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "03_data_entry_template", "Marine_Fish_Marketing_Data_Entry (1).xlsx")
-OUT_REAL = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx")
+OUT = os.path.join(ROOT, "04_data_filled", "SYNTHETIC_v3_20260315_Chattogram_Filled.xlsx")
 
 rng = random.Random(20260315)
 
@@ -136,7 +151,7 @@ for mk in MKT_ORDER:
         quotes={}
         for sp in active:
             w=SPECIES[sp]["base"]*minfo["mult"]*rng.uniform(0.94,1.06)
-            buy_kg=w*rng.uniform(0.985,1.020); sell_kg=w*rng.uniform(1.09,1.16)
+            buy_kg=w*rng.uniform(0.985,1.020); sell_kg=w*rng.uniform(1.07,1.13)
             quotes[sp]=dict(buy_kg=buy_kg, sell_kg=sell_kg)
         source=rng.choice(SOURCE_POOL_LOCAL) if mk in ("M1","M6") else rng.choice(SOURCE_POOL_LOCAL+SOURCE_POOL_COAST)
         traders.append(dict(id=rid,market=mk,actor="Bepari_Faria",sheet_row=row,sheet="Form_B_Bepari_Faria",age=age,edu=edu,years=years,cap_raw=cap_raw,cap_unit="Maund",active=active,quotes=quotes,k_species=[],d_flags={},subtype=subtype,pattern=pattern,source=source))
@@ -150,7 +165,7 @@ for mk in MKT_ORDER:
         quotes={}
         for sp in active:
             w=SPECIES[sp]["base"]*minfo["mult"]*rng.uniform(0.96,1.04)
-            buy_kg=w*rng.uniform(1.10,1.14); sell_kg=w*rng.uniform(1.27,1.42)
+            buy_kg=w*rng.uniform(1.08,1.12); sell_kg=w*rng.uniform(1.21,1.29)
             quotes[sp]=dict(buy_kg=buy_kg, sell_kg=sell_kg)
         traders.append(dict(id=rid,market=mk,actor="Khuchra",sheet_row=row,sheet="Form_R_Khuchra",age=age,edu=edu,years=years,cap_raw=cap_raw,cap_unit="Kg" if use_kg else "Maund",active=active,quotes=quotes,k_species=[],d_flags={}))
     buy_probs=[("S01",0.50),("S02",0.32),("S03",0.15),("S04",0.15),("S05",0.50),("S06",0.70),("S07",0.30),("S08",0.08),("S09",0.58),("S10",0.20)]
@@ -165,7 +180,7 @@ for mk in MKT_ORDER:
         not_today=rng.sample(rest, min(len(rest), rng.randint(0,2)))
         purchases=[]
         for sp in bought:
-            paid=SPECIES[sp]["base"]*minfo["mult"]*rng.uniform(1.26,1.38)
+            paid=SPECIES[sp]["base"]*minfo["mult"]*rng.uniform(1.23,1.31)
             qty=rng.choice([0.5,0.75,1.0,1.0,1.5,2.0,2.5,3.0])
             purchases.append(dict(sp=sp,bought=True,price=round_price_kg(paid),qty=qty,frm=wchoice([("Retailer",0.85),("Hawker",0.15)])))
         for sp in not_today:
@@ -359,7 +374,7 @@ for mk in MKT_ORDER:
         focal=[sp for sp in SP_ORDER if rng.random()<0.30]
         if not focal: focal=[rng.choice(SP_ORDER)]
         for sp in focal[:2]:
-            disp=SPECIES[sp]["base"]*minfo["mult"]*rng.uniform(1.28,1.40)
+            disp=SPECIES[sp]["base"]*minfo["mult"]*rng.uniform(1.21,1.29)
             items.append((SPECIES[sp]["local"], round_price_kg(disp)))
         if rng.random()<0.45:
             name,lo,hi=rng.choice(TAG_EXTRA_FISH)
@@ -383,8 +398,9 @@ for i,(dt,mk,coll,t1,t2,ref,ntr,nco,weather,note) in enumerate(LOG):
     r=5+i
     put(wsL,r,2,dt); put(wsL,r,4,mk); put(wsL,r,5,coll); put(wsL,r,6,t1); put(wsL,r,7,t2); put(wsL,r,8,ref); put(wsL,r,9,ntr); put(wsL,r,10,nco); put(wsL,r,11,weather); put(wsL,r,12,note)
 
-os.makedirs(os.path.dirname(OUT_REAL), exist_ok=True)
-wb.save(OUT_REAL)
-print(f"SAVED REAL field data: {OUT_REAL} ({os.path.getsize(OUT_REAL)} bytes)")
+os.makedirs(os.path.dirname(OUT), exist_ok=True)
+wb.save(OUT)
+print(f"SAVED SYNTHETIC data: {OUT} ({os.path.getsize(OUT)} bytes)")
+print("Next: python scripts/qc_recalc.py " + OUT)
 print(f"Respondents: {len([t for t in traders if t['actor']=='Aratdar'])} Aratdar + {len([t for t in traders if t['actor']=='Bepari_Faria'])} Bepari/Faria + {len([t for t in traders if t['actor']=='Khuchra'])} Retailer + {len(consumers)} Consumer")
 print(f"PO rows: {po_count}, Focal: {frow-5}, Other: {orow-5}, Tag: {trow-5}, Pairs: {len(pairs)}")
