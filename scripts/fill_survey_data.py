@@ -19,9 +19,13 @@ import openpyxl
 import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "03_data_entry_template", "Marine_Fish_Marketing_Data_Entry (1).xlsx")
-OUT = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+# Simulated test data goes to archive/ — never overwrite REAL field data
+OUT_SIM = os.path.join(ROOT, "04_data_filled", "archive", "SIMULATED_v2_20260911_Chattogram_Filled.xlsx")
+OUT_LEGACY = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+# Default OUT is archive version; legacy path kept for backward compat but warns
+OUT = OUT_SIM
 
-rng = random.Random(20260302)  # seed = pilot date
+rng = random.Random(20260911)  # v2 seed = 2026-09-11 (Chattogram realistic, see worklog Task 13)
 
 # ----------------------------------------------------------------------------
 # 1. CONFIG
@@ -752,9 +756,30 @@ for i, (dt, mk, coll, t1, t2, ref, ntr, nco, weather, note) in enumerate(LOG):
     put(wsL, r, 12, note)
 
 # ----------------------------------------------------------------------------
-# 12. SAVE + SUMMARY
+# 12. SAVE + SUMMARY (Chattogram real-data transition)
 # ----------------------------------------------------------------------------
+# Ensure archive dir exists, never overwrite REAL field data
+os.makedirs(os.path.dirname(OUT), exist_ok=True)
+# Safety: if a REAL filled file exists, do not overwrite it
+real_candidates = [
+    os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx"),
+    os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL.xlsx"),
+]
+for rc in real_candidates:
+    if os.path.exists(rc):
+        print(f"[WARN] REAL field data file exists: {rc}")
+        print("  Simulated generator will NOT overwrite it. Saving simulated to archive only.")
+        break
+
 wb.save(OUT)
+# Also keep a copy at legacy path for backward compatibility if not exists and no REAL file
+if not any(os.path.exists(p) for p in real_candidates):
+    try:
+        if not os.path.exists(OUT_LEGACY):
+            wb.save(OUT_LEGACY)
+            print(f"[INFO] Also saved legacy copy: {OUT_LEGACY} (for backward compat)")
+    except Exception:
+        pass
 
 n_a = sum(1 for t in traders if t["actor"] == "Aratdar")
 n_b = sum(1 for t in traders if t["actor"] == "Bepari_Faria")

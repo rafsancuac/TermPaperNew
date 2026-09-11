@@ -185,3 +185,31 @@ Stage Summary:
   raw price+unit whenever `Sell_BDT_per_kg` is blank, without distinguishing a genuine blank
   from a deliberate K/D-flag exclusion. Only affects this standalone script's own T11 build —
   `run_all.R`'s pipeline (the one matched against Python) is unaffected.
+
+---
+Task ID: 14
+Agent: Arena.ai agent (Chattogram real-data transition)
+Task: সিমুলেটেড টেস্ট-ডাটা সরিয়ে আসল ফিল্ড ডাটা দিয়ে হলুদ ঘরে বসিয়ে একই পাইপলাইন চালাও। চট্টগ্রামের সাপেক্ষে করবে সব কাজ!
+
+Work Log:
+- সিমুলেটেড ডাটা সরানো: `04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx` (199KB, v2 seed 20260911) → `04_data_filled/archive/SIMULATED_v2_20260911_Chattogram_Filled.xlsx` আর্কাইভ
+- আসল ডাটার জন্য খালি টেমপ্লেট তৈরি: `03_data_entry_template/Marine_Fish_Marketing_Data_Entry (1).xlsx` (171KB, শুধু Obs_ID/Respondent_ID প্রিফিল, হলুদ ঘর ফাঁকা) → `04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_EMPTY.xlsx`
+- নতুন ডক: `04_data_filled/archive/README.md` (সিমুলেটেড আর্কাইভ নোট), `04_data_filled/README_REAL.md` (চট্টগ্রাম 6 বাজার: M1 Fishery Ghat ল্যান্ডিং, M2 Chawkbazar, M3 Kazir Dewri, M4 Karnaphuli Complex, M5 Bahaddarhat, M6 Patenga — হলুদ ঘরে কীভাবে ভরতে হবে, যাচাই কমান্ড)
+- Python পাইপলাইন আপডেট (চট্টগ্রাম রিয়েল-ডাটা প্রায়োরিটি):
+  - `scripts/run_analysis.py`: `find_default_data()` এখন REAL*FILLED > REAL (non-EMPTY) > legacy Filled > EMPTY প্রায়োরিটি, archive/ বাদ, EMPTY হলে স্পষ্ট WARN; `load_data()`-এ empty-template guard (PO Market=0, A/B=0 → ValueError with Chattogram instructions)
+  - `scripts/verify_filled.py`: argparse --data + find_default_data() ব্যবহার, archive/simulated টেস্টের নির্দেশনা
+  - `scripts/review_audit.py`: DEFAULT খুঁজতে run_analysis.find_default_data() ব্যবহার
+  - `scripts/fill_survey_data.py`: OUT এখন archive/SIMULATED_v2..., seed 20260911 (v2), REAL ফাইল থাকলে overwrite না করার guard
+- R পাইপলাইন আপডেট:
+  - `scripts/R/config.R`: repo root খোঁজা 04_data_filled/ বা scripts/R/run_all.R দিয়ে; INPUT_FILE R variable + Sys.getenv("INPUT_FILE") উভয়ই সম্মান; auto-detect প্রায়োরিটি REAL*FILLED > REAL (non-EMPTY) > legacy Filled > EMPTY, archive/ বাদ; শুধু EMPTY থাকলে স্পষ্ট warning (চট্টগ্রাম 6 বাজারের নামসহ)
+  - `scripts/R/tables_descriptive.R`: empty-template guard মেসেজ আপডেট (archive/ + REAL_EMPTY → REAL_FILLED ফ্লো, চট্টগ্রাম 6 বাজার)
+- যাচাই:
+  - খালি REAL_EMPTY দিয়ে: `verify_filled.py` → 2 FAIL (Total interviews 0, Form_M 0) — expected; `run_analysis.py` → ValueError EMPTY TEMPLATE with Chattogram instructions — expected; R `run_all.R` → same [ERROR] — expected
+  - আর্কাইভ সিমুলেটেড দিয়ে: `run_analysis.py --data archive/...` → DONE (T1-T11), `extend_analysis.py --data archive/...` → DONE (T12-T18), R `INPUT_FILE=archive/... Rscript run_all.R` → DONE, quality gates PASS (A+B+R=246.39=spread, PS 70.9%), `compare_r_py.py` → 21/21 PASS
+- README.md আপডেট: উপরের ⚠️ সেকশন নতুন ট্রানজিশন নোট (REAL_EMPTY vs archive), চট্টগ্রাম 6 বাজারের তালিকা, আসল ডাটা বসানোর ধাপ, টেস্ট কমান্ড; আগের সিমুলেটেড ফলাফল সেকশন → আর্কাইভ রেফারেন্স
+
+Stage Summary:
+- সিমুলেটেড টেস্ট-ডাটা সক্রিয় পাথ থেকে সরানো হয়েছে, `04_data_filled/` এখন শুধু REAL_EMPTY (171KB) + README + archive/ (SIMULATED v2 199KB)
+- আসল ফিল্ড ডাটা এন্ট্রির জন্য সম্পূর্ণ প্রস্তুত: হলুদ ঘরে চট্টগ্রামের 6 বাজারের (M1-M6) ডাটা বসিয়ে *_REAL_FILLED.xlsx নামে সেভ করলেই একই পাইপলাইন (verify 24/24 → run_analysis → extend → clean → charts_v2 → review_audit → R run_all) চলবে
+- পাইপলাইন এখন চট্টগ্রামের সাপেক্ষে: landing markets M1/M6, 6 বাজার, 10 প্রজাতি, Pair_ID, K/D ফ্ল্যাগ — সবই চট্টগ্রাম ডিজাইনে
+- পরবর্তী: ব্যবহারকারী F:/TermPaperNew-এ REAL_EMPTY ফাইল খুলে হলুদ ঘরে আসল ডাটা বসিয়ে *_REAL_FILLED.xlsx হিসেবে সেভ করে উপরের কমান্ডগুলো চালাবেন; GitHub push-এর জন্য PAT ব্যবহার

@@ -131,12 +131,54 @@ def read_sheet_rows(ws, id_col=2, require=None):
 
 
 def find_default_data():
+    """
+    Locate the filled workbook for Chattogram field data.
+    Priority:
+      1. *REAL*FILLED*.xlsx (actual field data)
+      2. *REAL*.xlsx excluding EMPTY (real data, any name)
+      3. *Filled*.xlsx (legacy/simulated, e.g. archive fallback)
+      4. Any .xlsx in 04_data_filled/ (including EMPTY template — will fail with clear message)
+    Excludes 04_data_filled/archive/ and temp ~$ files.
+    """
     d = os.path.join(ROOT, "04_data_filled")
-    if os.path.isdir(d):
-        for f in sorted(os.listdir(d)):
-            if f.lower().endswith(".xlsx") and not f.startswith("~$"):
-                return os.path.join(d, f)
-    raise FileNotFoundError("No filled workbook found in 04_data_filled/")
+    if not os.path.isdir(d):
+        raise FileNotFoundError("04_data_filled/ folder not found")
+    files = [f for f in os.listdir(d)
+             if f.lower().endswith(".xlsx") and not f.startswith("~$")]
+    files = [f for f in files if os.path.isfile(os.path.join(d, f))]
+    if not files:
+        raise FileNotFoundError(
+            "No workbook found in 04_data_filled/. Expected REAL field data file, e.g.:\n"
+            "  04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx\n"
+            "Create it from REAL_EMPTY.xlsx by filling yellow cells with Chattogram field data.\n"
+            "Simulated test data is archived in 04_data_filled/archive/"
+        )
+    # priority buckets
+    def prio(name):
+        low = name.lower()
+        if "real" in low and "filled" in low:
+            return 0
+        if "real" in low and "empty" not in low:
+            return 1
+        if "filled" in low and "simulated" not in low and "archive" not in low:
+            return 2
+        if "empty" in low:
+            return 4
+        return 3
+    files_sorted = sorted(files, key=lambda n: (prio(n), n.lower()))
+    chosen = os.path.join(d, files_sorted[0])
+    # warn if only empty template
+    if "empty" in files_sorted[0].lower():
+        print(f"[WARN] Only template found: {files_sorted[0]} — this is EMPTY (yellow cells not filled).")
+        print("  Fill it with real field data from Chattogram (6 markets: M1 Fishery Ghat, M2 Chawkbazar, M3 Kazir Dewri, M4 Karnaphuli, M5 Bahaddarhat, M6 Patenga)")
+        print("  and save as *_REAL_FILLED.xlsx. Simulated test data is in 04_data_filled/archive/")
+    elif prio(files_sorted[0]) == 2:
+        print(f"[WARN] Using legacy/simulated file: {files_sorted[0]}")
+        print("  Simulated test data has been archived to 04_data_filled/archive/")
+        print("  For final paper, use REAL field data: fill REAL_EMPTY.xlsx -> REAL_FILLED.xlsx")
+    else:
+        print(f"[INFO] Using field data: {files_sorted[0]} (Chattogram)")
+    return chosen
 
 
 # ----------------------------------------------------------------------------
@@ -182,12 +224,41 @@ def load_data(path):
     d["M"] = read_sheet_rows(wb["Form_M_Market_Observation"], require=["Obs_Date"])
     d["TAG"] = read_sheet_rows(wb["Tag_Price_Sheet"], require=["Market"])
 
+    # ---- empty-template guard (Chattogram real-data transition) ----
+    po_market_filled = sum(1 for r in d["PO"] if r.get("Market") not in (None, ""))
+    # In the empty template, PO has only Obs_ID, no Market; Forms have no Interview_Date
+    if po_market_filled == 0 and len(d["A"]) == 0 and len(d["B"]) == 0:
+        raise ValueError(
+            f"\n[ERROR] This workbook appears to be the EMPTY TEMPLATE (not real field data).\n"
+            f"  File: {path}\n"
+            f"  Price_Observations: {len(d['PO'])} Obs_ID rows but 0 Market/price values\n"
+            f"  Form A/B/C dated interviews: 0\n"
+            f"  -> The simulated test data has been moved to 04_data_filled/archive/\n"
+            f"  -> For real Chattogram field work:\n"
+            f"     1. Open 04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_EMPTY.xlsx\n"
+            f"     2. Fill ONLY yellow cells with real survey data from 6 markets:\n"
+            f"        M1 Fishery Ghat (landing), M2 Chawkbazar, M3 Kazir Dewri,\n"
+            f"        M4 Karnaphuli Complex, M5 Bahaddarhat, M6 Patenga\n"
+            f"     3. Save as ..._REAL_FILLED.xlsx\n"
+            f"     4. Run: python scripts/verify_filled.py --data <real-filled.xlsx>\n"
+            f"  -> To test pipeline with archived simulated data:\n"
+            f"     python scripts/run_analysis.py --data 04_data_filled/archive/SIMULATED_v2_20260911_Chattogram_Filled.xlsx\n"
+        )
+    if po_market_filled < 10:
+        print(f"[WARN] Very few filled PO rows ({po_market_filled}) — file may be partially filled: {path}")
+
     dates = []
     for key in ("A", "B", "R", "C"):
         for r in d[key]:
             if r.get("Interview_Date") is not None:
-                dates.append(pd.Timestamp(r["Interview_Date"]).date())
-    d["window"] = (min(dates).strftime("%d/%m/%Y"), max(dates).strftime("%d/%m/%Y"))
+                try:
+                    dates.append(pd.Timestamp(r["Interview_Date"]).date())
+                except Exception:
+                    pass
+    if dates:
+        d["window"] = (min(dates).strftime("%d/%m/%Y"), max(dates).strftime("%d/%m/%Y"))
+    else:
+        d["window"] = ("NA", "NA")
     return d
 
 

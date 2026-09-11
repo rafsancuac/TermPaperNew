@@ -1,13 +1,38 @@
 #!/usr/bin/env python3
-"""Verify the filled workbook: QC values, dashboard, chain consistency, validations."""
+"""Verify the filled workbook: QC values, dashboard, chain consistency, validations.
+Now supports REAL field data for Chattogram (04_data_filled/*REAL*.xlsx).
+Simulated test data archived in 04_data_filled/archive/.
+"""
+import argparse
 import openpyxl
-
 import os
+import sys
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+
+# Use the same discovery logic as run_analysis.py
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
+try:
+    from run_analysis import find_default_data
+    DEFAULT = find_default_data()
+except Exception:
+    DEFAULT = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_EMPTY.xlsx")
+
+ap = argparse.ArgumentParser(description="Verify filled workbook (Chattogram real data)")
+ap.add_argument("--data", default=DEFAULT, help="path to filled workbook (.xlsx)")
+args = ap.parse_args()
+OUT = args.data
+print(f"Verifying workbook: {OUT}")
 
 # ---------- cached values (post-recalc) ----------
-wbv = openpyxl.load_workbook(OUT, data_only=True)
+try:
+    wbv = openpyxl.load_workbook(OUT, data_only=True)
+except Exception as e:
+    print(f"[ERROR] Could not open {OUT}: {e}")
+    print("If this is the EMPTY template, fill yellow cells with real field data first.")
+    print("Simulated data is in 04_data_filled/archive/ for testing:")
+    print("  python scripts/verify_filled.py --data 04_data_filled/archive/SIMULATED_v2_20260911_Chattogram_Filled.xlsx")
+    sys.exit(1)
 
 print("=== QC_Check (values) ===")
 ws = wbv["QC_Check"]

@@ -27,8 +27,9 @@
 ##    currently in 04_data_filled/) so the suite can be tested end-to-end.
 ##    The repo root is located by walking upward from the working directory.
 ## ---------------------------------------------------------------------------
-## If the user already set INPUT_FILE manually (in console or by editing this file
+## If the user already set INPUT_FILE manually (in console, env var, or by editing this file
 ## below), respect it and do not overwrite.
+## 1) R variable INPUT_FILE in global env
 if (exists("INPUT_FILE", inherits = TRUE)) {
   try({
     pf <- get("INPUT_FILE", inherits = TRUE)
@@ -36,6 +37,14 @@ if (exists("INPUT_FILE", inherits = TRUE)) {
       INPUT_FILE <- normalizePath(pf, winslash = "/", mustWork = FALSE)
     }
   }, silent = TRUE)
+}
+## 2) Environment variable INPUT_FILE (e.g. INPUT_FILE=... Rscript ...)
+if (!exists("INPUT_FILE", inherits = FALSE) || !file.exists(INPUT_FILE)) {
+  ev <- Sys.getenv("INPUT_FILE", unset = "")
+  if (nzchar(ev) && file.exists(ev)) {
+    INPUT_FILE <- normalizePath(ev, winslash = "/", mustWork = FALSE)
+    message(sprintf("[config] Using INPUT_FILE from env var: %s", INPUT_FILE))
+  }
 }
 
 find_repo_root <- function() {
@@ -59,21 +68,44 @@ if (exists("INPUT_FILE", inherits = FALSE)) {
 }
 if (need_auto) {
   if (!is.null(repo_root) && dir.exists(file.path(repo_root, "04_data_filled"))) {
-    found <- list.files(file.path(repo_root, "04_data_filled"),
-                        pattern = "\\.xlsx$", full.names = TRUE)
-    found <- found[!grepl("^~\\$", basename(found))]
-    if (length(found) > 0) {
-      INPUT_FILE <- found[1]
+    all_xlsx <- list.files(file.path(repo_root, "04_data_filled"),
+                           pattern = "\\.xlsx$", full.names = TRUE, recursive = FALSE)
+    all_xlsx <- all_xlsx[!grepl("^~\\$", basename(all_xlsx))]
+    ## Exclude archive folder
+    all_xlsx <- all_xlsx[!grepl("/archive/", all_xlsx, fixed = TRUE)]
+
+    ## Priority 1: REAL FILLED file (actual field data for Chattogram)
+    real_filled <- all_xlsx[grepl("REAL.*FILLED|FILLED.*REAL", basename(all_xlsx), ignore.case = TRUE)]
+    ## Priority 2: any REAL file that is not EMPTY
+    real_any <- all_xlsx[grepl("REAL", basename(all_xlsx), ignore.case = TRUE) &
+                           !grepl("EMPTY", basename(all_xlsx), ignore.case = TRUE)]
+    ## Priority 3: any filled file (legacy, simulated)
+    legacy_filled <- all_xlsx[grepl("Filled", basename(all_xlsx), ignore.case = TRUE)]
+
+    if (length(real_filled) > 0) {
+      INPUT_FILE <- real_filled[1]
+      message(sprintf("[config] Using REAL field data: %s", basename(INPUT_FILE)))
+    } else if (length(real_any) > 0) {
+      INPUT_FILE <- real_any[1]
+      message(sprintf("[config] Using REAL file: %s", basename(INPUT_FILE)))
+    } else if (length(legacy_filled) > 0) {
+      INPUT_FILE <- legacy_filled[1]
+      warning(sprintf("[config] Using legacy/simulated file %s (04_data_filled/archive/ contains simulated v2). For real Chattogram field data, fill %s and rename to *_REAL_FILLED.xlsx",
+                      basename(INPUT_FILE), "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_EMPTY.xlsx"))
+    } else if (length(all_xlsx) > 0) {
+      ## Only EMPTY template exists
+      INPUT_FILE <- all_xlsx[1]
+      warning(sprintf("[config] Only template found: %s — this is EMPTY (yellow cells not filled). Fill it with real field data from Chattogram (6 markets: M1 Fishery Ghat, M2 Chawkbazar, M3 Kazir Dewri, M4 Karnaphuli, M5 Bahaddarhat, M6 Patenga) and save as *_REAL_FILLED.xlsx", basename(INPUT_FILE)))
     } else {
       INPUT_FILE <- NULL
-      warning("[config] No filled workbook (*.xlsx) found in 04_data_filled/ - set INPUT_FILE manually, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Your_Final_File.xlsx\"")
+      warning("[config] No workbook found in 04_data_filled/ — expected REAL field data file, e.g.:\n  04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx\nCreate it from REAL_EMPTY.xlsx by filling yellow cells with Chattogram field data.")
     }
   } else if (!is.null(repo_root)) {
     INPUT_FILE <- NULL
-    warning(sprintf("[config] Repo root found at %s but no 04_data_filled/ folder. Set INPUT_FILE manually, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx\"", repo_root))
+    warning(sprintf("[config] Repo root found at %s but no 04_data_filled/ folder. Set INPUT_FILE manually, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx\"", repo_root))
   } else {
     INPUT_FILE <- NULL
-    warning("[config] Could not locate the repo root (looked for 04_data_filled/ or scripts/R/run_all.R). Set INPUT_FILE explicitly, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx\"")
+    warning("[config] Could not locate the repo root (looked for 04_data_filled/ or scripts/R/run_all.R). Set INPUT_FILE explicitly, e.g.:\n  INPUT_FILE <- \"F:/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx\"")
   }
 }
 
