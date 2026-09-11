@@ -150,7 +150,13 @@ def table_wilcoxon(po):
                      "Value": "No usable pairs"})
     else:
         try:
-            res = stats.wilcoxon(diffs, zero_method="wilcox",
+            # zero_method='wilcox' semantics applied EXPLICITLY: scipy switches
+            # to the normal approximation when zeros are present (they create
+            # tied |d| before dropping), while R's wilcox.test drops zeros and
+            # still uses the exact test. Dropping first makes both engines use
+            # the exact signed-rank distribution (n <= 25, no ties).
+            diffs_nz = diffs[diffs != 0]
+            res = stats.wilcoxon(diffs_nz, zero_method="wilcox",
                                  alternative="two-sided", correction=False)
             w, p = float(res.statistic), float(res.pvalue)
         except ValueError:

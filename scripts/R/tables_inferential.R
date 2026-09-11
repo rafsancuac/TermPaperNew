@@ -74,7 +74,10 @@ t12b <- function() {
   if (n == 0) {
     rows <- item("Wilcoxon signed-rank (two-sided)", "No usable pairs")
   } else {
-    w <- suppressWarnings(wilcox.test(dd, alternative = "two.sided", exact = FALSE))
+    ## Exact signed-rank test when available (no ties among non-zero |d|);
+    ## mirrors scipy after the Python side drops zero differences first.
+    ## (Normal approximation with tie handling only when exact is unavailable.)
+    w <- suppressWarnings(wilcox.test(dd, alternative = "two.sided"))
     ## scipy.stats.wilcoxon reports W = the smaller of the signed-rank sums
     ## (ranks of |diff| over non-zero differences; zero_method='wilcox' drops
     ## zeros before ranking, exactly as R's wilcox.test does).

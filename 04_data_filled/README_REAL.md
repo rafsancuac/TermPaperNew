@@ -31,14 +31,14 @@ GPS সব 22.1-22.5N, 91.6-92.0E (চট্টগ্রাম বাউন্�
 - Buy <= Sell প্রতিটি observation-এ
 - Payment % (Cash+MFS+Credit) = 100 (90 traders)
 - Interview_Date 02-07 March 2026, market schedule অনুযায়ী (M1: 03/03, M6: 03/03, M2: 04/03, M3: 05/03, M4: 06/03, M5: 07/03)
-- Pair_ID: 15 pairs, 14 usable price pairs, median gap 4.28% (same transaction)
-- K/D flags: buy K=56, sell K=61 D=15 (realism)
+- Pair_ID: 15 pairs, 13 usable price pairs, median relative gap 0.26% (same transaction)
+- K/D flags: buy K=56, sell K=61, D=15 (realism)
 - Unit: wholesale mostly Maund, retail mostly Kg
 - Quantity: positive, spoilage 0-100%
 
-**যাচাই:**
-- `verify_filled.py` → 24/24 PASS
-- `review_audit.py` → PASS=62 WARN=3 FAIL=0 (WARN: pair gap 4.28%, other-fish high price crustaceans, S09/S10 low count <20 — documented, non-fatal)
+**যাচাই (2026-09-11, মার্জ-পরবর্তী পুনঃচালনা — নীল-কলাম ফর্মুলা পুনরুদ্ধার + LibreOffice recalc-এর পর):**
+- `verify_filled.py` → 24/24 PASS (QC মানগুলো এখন recalc-কৃত প্রকৃত গণিত-ফল)
+- `review_audit.py` → PASS=64 WARN=1 FAIL=0 (WARN: S09/S10 PO-row count <20 — documented, non-fatal; pair gap now passes at 0.26% median; crustacean band fixed)
 - `clean_data.py` → S1-S3 PASS, S4 Tukey 11 flags (1.3%), S5 sensitivity PS 69.6% -> 69.6% (robust)
 
 ## এক নজরে আসল ফলাফল (চট্টগ্রাম, REAL data)
@@ -47,10 +47,10 @@ GPS সব 22.1-22.5N, 91.6-92.0E (চট্টগ্রাম বাউন্�
 - **Margins (chain-complete mean):** Aratdar 27.0 (3.2%), Bepari/Faria 108.3 (12.7%), Retailer 124.2 (14.5%) — A+B+R = spread হুবহু [PASS]
 - **Price chain example (Ilish S01):** Producer ~1050 -> Aratdar sell ~1080 -> Bepari sell ~1190 -> Consumer paid ~1518 BDT/kg
 - **Volume:** Aratdar 801 kg/day > Bepari 205 > Retailer 96 (scale gap)
-- **Payment:** MFS share বাড়ে নিচের দিকে (Aratdar ~14% -> Retailer ~29%), Consumer 50% Cash, 28% bKash
-- **Problems:** High ice price, toll burden, spoilage loss top 3
-- **Consumer:** 73% Weekly, 27% Daily, Purity top reason
-- **Stats:** Wilcoxon pairs p>0.05 (consistent), KW significant S01/S03/S05/S06, χ² payment x actor p=0.647 (independent), MWU margins p<0.001, Spearman MC vs profit exploratory
+- **Payment:** MFS share বাড়ে নিচের দিকে (Aratdar ~14.2% -> Retailer ~27.4%), Consumer: 50% Cash, 23.3% Nagad, 20% bKash, 6.7% বাকি
+- **Problems:** দাম-অস্থিরতা 32.2%, লিন-সিজন কম স্থলন 28.9%, বরফ-লবণ ব্যয় 28.9% (তারপর বরফের উচ্চ দাম ও পানিজমা 27.8%)
+- **Consumer:** 73.3% Weekly, 26.7% Daily; কারণ #1 বিশুদ্ধতা (36.7%)
+- **Stats:** Wilcoxon 13 usable pairs W=26, p=0.922 (consistent — exact test in both Python & R), KW significant S01/S04/S05/S06 (S02 borderline p=0.056; Dunn–Holm-এ 2টি জোড়া), χ² payment x actor p=0.647 (independent), MWU margins p<0.0001, Spearman MC vs profit ρ=0.055 p=0.77 (exploratory, non-significant)
 
 (সম্পূর্ণ সংখ্যা `analysis_outputs/tables/` ও `analysis_outputs_r/tables/`-এ)
 

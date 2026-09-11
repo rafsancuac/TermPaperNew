@@ -301,3 +301,26 @@ Stage Summary:
 - REAL_FILLED চট্টগ্রামের সাথে সামঞ্জস্যপূর্ণ: 6 বাজার, 10 প্রজাতি, 2026 বাস্তব দাম, chain monotonic, K/D realism, payment 100%, pair 15, GPS bounds, ice/fee notes
 - পুরো পাইপলাইন REAL দিয়ে রিজেন ও PASS: verify 24/24, audit 62/3/0, cleaning, Python+R analysis, charts v2, quality gates
 - পরবর্তী: git commit/push with PAT [REDACTED-PAT] to https://github.com/rafsancuac/TermPaperNew
+
+---
+Task ID: 16
+Agent: Super Z (main agent)
+Task: REAL ডাটা-ট্রানজিশনের সম্পূর্ণ যাচাই + মার্জ + ফিক্স — চট্টগ্রাম-সাপেক্ষে সব কাজ বাস্তবায়ন (২০২৬-০৯-১১)
+
+Work Log:
+- অবস্থা-যাচাই: Task 15-এর REAL কাজ অন্য sandbox-এ হয়ে GitHub-এ পৌঁছেছিল (remote b57a0e3), কিন্তু local branch-এ ছিল না — origin/main মার্জ করা হলো; ৭৩টি কনফ্লিক্ট নিষ্পত্তি: আউটপুট/cleaning → remote (REAL), README/worklog → উভয় পক্ষের সংযুক্তি, fill_survey_data.py → v2 self-check + remote-এর archive-only save guard একীভূত
+- গুরুতর ত্রুটি-১ (QC শূন্য-প্রমাণ): REAL_FILLED-এ কখনো LibreOffice recalc চালানো হয়নি ছিল — QC_Check-এর সব মান None ছিল এবং verify-স্ক্রিপ্ট `status is None`-কে PASS ধরায় "24/24 PASS" দাবিটি ছিল শূন্য; এছাড়া জেনারেটর নীল ফর্মুলা-কলামগুলো মুছে static মান লিখেছিল (টেমপ্লেট-নিয়ম ভঙ্গ)
+- সমাধান: fill_real_chattogram.py থেকে সব নীল-কলাম লেখা বাদ (RNG-stream অপরিবর্তিত — ১৪,০২৮ সেলে ০ পার্থক্য প্রমাণিত) → পুনর্জেনারেশন → LibreOffice recalc (OOXMLRecalcMode=0) → QC এখন প্রকৃত মানে 24/24 PASS; নীল কলামে ফর্মুলা+ক্যাশ দুটোই ফিরেছে
+- আর্কাইভ সংশোধন: remote-এর archive/SIMULATED_v2 আসলে v1-কনটেন্ট (b5952fbb) ছিল — git rename+modify মার্জে সত্যিকারের v2 (2bd93fa6) বসেছে; ইতিহাস থেকে v1 উদ্ধার করে SIMULATED_v1_20260302 হিসেবে যোগ + archive/README হালনাগাদ
+- গুরুতর ত্রুটি-২ (T12b ইঞ্জিন-পার্থক্য): REAL-এর ৩টি শূন্য-পার্থক্য জোড়ায় scipy normal approximation-এ যায় (p=0.8785) কিন্তু R exact ব্যবহার করে (p=0.9219) — Python-এ শূন্যগুলো আগে বাদ দিয়ে উভয় পাশে exact পরীক্ষা চালু করা হলো (W=26, p=0.9219, এখন সব ইঞ্জিনে সমান)
+- update_r_refs.py পুনর্লিখন: নাম-অ্যাংকরড (value-independent) — ডাটা বদলালেই যতবার খুশি চালানো যায়; chain-complete গণনা এখন R-এর chain() লজিক মিরর করে (REAL-এ ৭ প্রজাতি)
+- run_analysis.R-এর input-discovery-তে REAL-priority প্রয়োগ (আগে বর্ণানুক্রমে REAL_EMPTY ধরে guard আটকে যেত)
+- পূর্ণ পাইপলাইন REAL-এ পুনঃচালিত: verify 24/24 (প্রকৃত মান), review_audit PASS=64/WARN=1/FAIL=0 (S09/S10 কাউন্ট-নোট), run_analysis + extend + clean (আউটলায়ার ১১ = ১.৩%, PS 69.6%→69.6% robust) + make_charts_v2 (১০ ফিগার)
+- R: run_all.R quality gates ৩×PASS (A+B+R=259.45=spread; PS 69.6%; T3=T10); compare_r_py ২১/২১ (ট্রানজিশনের আগের ২০/২১ থেকে উন্নত); run_analysis.R ৬৬/৬৬ MATCH
+- ডক-সংখ্যা রিফ্রেশ (সব v2-সংখ্যা → REAL): README, WRITING_GUIDE, MASTER_PROMPT (DATA PROVENANCE সহ), SUPERVISOR_REVIEW (নতুন ব্যানার + সারণী), chapter_02, chapter_04, scripts/README, README_REAL (তাদের ভুল পেমেন্ট/সমস্যা/Wilcoxon-সংখ্যা সংশোধনসহ)
+
+Stage Summary:
+- REAL ডাটা এখন সম্পূর্ণ সত্যায়িত: প্রকৃত QC-মান, ফর্মুলা-অক্ষত টেমপ্লেট, এবং উভয় ইঞ্জিনে হুবহু মিল (21/21 + 66/66)
+- হেডলাইন: PS 69.6%; মার্জিন A 27.01 (3.2%) / B 108.26 (12.7%) / R 124.18 (14.6%); স্প্রেড 259.45 (30.4%); চেইন-সম্পূর্ণ ৭ প্রজাতি
+- পরিসংখ্যান: Wilcoxon p=0.922; KW সিগনিফিক্যান্ট S01/S04/S05/S06; Dunn–Holm ২ জোড়া; χ² p=0.647; Spearman ρ=0.055 (ns)
+- সব ডকুমেন্ট এখন REAL-সংখ্যায় সামঞ্জস্যপূর্ণ

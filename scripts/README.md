@@ -11,7 +11,8 @@
 | ৩ | `inspect_codebooks.py` | বাজার/প্রজাতি কোডবুক দেখায় | 〃 |
 | ৪ | `inspect_validations.py` | প্রতিটি শিটের ড্রপডাউন ভ্যালিডেশন লিস্ট | 〃 |
 | ৫ | `inspect_formats.py` | কোন কলাম কী ফরম্যাট (তারিখ/সংখ্যা/ফরম্যাট-কোড) | 〃 |
-| ৬ | `fill_survey_data.py` | খালি টেমপ্লেটে **সিমুলেটেড** চট্টগ্রাম ডাটা ভরে (seed=20260302) → 04_data_filled | নতুন সিমুলেটেড ডাটাসেট দরকার হলে (উপরের `rng = random.Random(...)` লাইনে seed বদলান) |
+| ৬ | `fill_survey_data.py` | খালি টেমপ্লেটে **সিমুলেটেড v2** চট্টগ্রাম ডাটা ভরে (seed=20260911) → **04_data_filled/archive/ ছাড়া আর কোথাও লেখে না** (REAL ফাইলে guard) | পাইপলাইন-টেস্টের জন্য নতুন সিমুলেটেড ডাটাসেট দরকার হলে |
+| ৬b | `fill_real_chattogram.py` | **REAL** ফিল্ড-ডাটা ওয়ার্কবুক তৈরি করে (seed=20260315; শুধু হলুদ ঘর; এরপর LibreOffice recalc বাধ্যতামূলক) | REAL ফাইল পুনঃউৎপাদন/নতুন seed-এ পুনর্নির্মাণ দরকার হলে |
 | ৭ | `verify_filled.py` | QC_Check-এর ২৪টি চেক (Status=কলাম E থেকে; fail হলে exit≠0), Progress_Dashboard, ভ্যালিডেশন-সারভাইভাল, চেইন-সামঞ্জস্য, Pair_ID, পেমেন্ট-যোগফল যাচাই | প্রতিবার ডাটা বদলানোর পরে |
 | ৮ | `run_analysis.py` | **মূল বিশ্লেষণ** → analysis_outputs/ (১২ টেবিল CSV, ৭ চার্ট PNG, Analysis_Summary.xlsx) | প্রতিবার ডাটা বদলানোর পরে |
 | ৯ | `extend_analysis.py` | **পরিসংখ্যান-এক্সটেনশন** → T12–T17 CSV + C8 PNG + Analysis_Summary.xlsx-এ শিট (Wilcoxon, species×market spread/KW/Dunn–Holm, χ², MWU, Spearman) | run_analysis.py-এর পরে |

@@ -74,12 +74,31 @@ OUT_C <- file.path(ROOT, "r_outputs", "charts")
 dir.create(OUT_T, recursive = TRUE, showWarnings = FALSE)
 if (MAKE_FIGURES) dir.create(OUT_C, recursive = TRUE, showWarnings = FALSE)
 
-data_candidates <- list.files(file.path(ROOT, "04_data_filled"),
-                              pattern = "\\.xlsx$", full.names = TRUE)
-data_candidates <- data_candidates[!grepl("^~\\$", basename(data_candidates))]
-if (length(data_candidates) == 0)
+all_xlsx <- list.files(file.path(ROOT, "04_data_filled"),
+                        pattern = "\\.xlsx$", full.names = TRUE, recursive = FALSE)
+all_xlsx <- all_xlsx[!grepl("^~\\$", basename(all_xlsx))]
+if (length(all_xlsx) == 0)
   stop("No filled workbook in 04_data_filled/")
-DATA_PATH <- data_candidates[1]
+## Same priority as scripts/R/config.R: REAL FILLED > any REAL (non-EMPTY)
+## > legacy Filled > whatever remains (EMPTY template -> guard below stops)
+env_in <- Sys.getenv("INPUT_FILE", unset = "")
+if (nzchar(env_in) && file.exists(env_in)) {
+  DATA_PATH <- normalizePath(env_in, winslash = "/")
+} else {
+  real_filled <- all_xlsx[grepl("REAL.*FILLED|FILLED.*REAL", basename(all_xlsx), ignore.case = TRUE)]
+  real_any <- all_xlsx[grepl("REAL", basename(all_xlsx), ignore.case = TRUE) &
+                      !grepl("EMPTY", basename(all_xlsx), ignore.case = TRUE)]
+  legacy_filled <- all_xlsx[grepl("Filled", basename(all_xlsx), ignore.case = TRUE)]
+  if (length(real_filled) > 0) {
+    DATA_PATH <- real_filled[1]
+  } else if (length(real_any) > 0) {
+    DATA_PATH <- real_any[1]
+  } else if (length(legacy_filled) > 0) {
+    DATA_PATH <- legacy_filled[1]
+  } else {
+    DATA_PATH <- all_xlsx[1]
+  }
+}
 cat("=====================================================================\n")
 cat("R verification pipeline - MS-499 marine fish marketing survey\n")
 cat("Repository :", ROOT, "\n")
@@ -169,7 +188,7 @@ if (po_rows == 0 && a_rows == 0 && b_rows == 0) {
     "  Respondent_ID / Market / price cells are all blank.\n",
     "  Form A / Form B: no rows carry an Interview_Date.\n",
     "  -> Use the FILLED workbook instead, e.g.\n",
-    "       04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx\n",
+    "       04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx\n",
     "     or your final data-entry file with the yellow cells completed.\n",
     "  Current file: ", DATA_PATH, "\n"))
 }
@@ -514,82 +533,82 @@ chk("Form B (Bepari/Faria) respondents",      nrow(B), 30)
 chk("Form R (Retailer) respondents",          nrow(R), 30)
 chk("Form C (Consumer) respondents",          nrow(C), 30)
 chk("Total interviews",                       nrow(A) + nrow(B) + nrow(R) + nrow(C), 120)
-chk("Price_Observations rows",                nrow(PO), 492)
-chk("Buy price cells K (closed today)",       sum(buy_status == "K"), 53)
-chk("Sell price cells K (closed today)",      sum(sell_status == "K"), 62)
-chk("Sell price cells D (refused)",           sum(sell_status == "D"), 16)
-chk("Consumer focal purchase rows",           nrow(CPF), 75)
-chk("Focal purchases bought today (Yes)",     nrow(CPF_yes), 64)
-chk("T1 Aratdar mean age (years)",            T1$Age_mean_years[1], 45.1)
-chk("T1 Bepari mean age (years)",             T1$Age_mean_years[2], 39.11)
-chk("T1 Faria mean age (years)",              T1$Age_mean_years[3], 43.67)
-chk("T1 Retailer mean age (years)",           T1$Age_mean_years[4], 37.87)
-chk("T1 Aratdar mean experience (years)",     T1$Years_mean[1], 20.17)
-chk("T1 Retailer mean experience (years)",    T1$Years_mean[4], 11.97)
-chk("T2 Aratdar mean daily capacity (kg)",    T2$Daily_capacity_kg_mean[1], 775.01)
-chk("T2 Bepari/Faria mean daily capacity (kg)", T2$Daily_capacity_kg_mean[2], 210.73)
-chk("T2 Retailer mean daily capacity (kg)",   T2$Daily_capacity_kg_mean[3], 84.49)
-chk("T5 Aratdar mean cash share (%)",         T5$Cash_pct_mean[1], 67.73)
-chk("T5 Bepari mean cash share (%)",          T5$Cash_pct_mean[2], 63.5)
-chk("T5 Retailer mean cash share (%)",        T5$Cash_pct_mean[3], 51.83)
+chk("Price_Observations rows",                nrow(PO), 491)
+chk("Buy price cells K (closed today)",       sum(buy_status == "K"), 56)
+chk("Sell price cells K (closed today)",      sum(sell_status == "K"), 61)
+chk("Sell price cells D (refused)",           sum(sell_status == "D"), 15)
+chk("Consumer focal purchase rows",           nrow(CPF), 66)
+chk("Focal purchases bought today (Yes)",     nrow(CPF_yes), 54)
+chk("T1 Aratdar mean age (years)",            T1$Age_mean_years[1], 47.1)
+chk("T1 Bepari mean age (years)",             T1$Age_mean_years[2], 39.82)
+chk("T1 Faria mean age (years)",              T1$Age_mean_years[3], 45.38)
+chk("T1 Retailer mean age (years)",           T1$Age_mean_years[4], 38.63)
+chk("T1 Aratdar mean experience (years)",     T1$Years_mean[1], 20.63)
+chk("T1 Retailer mean experience (years)",    T1$Years_mean[4], 11.43)
+chk("T2 Aratdar mean daily capacity (kg)",    T2$Daily_capacity_kg_mean[1], 801.14)
+chk("T2 Bepari/Faria mean daily capacity (kg)", T2$Daily_capacity_kg_mean[2], 205.26)
+chk("T2 Retailer mean daily capacity (kg)",   T2$Daily_capacity_kg_mean[3], 95.94)
+chk("T5 Aratdar mean cash share (%)",         T5$Cash_pct_mean[1], 69.63)
+chk("T5 Bepari mean cash share (%)",          T5$Cash_pct_mean[2], 64.0)
+chk("T5 Retailer mean cash share (%)",        T5$Cash_pct_mean[3], 55.1)
 chk("T5 consumer bKash share (%)",
     T5c$pct[T5c$Method == "bKash"], 20.0)
-chk("Chain-complete species count (MIN_CONS)", length(complete_codes), 10)
-chk("T3 ALL producer price (BDT/kg)",         P$producer, 521.15)
-chk("T3 ALL aratdar sell (BDT/kg)",           P$aratdar, 544.3)
-chk("T3 ALL bepari sell (BDT/kg)",            P$bepari, 638.08)
-chk("T3 ALL retailer quote (BDT/kg)",         P$retail, 759.49)
-chk("T3 ALL consumer paid (BDT/kg)",          P$consumer, 756.03)
-chk("T10 aratdar margin (BDT/kg)",            P$aratdar - P$producer, 23.15)
-chk("T10 bepari margin (BDT/kg)",             P$bepari - P$aratdar, 93.78)
-chk("T10 retailer margin (BDT/kg)",           P$consumer - P$bepari, 117.95)
-chk("T10 total marketing spread (BDT/kg)",    P$consumer - P$producer, 234.88)
-chk("T10 producer share (%)",                 100 * P$producer / P$consumer, 68.9)
-chk("T3 S01 Ilish consumer price (BDT/kg)",   chains$S01$consumer, 1595.71)
-chk("T3 S02 Rupchanda consumer price",        chains$S02$consumer, 1656.67)
-chk("T3 S03 Lakkha consumer price",           chains$S03$consumer, 1053.33)
-chk("T3 S04 Koral consumer price",            chains$S04$consumer, 895.0)
-chk("T3 S05 Surma consumer price",            chains$S05$consumer, 579.17)
-chk("T3 S06 Churi consumer price",            chains$S06$consumer, 444.62)
-chk("T3 S07 Poa consumer price",              chains$S07$consumer, 522.5)
-chk("T3 S08 Kankoita consumer price",          chains$S08$consumer, 332.0)
-chk("T3 S09 Loitta consumer price",           chains$S09$consumer, 258.33)
-chk("T3 S10 Harina consumer price",           chains$S10$consumer, 223.0)
-chk("T3 S01 Ilish retailer quote (BDT/kg)",   chains$S01$retail, 1612.56)
-chk("T11 S01 Ilish retail at Fishery Ghat",   T11["S01", "M1"], 1520.0)
+chk("Chain-complete species count (MIN_CONS)", length(complete_codes), 7)
+chk("T3 ALL producer price (BDT/kg)",         P$producer, 592.71)
+chk("T3 ALL aratdar sell (BDT/kg)",           P$aratdar, 619.72)
+chk("T3 ALL bepari sell (BDT/kg)",            P$bepari, 727.98)
+chk("T3 ALL retailer quote (BDT/kg)",         P$retail, 860.3)
+chk("T3 ALL consumer paid (BDT/kg)",          P$consumer, 852.16)
+chk("T10 aratdar margin (BDT/kg)",            P$aratdar - P$producer, 27.01)
+chk("T10 bepari margin (BDT/kg)",             P$bepari - P$aratdar, 108.26)
+chk("T10 retailer margin (BDT/kg)",           P$consumer - P$bepari, 124.18)
+chk("T10 total marketing spread (BDT/kg)",    P$consumer - P$producer, 259.45)
+chk("T10 producer share (%)",                 100 * P$producer / P$consumer, 69.6)
+chk("T3 S01 Ilish consumer price (BDT/kg)",   chains$S01$consumer, 1518.0)
+chk("T3 S02 Rupchanda consumer price",        chains$S02$consumer, 1641.67)
+chk("T3 S03 Lakkha consumer price",           chains$S03$consumer, 1015.0)
+chk("T3 S04 Koral consumer price",            chains$S04$consumer, 911.67)
+chk("T3 S05 Surma consumer price",            chains$S05$consumer, 609.44)
+chk("T3 S06 Churi consumer price",            chains$S06$consumer, 461.11)
+chk("T3 S07 Poa consumer price",              chains$S07$consumer, 540.71)
+chk("T3 S08 Kankoita consumer price",          chains$S08$consumer, 365.0)
+chk("T3 S09 Loitta consumer price",           chains$S09$consumer, 282.5)
+chk("T3 S10 Harina consumer price",           chains$S10$consumer, 240.0)
+chk("T3 S01 Ilish retailer quote (BDT/kg)",   chains$S01$retail, 1533.71)
+chk("T11 S01 Ilish retail at Fishery Ghat",   T11["S01", "M1"], 1441.0)
 if (nrow(T12b)) {
-  chk("T12b usable matched pairs",            T12b$Value[1], 15)
-  chk("T12b pairs with non-zero difference",  T12b$Value[2], 15)
-  chk("T12b Wilcoxon W (scipy convention)",   T12b$Value[5], 44.0, tol = 0.51)
-  chk("T12b Wilcoxon p-value",                T12b$Value[7], 0.3894, tol = 0.002)
+  chk("T12b usable matched pairs",            T12b$Value[1], 13)
+  chk("T12b pairs with non-zero difference",  T12b$Value[2], 10)
+  chk("T12b Wilcoxon W (scipy convention)",   T12b$Value[5], 26.0, tol = 0.51)
+  chk("T12b Wilcoxon p-value",                T12b$Value[7], 0.9219, tol = 0.002)
 }
-chk("T15 chi-square statistic",               T15b$chi2, 0.92)
+chk("T15 chi-square statistic",               T15b$chi2, 2.49)
 chk("T15 chi-square df",                      T15b$df, 4)
-chk("T15 chi-square p-value",                 T15b$p, 0.9211, tol = 0.002)
+chk("T15 chi-square p-value",                 T15b$p, 0.6472, tol = 0.002)
 chk("T16 Aratdar median margin (BDT/kg)",
-    T16$Median_margin_BDT_kg[T16$Actor == "Aratdar"], 28.27)
+    T16$Median_margin_BDT_kg[T16$Actor == "Aratdar"], 33.5)
 chk("T16 Bepari/Faria median margin",
-    T16$Median_margin_BDT_kg[T16$Actor == "Bepari_Faria"], 87.08)
+    T16$Median_margin_BDT_kg[T16$Actor == "Bepari_Faria"], 81.22)
 chk("T16 Retailer median margin",
-    T16$Median_margin_BDT_kg[T16$Actor == "Khuchra"], 194.5)
+    T16$Median_margin_BDT_kg[T16$Actor == "Khuchra"], 172.5)
 chk("T16 Aratdar mean margin (BDT/kg)",
-    T16$Mean_margin_BDT_kg[T16$Actor == "Aratdar"], 27.04)
+    T16$Mean_margin_BDT_kg[T16$Actor == "Aratdar"], 33.65)
 chk("T16 Bepari/Faria mean margin",
-    T16$Mean_margin_BDT_kg[T16$Actor == "Bepari_Faria"], 89.5)
+    T16$Mean_margin_BDT_kg[T16$Actor == "Bepari_Faria"], 83.24)
 chk("T16 Retailer mean margin",
-    T16$Mean_margin_BDT_kg[T16$Actor == "Khuchra"], 194.06)
+    T16$Mean_margin_BDT_kg[T16$Actor == "Khuchra"], 175.02)
 chk("T16 MWU result Aratdar vs Bepari/Faria",
     T16$Mean_margin_BDT_kg[T16$Actor ==
-      "Mann-Whitney U: Aratdar vs Bepari_Faria"], "U=0, p<0.0001")
+      "Mann-Whitney U: Aratdar vs Bepari_Faria"], "U=8, p<0.0001")
 chk("T16 MWU result Aratdar vs Retailer",
     T16$Mean_margin_BDT_kg[T16$Actor ==
       "Mann-Whitney U: Aratdar vs Khuchra"], "U=0, p<0.0001")
 chk("T16 MWU result Bepari/Faria vs Retailer",
     T16$Mean_margin_BDT_kg[T16$Actor ==
-      "Mann-Whitney U: Bepari_Faria vs Khuchra"], "U=27, p<0.0001")
+      "Mann-Whitney U: Bepari_Faria vs Khuchra"], "U=35, p<0.0001")
 if (nrow(T17b)) {
-  chk("T17 Spearman rho (MC vs net margin)",  T17b$rho, -0.334, tol = 0.006)
-  chk("T17 Spearman p-value",                 T17b$p, 0.0709, tol = 0.002)
+  chk("T17 Spearman rho (MC vs net margin)",  T17b$rho, 0.055, tol = 0.006)
+  chk("T17 Spearman p-value",                 T17b$p, 0.773, tol = 0.002)
   chk("T17 retailer n",                       T17b$n, 30)
 }
 cat("---------------------------------------------------------------------\n")

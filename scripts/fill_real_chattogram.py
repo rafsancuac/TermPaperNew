@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Generate REALISTIC field data for Chattogram (MS-499) — yellow cells.
+Generate REALISTIC field data for Chattogram (MS-499) — yellow cells ONLY.
 Output: 04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx
 Chattogram 6 markets, 120 respondents, 10 species, March 2026.
-Writes both raw yellow cells AND blue formula cached values for data_only reading.
+Template rule (same as fill_survey_data.py): only YELLOW cells written;
+BLUE formula columns stay as live formulas — run LibreOffice recalc
+afterwards to populate cached values (data_only reads).
 """
 import random
 from datetime import date
@@ -200,8 +202,7 @@ wsA=wb["Form_A_Aratdar"]
 for t in [x for x in traders if x["actor"]=="Aratdar"]:
     r=t["sheet_row"]
     put(wsA,r,4,MARKETS[t["market"]]["date"]); put(wsA,r,5,t["age"]); put(wsA,r,6,t["edu"]); put(wsA,r,7,t["years"]); put(wsA,r,8,t["cap_raw"]); put(wsA,r,9,"Maund")
-    # cached kg
-    put(wsA,r,10,kg_from_raw(t["cap_raw"],"Maund"))
+    # col 10 = cached kg (template formula — LibreOffice recalc fills it)
     put(wsA,r,11,rng.randint(3,9))
     if rng.random()<0.85:
         put(wsA,r,12,"Pay")
@@ -231,7 +232,7 @@ wsB=wb["Form_B_Bepari_Faria"]
 for t in [x for x in traders if x["actor"]=="Bepari_Faria"]:
     r=t["sheet_row"]
     put(wsB,r,4,MARKETS[t["market"]]["date"]); put(wsB,r,5,t["subtype"]); put(wsB,r,6,t["pattern"]); put(wsB,r,7,t["age"]); put(wsB,r,8,t["edu"]); put(wsB,r,9,t["years"]); put(wsB,r,10,t["cap_raw"]); put(wsB,r,11,"Maund")
-    put(wsB,r,12,kg_from_raw(t["cap_raw"],"Maund"))
+    # col 12 = cached kg (template formula)
     put(wsB,r,13,rng.randint(2,8)); put(wsB,r,14,t["source"]); put(wsB,r,15,wchoice([("Fisherman",0.50),("Aratdar",0.30),("Faria",0.15),("Other",0.05)])); put(wsB,r,16,rng.randint(8,70)*50); put(wsB,r,17,rng.randint(1,3)); put(wsB,r,18,rng.randint(1,3)); put(wsB,r,19,rng.randint(2,10)*50)
     ice_kg=rng.randint(30,120); put(wsB,r,20,ice_kg); put(wsB,r,21,round(ice_kg*rng.uniform(2.5,4.0)/10.0)*10)
     if rng.random()<0.8:
@@ -249,7 +250,7 @@ wsR=wb["Form_R_Khuchra"]
 for t in [x for x in traders if x["actor"]=="Khuchra"]:
     r=t["sheet_row"]
     put(wsR,r,4,MARKETS[t["market"]]["date"]); put(wsR,r,5,t["age"]); put(wsR,r,6,t["edu"]); put(wsR,r,7,t["years"]); put(wsR,r,8,t["cap_raw"]); put(wsR,r,9,t["cap_unit"])
-    put(wsR,r,10,kg_from_raw(t["cap_raw"], t["cap_unit"]))
+    # col 10 = cached kg (template formula)
     put(wsR,r,11,rng.randint(2,8)); put(wsR,r,12,rng.randint(12,70)*5); put(wsR,r,13,rng.randint(16,50)*5); put(wsR,r,14,rng.randint(6,30)*5); put(wsR,r,15,rng.randint(2,8))
     buys={"M6":[("Fisherman",0.35),("Aratdar",0.40),("Faria",0.20),("Other",0.05)]}.get(t["market"],[("Aratdar",0.55),("Faria",0.20),("Fisherman",0.15),("Other",0.10)])
     put(wsR,r,16,wchoice(buys)); put(wsR,r,17,wchoice([("Household",0.60),("Hawker",0.15),("Hotel",0.15),("Institutional",0.05),("Other",0.05)]))
@@ -294,11 +295,8 @@ for t in traders:
         if actor=="Khuchra" and sell_raw is None and rng.random()<0.08:
             sell_raw="K"
         put(wsP,r,7,buy_raw if buy_raw else buy_val); put(wsP,r,8,sell_raw if sell_raw else sell_val); put(wsP,r,9,unit)
-        # cached BDT/kg
-        put(wsP,r,10,price_kg_from_raw(buy_val if buy_raw is None else None, unit))
-        put(wsP,r,11,price_kg_from_raw(sell_val if sell_raw is None else None, unit))
+        # cols 10/11 = cached BDT/kg, col 14 = cached qty kg (template formulas)
         put(wsP,r,12,qtys[idx]); put(wsP,r,13,unit)
-        put(wsP,r,14,kg_from_raw(qtys[idx], unit))
         if "pair" in t and t["pair"][1]==sp:
             put(wsP,r,15,t["pair"][0])
 
@@ -314,9 +312,9 @@ for c in consumers:
         put(wsF,frow,2,c["id"]); put(wsF,frow,3,c["market"]); put(wsF,frow,4,p["sp"]); put(wsF,frow,5,"Yes" if p["bought"] else "No")
         if p["bought"]:
             put(wsF,frow,6,p["frm"]); put(wsF,frow,7,p["price"]); put(wsF,frow,8,"Kg")
-            put(wsF,frow,9,price_kg_from_raw(p["price"],"Kg"))
+            # col 9 = cached BDT/kg (template formula)
             put(wsF,frow,10,p["qty"]); put(wsF,frow,11,"Kg")
-            put(wsF,frow,12,kg_from_raw(p["qty"],"Kg"))
+            # col 12 = cached kg (template formula)
         else:
             put(wsF,frow,7,"K")
         frow+=1
@@ -331,9 +329,9 @@ for c in consumers:
             price=round_price_kg(rng.uniform(lo,hi)); qty=rng.choice([0.25,0.5,0.5,0.75,1.0,1.5])
             loc=wchoice([("Same market",0.75),("Khatunganj wholesale",0.10),("Neighbourhood van",0.15)])
             put(wsO,orow,2,c["id"]); put(wsO,orow,3,c["market"]); put(wsO,orow,4,name); put(wsO,orow,5,price); put(wsO,orow,6,"Kg")
-            put(wsO,orow,7,price_kg_from_raw(price,"Kg"))
+            # col 7 = cached BDT/kg (template formula)
             put(wsO,orow,8,qty); put(wsO,orow,9,"Kg")
-            put(wsO,orow,10,kg_from_raw(qty,"Kg"))
+            # col 10 = cached kg (template formula)
             put(wsO,orow,11,loc)
             orow+=1
 
@@ -368,7 +366,7 @@ for mk in MKT_ORDER:
             items.append((name, round_price_kg(rng.uniform(lo,hi))))
         for name,price in items:
             put(wsT,trow,2,minfo["date"]); put(wsT,trow,3,mk); put(wsT,trow,4,v_id); put(wsT,trow,5,"RS"); put(wsT,trow,6,name); put(wsT,trow,7,price); put(wsT,trow,8,"Kg")
-            put(wsT,trow,9,price_kg_from_raw(price,"Kg"))
+            # col 9 = cached BDT/kg (template formula)
             trow+=1
 
 wsL=wb["Data_Collection_Log"]
