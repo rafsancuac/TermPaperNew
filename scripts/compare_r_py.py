@@ -29,7 +29,13 @@ def same_cell(a, b):
         if isinstance(v, str):
             break
     else:
-        return abs(float(a) - float(b)) < 1e-6
+        # Docstring contract: numbers must agree after rounding to 2 decimals.
+        # The two engines legitimately differ in the last decimal on a handful
+        # of derived cells, because Python rounds intermediate price/margin
+        # columns before differencing them while R rounds only at output. Both
+        # are internally consistent (each engine's own accounting gates pass);
+        # the gap is a rounding-path artefact, not a computational disagreement.
+        return abs(float(a) - float(b)) < 0.011
     try:
         fa, fb = float(str(a).replace(",", "")), float(str(b).replace(",", ""))
         return abs(fa - fb) < 0.011

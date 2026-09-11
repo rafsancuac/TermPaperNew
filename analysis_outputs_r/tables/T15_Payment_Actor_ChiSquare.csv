@@ -2,5 +2,5 @@
 "Aratdar",30,14,12,4,"46.7"
 "Bepari/Faria",30,9,16,5,"30"
 "Retailer",30,14,13,3,"46.7"
-"chi-square (actor x MFS frequency)",90,NA,NA,NA,"chi2=2.49, df=4, p=0.6472, G-test p=0.6349, Fisher-exact p=0.6508"
+"chi-square (actor x MFS frequency)",90,NA,NA,NA,"chi2=2.49, df=4, p=0.6472, G-test p=0.6349, Fisher-exact p=0.6526"
 "Cramer's V / smallest expected count",NA,NA,NA,NA,"V=0.118 / min exp=4.00"
