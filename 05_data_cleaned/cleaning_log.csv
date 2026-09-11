@@ -9,7 +9,7 @@ S1 structural,Interview quota,Form R (Retailer),n=30 / quota 30,PASS,30
 S1 structural,Interview quota,Form C (Consumer),n=30 / quota 30,PASS,30
 S1 structural,Interview date inside 02-07 Mar 2026 window,All four forms,outside window = 0,PASS,0
 S1 structural,Overall structural validation,All forms,PASS,proceed,0
-S2 missing,Price cells K/D classification,Price_Observations,buy: K=53 D=6; sell: K=62 D=16,"K = valid skip (closed today); D = item non-response; both excluded from price statistics, respondents retained",0
+S2 missing,Price cells K/D classification,Price_Observations,buy: K=56 D=0; sell: K=61 D=15,"K = valid skip (closed today); D = item non-response; both excluded from price statistics, respondents retained",0
 S3 range,Age in 18-80; experience <= age-12,Form A,"age violations=0, experience violations=0",PASS,0
 S3 range,Age in 18-80; experience <= age-12,Form B,"age violations=0, experience violations=0",PASS,0
 S3 range,Age in 18-80; experience <= age-12,Form R,"age violations=0, experience violations=0",PASS,0
@@ -18,5 +18,5 @@ S3 range,Positive quantity,Price_Observations,non-positive quantities = 0,PASS,0
 S3 range,Spoilage 0-100 %,Form R,violations = 0,PASS,0
 S3 logic,Payment shares sum to 100 %,Forms A/B/R,rows not summing = 0,PASS,0
 S3 logic,Sell >= buy on the same observation row,Price_Observations,rows with sell < buy = 0,PASS,0
-S4 outliers,Tukey fences (1.5 x IQR) by species x actor x side,Price_Observations,"groups screened=59, numeric price cells=847, flagged=18 (2.1%)",flag only (kept in baseline; sensitivity table quantifies effect),18
-S5 sensitivity,Headline chain recomputed without flagged outliers,Chain-complete species (MIN_CONS=3),producer share baseline=68.9% vs outlier-excluded=68.9%,differences below ~2 percentage points are reported as robust,0
+S4 outliers,Tukey fences (1.5 x IQR) by species x actor x side,Price_Observations,"groups screened=42, numeric price cells=850, flagged=11 (1.3%)",flag only (kept in baseline; sensitivity table quantifies effect),11
+S5 sensitivity,Headline chain recomputed without flagged outliers,Chain-complete species (MIN_CONS=3),producer share baseline=69.6% vs outlier-excluded=69.6%,differences below ~2 percentage points are reported as robust,0

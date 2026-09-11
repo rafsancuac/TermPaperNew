@@ -20,8 +20,30 @@ import openpyxl
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-DEFAULT = os.path.join(ROOT, "04_data_filled",
-                       "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+# Prefer REAL field data for Chattogram, fallback to legacy/simulated, exclude archive
+def _find_default():
+    try:
+        from run_analysis import find_default_data as _f
+        return _f()
+    except Exception:
+        # fallback hardcoded paths
+        for cand in [
+            "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx",
+            "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL.xlsx",
+            "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx",
+        ]:
+            p = os.path.join(ROOT, "04_data_filled", cand)
+            if os.path.exists(p):
+                return p
+        # last resort: any xlsx in 04_data_filled
+        d = os.path.join(ROOT, "04_data_filled")
+        if os.path.isdir(d):
+            for f in os.listdir(d):
+                if f.lower().endswith(".xlsx") and not f.startswith("~$"):
+                    return os.path.join(d, f)
+        return os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+
+DEFAULT = _find_default()
 MAUND = 37.32
 
 MARKETS = ["M1", "M2", "M3", "M4", "M5", "M6"]

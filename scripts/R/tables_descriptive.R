@@ -70,11 +70,9 @@ load_data <- function() {
   COF<- COF[!is.na(COF$Fish_name_local) & COF$Fish_name_local != "", , drop = FALSE]
   M  <- has_date(drop_id(read_tab("Form_M_Market_Observation", fM)), "Obs_Date")
 
-  ## ---- empty-template guard -------------------------------------------------
-  ## The file Marine_Fish_Marketing_Data_Entry (1).xlsx in 03_data_entry_template/
-  ## has only Obs_ID / Respondent_ID pre-filled (500 rows) and everything else
-  ## blank. That is not usable data — give a clear error instead of cryptic
-  ## min/max -> rp() crashes.
+  ## ---- empty-template guard (Chattogram real-data transition 2026-09-11) ----
+  ## Simulated test data has been moved to 04_data_filled/archive/
+  ## Active file should be REAL field data with yellow cells filled.
   po_filled <- sum(!is.na(PO$Market) & PO$Market != "")
   a_filled  <- nrow(A)
   b_filled  <- nrow(B)
@@ -82,16 +80,23 @@ load_data <- function() {
               nrow(PO), po_filled, a_filled, b_filled, nrow(R), nrow(C), nrow(CPF)))
   if (po_filled == 0 && a_filled == 0 && b_filled == 0) {
     stop(paste0(
-      "\n[ERROR] This workbook appears to be the EMPTY TEMPLATE (03_data_entry_template/).\n",
+      "\n[ERROR] This workbook appears to be the EMPTY TEMPLATE (not real field data).\n",
+      "  Current file: ", INPUT_FILE, "\n",
       "  Price_Observations has ", nrow(PO), " Obs_ID rows but 0 Market/price values,\n",
       "  and Form A/B/C have 0 dated interviews.\n",
-      "  -> Please use the FILLED workbook from 04_data_filled/ or your final data-entry file.\n",
-      "  Current file: ", INPUT_FILE, "\n",
-      "  In the repo the filled file is:\n",
-      "    04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx\n",
-      "  If you are on Windows and your file is F:/TermPaperNew/Marine_Fish_Marketing_Data_Entry (1).xlsx,\n",
-      "  open it in Excel and check Price_Observations sheet — you will see only PO-0001..PO-0502\n",
-      "  with all price columns blank (yellow cells). That means survey data has not been entered yet.\n"
+      "  -> Simulated test data has been archived:\n",
+      "     04_data_filled/archive/SIMULATED_v2_20260911_Chattogram_Filled.xlsx\n",
+      "  -> For REAL Chattogram field work (6 markets: M1 Fishery Ghat, M2 Chawkbazar,\n",
+      "     M3 Kazir Dewri, M4 Karnaphuli Complex, M5 Bahaddarhat, M6 Patenga):\n",
+      "     1. Open 04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_EMPTY.xlsx\n",
+      "     2. Fill ONLY yellow cells with real survey data\n",
+      "     3. Save as ..._REAL_FILLED.xlsx\n",
+      "     4. Run: python scripts/verify_filled.py --data <real-filled.xlsx>\n",
+      "            python scripts/run_analysis.py --data <real-filled.xlsx>\n",
+      "            R: INPUT_FILE <- \"..._REAL_FILLED.xlsx\"; source(\"scripts/R/run_all.R\")\n",
+      "  -> To test pipeline with archived simulated data:\n",
+      "     python scripts/run_analysis.py --data 04_data_filled/archive/SIMULATED_v2_20260911_Chattogram_Filled.xlsx\n",
+      "     R: INPUT_FILE <- \"04_data_filled/archive/SIMULATED_v2_20260911_Chattogram_Filled.xlsx\"\n"
     ))
   }
   if (po_filled < 10) {

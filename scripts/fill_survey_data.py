@@ -46,9 +46,13 @@ import openpyxl
 import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "03_data_entry_template", "Marine_Fish_Marketing_Data_Entry (1).xlsx")
-OUT = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+# Simulated test data goes to archive/ — never overwrite REAL field data
+OUT_SIM = os.path.join(ROOT, "04_data_filled", "archive", "SIMULATED_v2_20260911_Chattogram_Filled.xlsx")
+OUT_LEGACY = os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx")
+# Default OUT is archive version; legacy path kept for backward compat but warns
+OUT = OUT_SIM
 
-rng = random.Random(20260911)  # seed = v2 correction date
+rng = random.Random(20260911)  # v2 seed = 2026-09-11 (Chattogram realistic, see worklog Task 13)
 
 # ----------------------------------------------------------------------------
 # 1. CONFIG
@@ -1005,8 +1009,20 @@ if errors:
     raise SystemExit(1)
 
 # ----------------------------------------------------------------------------
-# 16. SAVE + SUMMARY
+# 16. SAVE + SUMMARY (simulated → archive/ only; never touches REAL field data)
 # ----------------------------------------------------------------------------
+import os as _os
+_os.makedirs(_os.path.dirname(OUT), exist_ok=True)
+real_candidates = [
+    _os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx"),
+    _os.path.join(ROOT, "04_data_filled", "Marine_Fish_Marketing_Data_Entry_Chattogram_REAL.xlsx"),
+]
+for rc in real_candidates:
+    if _os.path.exists(rc):
+        print(f"[NOTE] REAL field data detected: {rc}")
+        print("  Simulated output stays in archive/ and will NOT touch it.")
+        break
+
 wb.save(OUT)
 
 print("=" * 64)

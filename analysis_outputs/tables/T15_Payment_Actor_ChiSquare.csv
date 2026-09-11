@@ -1,6 +1,6 @@
 ﻿Actor,n,MFS_Regular,MFS_Occasional,MFS_Never,MFS_share_pct
-Aratdar,30,12,15,3,40.0
-Bepari/Faria,30,12,13,5,40.0
-Retailer,30,13,14,3,43.3
-chi-square (actor x MFS frequency),90,,,,"chi2=0.92, df=4, p=0.9211, G-test p=0.9260, Fisher-exact p=0.9383"
-Cramer's V / smallest expected count,,,,,V=0.072 / min exp=3.67
+Aratdar,30,14,12,4,46.7
+Bepari/Faria,30,9,16,5,30.0
+Retailer,30,14,13,3,46.7
+chi-square (actor x MFS frequency),90,,,,"chi2=2.49, df=4, p=0.6472, G-test p=0.6349, Fisher-exact p=0.6603"
+Cramer's V / smallest expected count,,,,,V=0.118 / min exp=4.00

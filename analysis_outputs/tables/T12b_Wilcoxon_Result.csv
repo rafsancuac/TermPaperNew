@@ -1,8 +1,8 @@
 ﻿Item,Value
-Usable matched pairs (n),15
-Pairs with non-zero difference,15
-Median difference (BDT/kg),-1.1
-Mean difference (BDT/kg),-0.42
-Wilcoxon W statistic,44.0
-p-value (two-sided),0.3894
+Usable matched pairs (n),13
+Pairs with non-zero difference,10
+Median difference (BDT/kg),0.0
+Mean difference (BDT/kg),-0.32
+Wilcoxon W statistic,26.0
+p-value (two-sided),0.9219
 Interpretation,p >= 0.05: seller-sell and buyer-buy quotes of matched lots do not differ systematically - self-reported chain prices are internally consistent
