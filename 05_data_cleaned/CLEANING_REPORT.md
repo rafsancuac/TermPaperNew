@@ -29,7 +29,7 @@ silently dropped.
 ## 4. Outlier screening (Stage S4)
 Tukey fences (Q1 - 1.5 x IQR, Q3 + 1.5 x IQR) were computed separately for
 each species x actor x price-side group with at least 8 numeric quotes.
-17 of the numeric price cells (1.8%)
+11 of the numeric price cells (1.1%)
 fall outside their fences. Consistent with common practice for fish-market
 price data (genuinely right-skewed, small samples per cell), flagged values
 are RETAINED in the baseline analysis and listed in `outlier_flags.csv`.

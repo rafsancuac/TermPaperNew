@@ -1,9 +1,9 @@
 MS-499 R analysis session
- 2026-09-10 10:58:28 
-Input : /home/user/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_Filled.xlsx 
+ 2026-09-11 12:07:15 
+Input : /home/user/TermPaperNew/04_data_filled/Marine_Fish_Marketing_Data_Entry_Chattogram_REAL_FILLED.xlsx 
 Output: /home/user/TermPaperNew/analysis_outputs_r 
 
-[load] PO rows=501 (with Market=463), A=30, B=30, R=30, C=30, CPF=69
+[load] PO rows=501 (with Market=491), A=30, B=30, R=30, C=30, CPF=66
   table  T1_Respondent_Profile.csv                  (5 rows)
   table  T2_Business_Scale.csv                      (3 rows)
   table  T2b_Channel_Patterns.csv                   (30 rows)
@@ -12,26 +12,26 @@ Output: /home/user/TermPaperNew/analysis_outputs_r
   table  T5_Payment_Methods.csv                     (7 rows)
   table  T6_Problems.csv                            (12 rows)
   table  T7_Market_Infrastructure.csv               (6 rows)
-  table  T8_Consumer_Behaviour.csv                  (16 rows)
+  table  T8_Consumer_Behaviour.csv                  (17 rows)
   table  T9_Other_Fish.csv                          (8 rows)
   table  T10_Margin_Summary.csv                     (5 rows)
   table  T11_Retail_Price_by_Market.csv             (10 rows)
-  table  T12_Pair_Detail.csv                        (16 rows)
+  table  T12_Pair_Detail.csv                        (15 rows)
   table  T12b_Wilcoxon_Result.csv                   (7 rows)
   table  T13_Species_Market_Spread.csv              (60 rows)
   table  T14_Species_Market_KruskalWallis.csv       (10 rows)
-  table  T14b_Dunn_Holm_Posthoc.csv                 (41 rows)
+  table  T14b_Dunn_Holm_Posthoc.csv                 (34 rows)
   table  T15_Payment_Actor_ChiSquare.csv            (5 rows)
   table  T16_Stratum_Margin_MannWhitney.csv         (6 rows)
   table  T17_Retailer_MC_Profit_Spearman.csv        (31 rows)
   table  T18_ShapiroWilk_Screening.csv              (5 rows)
-[10:58:32] Figures C1-C8 written
+[12:07:19] Figures C1-C8 written
 Workbook written: /home/user/TermPaperNew/analysis_outputs_r/R_Analysis_Summary.xlsx 
 
 ---------------- QUALITY GATES ----------------
-Margins telescope: A+B+R = 246.39 vs spread = 246.39  [PASS]
-PS + spread% = 100: PS 70.9%  [PASS]
-T3 ALL matches T10: 70.9% vs 70.9%  [PASS]
+Margins telescope: A+B+R = 259.45 vs spread = 259.45  [PASS]
+PS + spread% = 100: PS 69.6%  [PASS]
+T3 ALL matches T10: 69.6% vs 69.6%  [PASS]
 -----------------------------------------------
 
 DONE - R analysis outputs in: /home/user/TermPaperNew/analysis_outputs_r 
