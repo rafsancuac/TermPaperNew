@@ -2,11 +2,21 @@
 ## MS-499 — Marine Fish Marketing System of Chattogram, Bangladesh
 ## COMPLETE, SELF-CONTAINED ANALYSIS SCRIPT FOR R
 ##
-## Run in R / RStudio:   source("scripts/R/MS499_full_analysis.R")
-## Or from a terminal:   Rscript scripts/R/MS499_full_analysis.R
+## HOW TO RUN (R console / RStudio) ----------------------------------------
+##   1. Put this script and the data workbook in the SAME folder.
+##   2. In the R console:
+##          setwd("path/to/that/folder")
+##          source("MS499_full_analysis.R")
+##      Or simply:  Rscript MS499_full_analysis.R
+##   3. One-off package install (internet needed once):
+##          install.packages(c("readxl", "openxlsx"))
 ##
-## Required packages:    install.packages(c("readxl", "openxlsx"))
-## Optional (charts):    install.packages("ggplot2")
+## Tested against R 4.x (base R only -- NO dplyr / tidyr / ggplot2 needed,
+## so it runs on a stock R installation). Charts use base graphics.
+##
+## At the end it prints a VERIFICATION REPORT: every table with its row and
+## column count, the reproducibility checks, and the three accounting gates.
+## Everything it writes lands in a new folder "analysis_outputs_r/".
 ##
 ## Produces, from the filled data workbook only:
 ##   T1  Respondent profile                 T11 Retail price by species x market
@@ -34,9 +44,40 @@
 ###############################################################################
 
 ## ---------------------------------------------------------------- CONFIG ----
-INPUT_FILE  <- "04_data_filled/SYNTHETIC_v3_20260315_Chattogram_Filled.xlsx"
-OUTPUT_DIR  <- "analysis_outputs_r"
-MAKE_CHARTS <- TRUE
+## Data workbook. Leave as-is for the shipped dataset; for real field data
+## put your filled workbook next to this script and set its file name here
+## (or set INPUT_FILE <- "" to auto-detect the only .xlsx in the folder).
+INPUT_FILE  <- "MS499_Chattogram_Marine_Fish_Data.xlsx"
+OUTPUT_DIR  <- "analysis_outputs_r"   ## created automatically if missing
+MAKE_CHARTS <- TRUE                   ## set FALSE for tables only
+
+## --- locate the workbook, so source() works from any working directory ------
+.locate <- function(cand) {
+  if (cand != "" && file.exists(cand)) return(cand)
+  here <- tryCatch(dirname(normalizePath(sys.frame(1)$ofile)),
+                   error = function(e) getwd())
+  if (!is.null(here) && !is.na(here)) {
+    for (t in c(file.path(here, basename(cand)), file.path(here, cand)))
+      if (file.exists(t)) return(t)
+  }
+  for (t in c(file.path(getwd(), basename(cand)), file.path(getwd(), cand)))
+    if (file.exists(t)) return(t)
+  for (d in unique(c(if (!is.null(here)) here else NA, getwd()))) {
+    if (is.na(d) || !dir.exists(d)) next
+    x <- list.files(d, pattern = "\\.xlsx$", full.names = TRUE, ignore.case = TRUE)
+    x <- x[!grepl("(~\\$|Analysis_Summary)", x)]
+    if (length(x) == 1) return(x)
+    if (length(x) > 1) {
+      hit <- grep("MS499|Chattogram|Filled|Data", x, ignore.case = TRUE, value = TRUE)
+      if (length(hit) >= 1) return(hit[1])
+    }
+  }
+  cand
+}
+INPUT_FILE <- .locate(INPUT_FILE)
+if (!file.exists(INPUT_FILE))
+  stop("\nData workbook not found. Put the .xlsx in the same folder as this ",
+       "script,\nor set INPUT_FILE (line ~44) to the full path.\n")
 
 MAUND         <- 37.32          ## 1 maund = 37.32 kg (Methodology 3.2)
 LANDING       <- c("M1", "M6")  ## landing-linked markets (Methodology 3.11c)
@@ -48,10 +89,11 @@ ALPHA         <- 0.05
 
 ## --------------------------------------------------------------- PACKAGES ---
 need <- c("readxl", "openxlsx")
-for (p in need) {
-  if (!requireNamespace(p, quietly = TRUE))
-    stop("Package '", p, "' is required. Run: install.packages(\"", p, "\")")
-}
+missing_pkgs <- need[!vapply(need, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs))
+  stop("\nMissing R package(s): ", paste(missing_pkgs, collapse = ", "),
+       "\nInstall them once with:\n    install.packages(c(",
+       paste(sprintf("\"%s\"", missing_pkgs), collapse = ", "), "))\n")
 suppressPackageStartupMessages({ library(readxl); library(openxlsx) })
 HAVE_GGPLOT <- requireNamespace("ggplot2", quietly = TRUE)
 
@@ -1085,4 +1127,72 @@ cat(sprintf("T3 ALL PS = %.1f  vs T10 PS = %.1f   [%s]\n",
             ifelse(abs(T3$Producer_share_pct[T3$Species_code == "ALL"] - ps) < 0.05,
                    "PASS", "FAIL")))
 cat(sprintf("Chain-complete species: %s\n", paste(chain_codes, collapse = ", ")))
-cat("\nDONE — outputs in ", OUTPUT_DIR, "/\n", sep = "")
+## --------------------------------------------------------- VERIFICATION -----
+gate <- function(ok) if (isTRUE(ok)) "PASS" else "FAIL"
+GATES <- c(
+  sum = abs((A + B + R) - SP_) < 0.05,
+  pct = abs((ps + T10$Margin_pct_consumer[4]) - 100) < 0.15,
+  psx = abs(T3$Producer_share_pct[T3$Species_code == "ALL"] - ps) < 0.05
+)
+
+hr <- strrep("=", 74)
+cat("\n", hr, "\n", sep = "")
+cat("VERIFICATION REPORT\n")
+cat(hr, "\n")
+cat("R version      : ", R.version.string, "\n", sep = "")
+cat("Input workbook : ", basename(INPUT_FILE), "\n", sep = "")
+cat("Output folder  : ", normalizePath(OUTPUT_DIR), "\n", sep = "")
+cat("Data provenance: SYNTHETIC (pipeline-validation dataset, not field data)\n")
+
+cat("\n-- Tables written ---------------------------------------------------------\n")
+tf <- sort(list.files(file.path(OUTPUT_DIR, "tables"), pattern = "\\.csv$"))
+nempty <- 0
+for (f in tf) {
+  d <- tryCatch(read.csv(file.path(OUTPUT_DIR, "tables", f), check.names = FALSE),
+                error = function(e) NULL)
+  ok <- !is.null(d) && nrow(d) > 0 && ncol(d) > 0
+  if (!ok) nempty <- nempty + 1
+  cat(sprintf("  %-36s %4d rows x %3d cols   %s\n",
+              sub("\\.csv$", "", f), if (is.null(d)) 0 else nrow(d),
+              if (is.null(d)) 0 else ncol(d),
+              if (ok) "OK" else "<-- CHECK"))
+}
+cat(sprintf("  TOTAL: %d tables (%d with no data)\n", length(tf), nempty))
+
+cat("\n-- Charts written ---------------------------------------------------------\n")
+if (dir.exists(file.path(OUTPUT_DIR, "charts"))) {
+  cf <- sort(list.files(file.path(OUTPUT_DIR, "charts"), pattern = "\\.png$"))
+  cat("  ", paste(sub("\\.png$", "", cf), collapse = ", "), "\n", sep = "")
+  cat(sprintf("  TOTAL: %d charts\n", length(cf)))
+} else cat("  (none - MAKE_CHARTS = FALSE)\n")
+
+cat("\n-- Headline figures (copy these into the paper) ---------------------------\n")
+cat(sprintf("  Producer share (PS%%)            : %.1f %%\n", ps))
+cat(sprintf("  Total price spread              : %.2f BDT/kg (%.1f %%)\n",
+            SP_, T10$Margin_pct_consumer[4]))
+cat(sprintf("  Aratdar / Bepari / Retailer     : %.2f / %.2f / %.2f BDT/kg\n", A, B, R))
+cat(sprintf("  Gross / net marketing margin    : %.1f %% / %.1f %%\n",
+            T19$GMM_pct[T19$Species_code == "ALL"], T19$NMM_pct[T19$Species_code == "ALL"]))
+cat(sprintf("  Marketing efficiency (cons/prod): %.3f / %.3f\n",
+            T19$ME_consumer[T19$Species_code == "ALL"],
+            T19$ME_producer[T19$Species_code == "ALL"]))
+cat(sprintf("  Chain-complete species          : %s\n",
+            paste(chain_codes, collapse = ", ")))
+
+cat("\n-- Reproducibility gates ---------------------------------------------------\n")
+cat(sprintf("  [%s] segment margins telescope to the spread (%.2f vs %.2f)\n",
+            gate(GATES["sum"]), A + B + R, SP_))
+cat(sprintf("  [%s] producer share + spread = 100 (%.1f)\n",
+            gate(GATES["pct"]), ps + T10$Margin_pct_consumer[4]))
+cat(sprintf("  [%s] Table 3 pooled PS = Table 10 PS (%.1f vs %.1f)\n",
+            gate(GATES["psx"]), T3$Producer_share_pct[T3$Species_code == "ALL"], ps))
+cat(sprintf("  [%s] every table non-empty (%d of %d)\n",
+            gate(nempty == 0), length(tf) - nempty, length(tf)))
+
+allok <- all(GATES) && nempty == 0
+cat("\n", hr, "\n", sep = "")
+cat(sprintf("RESULT: %s  -- %d/%d tables written, %d/%d gates passed\n",
+            if (allok) "ALL CHECKS PASSED" else "REVIEW NEEDED (see FAIL above)",
+            length(tf) - nempty, length(tf), sum(GATES), length(GATES)))
+cat(hr, "\n")
+cat("\nDONE - outputs in ", normalizePath(OUTPUT_DIR), "/\n", sep = "")

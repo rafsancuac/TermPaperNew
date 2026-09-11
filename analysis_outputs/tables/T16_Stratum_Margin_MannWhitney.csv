@@ -1,7 +1,0 @@
-﻿Actor,n,Median_margin_BDT_kg,IQR_BDT_kg,Mean_margin_BDT_kg
-Aratdar,30,33.5,8.42,33.65
-Bepari_Faria,30,64.81,22.71,66.16
-Khuchra,30,116.62,39.52,118.06
-Mann-Whitney U: Aratdar vs Bepari_Faria,30/30,,,"U=42, p<0.0001"
-Mann-Whitney U: Aratdar vs Khuchra,30/30,,,"U=0, p<0.0001"
-Mann-Whitney U: Bepari_Faria vs Khuchra,30/30,,,"U=66, p<0.0001"
