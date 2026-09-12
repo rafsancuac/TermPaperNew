@@ -17,8 +17,8 @@ conventions could be validated end to end before fieldwork.
 
 **It is not observed field data.** No figure in the paper may be cited as an empirical
 finding about Chattogram's markets. Presenting it as a real survey would be research
-misconduct. Section 4.11 and Section 5.6 of the paper state exactly what must be
-redone when real data replace the workbook.
+misconduct. Section 3.13, Section 5.5 and Appendix B of the paper state exactly what
+must be redone when real data replace the workbook.
 
 ---
 
@@ -28,7 +28,7 @@ redone when real data replace the workbook.
 |---|---|
 | `MS499_Chattogram_Marine_Fish_Data.xlsx` | The analysis dataset. 16 sheets: Forms A/B/R/M/C, codebooks, derived columns and a 24-check QC dashboard (currently 24/24). 120 respondents across 6 markets, 10 focal species, 491 price observations, 15 matched buyer–seller pairs. |
 | `MS499_full_analysis.R` | One self-contained script that reproduces every number in the paper: 23 tables (T1–T19), 14 charts and a summary workbook. |
-| `MS499_Term_Paper.docx` | The finished paper — five chapters, APA 7th edition, 34 tables, 10 figures, references and five appendices. |
+| `MS499_Term_Paper.docx` | The finished paper — five chapters, APA 7th edition, 15 tables and 6 figures, a single reference list placed before three appendices. |
 
 ---
 
@@ -48,11 +48,9 @@ Or from a terminal: `Rscript MS499_full_analysis.R`
 runs on a stock R 4.x installation. Tested against R 4.5.0.
 
 Outputs are written to a new folder `analysis_outputs_r/` containing `tables/` (23 CSVs),
-`charts/` (14 PNGs) and `R_Analysis_Summary.xlsx`. The charts include the F- and A-series
-figures printed in the paper (F1–F5, F8, A1–A2), so the illustrations can be regenerated
-alongside the numbers. Two paper figures are not reproduced in base R: the infrastructure
-radar (Figure 4.8) and the problems rose (Figure 4.7), the latter being covered by the
-`C5_problems` bar chart.
+`charts/` (14 PNGs) and `R_Analysis_Summary.xlsx`. Every figure printed in the paper is
+among them (F1–F4, A1–A2), so the illustrations regenerate alongside the numbers. The
+remaining charts (C1–C5, C7, F5, F8) are additional views not carried into the paper.
 
 The script ends by printing a **verification report** — every table with its row and
 column count, the headline figures, and three reproducibility gates:
@@ -110,12 +108,17 @@ Synthetic, and valid only as a demonstration of the pipeline:
 
 ## Notes on the paper
 
-- **Table numbering is chapter-qualified**: Tables 1.1–1.2 in Chapter 1, 3.1–3.6 in
-  Chapter 3, 4.1–4.23 in Chapter 4, 5.1 in Chapter 5, A.1–A.3 in the appendices. Figures
-  are 4.1–4.8 and A.1–A.2.
-- **Ten reference entries** are flagged in Appendix E as needing volume, issue and page
-  details confirmed against the published source before final submission. All other
-  entries are complete as printed.
+- **Numbering is chapter-qualified**: Tables 3.1–3.4 in Chapter 3, 4.1–4.10 in
+  Chapter 4, A.1 in the appendices. Figures are 4.1–4.5 and A.1.
+- **All 19 references sit in one list at the very end of the document, immediately
+  before the appendices**, and every entry is complete with volume, issue and page or
+  DOI details.
+- The paper is set in the house style of `Methodology_v4_FIXED`: A4, Times New Roman,
+  12 pt body at 1.32 line height with 1-inch margins, 12 pt bold headings at every
+  level, 10 pt tables with horizontal rules only, and 12 pt italic equations numbered
+  right.
+- Three objectives only, and every chapter is framed as pursuing those three.
+- No em dashes anywhere in the text.
 - The hilsa conservation ban (reported 1 March – 30 April 2026) is treated as a caveat on
   interpreting the Ilish results, not as a measured variable. Chattogram is not among the
   six designated sanctuary districts.
