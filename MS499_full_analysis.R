@@ -1026,8 +1026,11 @@ cat(sprintf("Wrote %d tables to %s/tables/\n", length(TABLES), OUTPUT_DIR))
 
 ## ------------------------------------------------------------------ CHARTS --
 if (MAKE_CHARTS) {
-  png1 <- function(f, w = 2400, h = 1600, res = 300)
+  CHARTS_WRITTEN <- character(0)
+  png1 <- function(f, w = 2400, h = 1600, res = 300) {
     png(file.path(OUTPUT_DIR, "charts", f), width = w, height = h, res = res)
+    CHARTS_WRITTEN <<- c(CHARTS_WRITTEN, f)
+  }
   ## C1 price chain
   d <- T3[T3$Species_code != "ALL", , drop = FALSE]
   d <- d[!is.na(d$Producer_BDT_kg), , drop = FALSE]
@@ -1086,6 +1089,100 @@ if (MAKE_CHARTS) {
   boxplot(split(mc_all$cap, mc_all$Stratum), las = 1, col = "#2e8b57",
           main = "Daily throughput by stratum", ylab = "kg per day")
   par(op); dev.off()
+
+  ## ---- Figures used in the paper (F-series / A-series) ----------------------
+  ## These reproduce the figures printed in MS499_Term_Paper.docx.
+  PAL <- c("#1f4e79", "#d9822b", "#2e8b57", "#c0504d", "#7b5ea7", "#4f81bd")
+
+  ## F1  average marketing margin by chain intermediary
+  mg <- T10$Margin_BDT_kg[1:3]
+  names(mg) <- c("Aratdar", "Bepari/Faria", "Retailer")
+  png1("F1_margin_by_intermediary.png", w = 2000, h = 1500)
+  op <- par(mar = c(6, 6, 4, 2) + 0.1)
+  b <- barplot(mg, col = PAL[1:3], las = 1, ylab = "BDT per kilogram",
+               main = "Average marketing margin by chain intermediary",
+               ylim = c(0, max(mg) * 1.15))
+  text(b, mg, labels = sprintf("%.2f", mg), pos = 3, cex = 1.1)
+  par(op); dev.off()
+
+  ## retail (khuchra) selling prices, keyed to species and market names
+  PO_retail <- PO[PO$Actor_type == "Khuchra", , drop = FALSE]
+  PO_retail$value   <- PO_retail$sell_kg
+  PO_retail$species <- unname(SP_LOCAL[as.character(PO_retail$Species_code)])
+  PO_retail$market  <- unname(MK_NAME[as.character(PO_retail$Market)])
+  PO_retail <- PO_retail[!is.na(PO_retail$value) & !is.na(PO_retail$species), , drop = FALSE]
+
+  ## F2  distribution of retail selling prices by species
+  png1("F2_retail_price_boxplot.png", w = 2400, h = 1600)
+  op <- par(mar = c(9, 6, 4, 2) + 0.1)
+  boxplot(split(PO_retail$value, PO_retail$species), las = 2, col = PAL[3],
+          main = "Distribution of retail selling prices by species",
+          ylab = "BDT per kilogram", cex.axis = 0.8)
+  par(op); dev.off()
+
+  ## F3  average price progression along the marketing chain
+  chp <- T3[T3$Species_code %in% chain_codes, , drop = FALSE]
+  m3 <- t(as.matrix(chp[, c("Producer_BDT_kg", "Aratdar_sell_BDT_kg",
+                            "Bepari_sell_BDT_kg", "Consumer_paid_BDT_kg")]))
+  rownames(m3) <- c("Producer", "Aratdar", "Bepari", "Consumer")
+  colnames(m3) <- chp$Local_name
+  png1("F3_price_chain_progression.png", w = 2200, h = 1600)
+  op <- par(mar = c(6, 6, 4, 6) + 0.1)
+  matplot(m3, type = "o", pch = 16, lty = 1, lwd = 2, col = PAL, las = 1,
+          xaxt = "n", ylab = "BDT per kilogram",
+          main = "Average price progression along the marketing chain")
+  axis(1, at = 1:ncol(m3), labels = colnames(m3))
+  legend("topleft", rownames(m3), col = PAL, lty = 1, pch = 16, bty = "n", cex = 0.9)
+  par(op); dev.off()
+
+  ## F4  decomposition of the average consumer price
+  dc <- c(T10$Margin_BDT_kg[1:3], T3$Producer_BDT_kg[T3$Species_code == "ALL"])
+  names(dc) <- c("Aratdar margin", "Bepari margin", "Retailer margin", "Producer")
+  png1("F4_consumer_price_decomposition.png", w = 2000, h = 1700)
+  op <- par(mar = c(2, 2, 4, 2) + 0.1)
+  pie(sort(dc, decreasing = TRUE), col = PAL,
+      labels = sprintf("%s\n%.1f%%", names(sort(dc, decreasing = TRUE)),
+                       100 * sort(dc, decreasing = TRUE) / sum(dc)),
+      main = "Decomposition of the average consumer price", cex = 0.95)
+  par(op); dev.off()
+
+  ## F5  payment method composition by market actor
+  pm <- as.matrix(T5[1:3, c("Cash_pct_mean", "MFS_pct_mean", "Credit_pct_mean")])
+  rownames(pm) <- T5$Actor[1:3]
+  png1("F5_payment_method_mix.png", w = 2000, h = 1500)
+  op <- par(mar = c(6, 6, 4, 6) + 0.1)
+  barplot(t(pm), beside = FALSE, col = PAL[1:3], las = 1, ylab = "% of receipts",
+          main = "Payment method composition by market actor")
+  legend("topright", c("Cash", "MFS", "Credit"), fill = PAL[1:3], bty = "n", cex = 0.9)
+  par(op); dev.off()
+
+  ## F8  average retail selling price by market
+  png1("F8_retail_price_by_market.png", w = 2400, h = 1600)
+  op <- par(mar = c(9, 6, 4, 2) + 0.1)
+  boxplot(split(PO_retail$value, PO_retail$market), las = 2, col = PAL[2],
+          main = "Average retail selling price by market",
+          ylab = "BDT per kilogram", cex.axis = 0.8)
+  par(op); dev.off()
+
+  ## A1  daily trading capacity by actor group (log scale)
+  png1("A1_daily_capacity_boxplot.png", w = 2000, h = 1500)
+  op <- par(mar = c(6, 6, 4, 2) + 0.1)
+  boxplot(split(mc_all$cap, mc_all$Stratum), las = 1, col = PAL[4], log = "y",
+          main = "Daily trading capacity by actor group (log scale)",
+          ylab = "kg per day")
+  par(op); dev.off()
+
+  ## A2  producer share of the consumer price by species
+  psx <- T3$Producer_share_pct[T3$Species_code %in% chain_codes]
+  names(psx) <- T3$Local_name[T3$Species_code %in% chain_codes]
+  png1("A2_producer_share_by_species.png", w = 2000, h = 1500)
+  op <- par(mar = c(6, 8, 4, 2) + 0.1)
+  b <- barplot(sort(psx), horiz = TRUE, las = 1, col = PAL[6],
+               main = "Producer share of the consumer price by species",
+               xlab = "% of consumer price", xlim = c(0, 100))
+  text(sort(psx), b, labels = sprintf("%.1f%%", sort(psx)), pos = 4, cex = 0.9)
+  par(op); dev.off()
+
   cat("Wrote charts to ", OUTPUT_DIR, "/charts/\n", sep = "")
 }
 
@@ -1160,10 +1257,14 @@ for (f in tf) {
 cat(sprintf("  TOTAL: %d tables (%d with no data)\n", length(tf), nempty))
 
 cat("\n-- Charts written ---------------------------------------------------------\n")
-if (dir.exists(file.path(OUTPUT_DIR, "charts"))) {
-  cf <- sort(list.files(file.path(OUTPUT_DIR, "charts"), pattern = "\\.png$"))
-  cat("  ", paste(sub("\\.png$", "", cf), collapse = ", "), "\n", sep = "")
-  cat(sprintf("  TOTAL: %d charts\n", length(cf)))
+if (MAKE_CHARTS && exists("CHARTS_WRITTEN") && length(CHARTS_WRITTEN)) {
+  cat("  ", paste(sub("\\.png$", "", CHARTS_WRITTEN), collapse = ", "), "\n", sep = "")
+  cat(sprintf("  TOTAL: %d charts written by this run\n", length(CHARTS_WRITTEN)))
+  extra <- setdiff(list.files(file.path(OUTPUT_DIR, "charts"), pattern = "\\.png$"),
+                   CHARTS_WRITTEN)
+  if (length(extra))
+    cat("  Note: ", length(extra), " additional PNG(s) in the folder are left from an\n",
+        "       earlier run and were not produced by this script.\n", sep = "")
 } else cat("  (none - MAKE_CHARTS = FALSE)\n")
 
 cat("\n-- Headline figures (copy these into the paper) ---------------------------\n")

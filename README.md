@@ -27,7 +27,7 @@ redone when real data replace the workbook.
 | File | What it is |
 |---|---|
 | `MS499_Chattogram_Marine_Fish_Data.xlsx` | The analysis dataset. 16 sheets: Forms A/B/R/M/C, codebooks, derived columns and a 24-check QC dashboard (currently 24/24). 120 respondents across 6 markets, 10 focal species, 491 price observations, 15 matched buyer–seller pairs. |
-| `MS499_full_analysis.R` | One self-contained script that reproduces every number in the paper: 23 tables (T1–T19), 8 charts and a summary workbook. |
+| `MS499_full_analysis.R` | One self-contained script that reproduces every number in the paper: 23 tables (T1–T19), 14 charts and a summary workbook. |
 | `MS499_Term_Paper.docx` | The finished paper — five chapters, APA 7th edition, 34 tables, 10 figures, references and five appendices. |
 
 ---
@@ -48,7 +48,11 @@ Or from a terminal: `Rscript MS499_full_analysis.R`
 runs on a stock R 4.x installation. Tested against R 4.5.0.
 
 Outputs are written to a new folder `analysis_outputs_r/` containing `tables/` (23 CSVs),
-`charts/` (8 PNGs) and `R_Analysis_Summary.xlsx`.
+`charts/` (14 PNGs) and `R_Analysis_Summary.xlsx`. The charts include the F- and A-series
+figures printed in the paper (F1–F5, F8, A1–A2), so the illustrations can be regenerated
+alongside the numbers. Two paper figures are not reproduced in base R: the infrastructure
+radar (Figure 4.8) and the problems rose (Figure 4.7), the latter being covered by the
+`C5_problems` bar chart.
 
 The script ends by printing a **verification report** — every table with its row and
 column count, the headline figures, and three reproducibility gates:
